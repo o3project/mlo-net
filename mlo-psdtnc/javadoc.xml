@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc 
+        	access="package" 
+        	additionalparam="-encoding &quot;utf-8&quot; -charset &quot;utf-8&quot; " 
+        	author="false" 
+        	Overview="src/main/java/org/o3project/mlo/client/overview.html" 
+        	classpath="lib/aopalliance-1.0.jar;lib/cglib-nodep-2.1_3.jar;lib/commons-logging-1.1.jar;lib/easymock-2.4.jar;lib/easymockclassextension-2.4.jar;lib/geronimo-jta_1.1_spec-1.0.jar;lib/geronimo-servlet_2.4_spec-1.0.jar;lib/h2-1.0.69.jar;lib/javassist-3.4.ga.jar;lib/jfxrt.jar;lib/junit-4.4.jar;lib/log4j-1.2.13.jar;lib/ognl-2.6.9-patch-20090427.jar;lib/poi-3.0-FINAL.jar;lib/s2-extension-2.4.46.jar;lib/s2-framework-2.4.46.jar;lib/s2-tiger-2.4.46.jar" 
+        	destdir="doc/javadoc" 
+        	nodeprecated="false" 
+        	nodeprecatedlist="false" 
+        	noindex="false" 
+        	nonavbar="false" 
+        	notree="false" 
+        	sourcepath="src/main/resources;src/main/java" 
+        	splitindex="true" 
+        	use="true" 
+        	windowtitle="検証アプリ" 
+        	version="true"/>
+    </target>
+</project>

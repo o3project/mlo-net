@@ -1,0 +1,8 @@
+DaoType=S2JDBC
+DefaultResourcePath=/mlo-srv/src/main/resources
+DefaultRootPackage=org.o3project.mlo.server
+DefaultSrcPath=/mlo-srv/src/main/java
+ServletPath=/mlo-srv
+ViewType=SA-Struts
+WebContentsRoot=src/main/webapp/
+eclipse.preferences.version=1

@@ -1,0 +1,27 @@
+<rootTag>
+    <Common>
+        <Version>1</Version>
+        <SourceComponent>
+            <ComponentName>mlo</ComponentName>
+        </SourceComponent>
+        <DestComponent>
+            <ComponentName>mloClient</ComponentName>
+        </DestComponent>
+        <Operation>Response</Operation>
+    </Common>
+    <Slice>
+        <SliceName>sliceC</SliceName>
+        <SliceId>00000003</SliceId>
+        <Flows>
+            <Flow>
+                <FlowName>fc101</FlowName>
+                <FlowId>00000005</FlowId>
+            </Flow>
+            <Flow>
+                <FlowName>fc102</FlowName>
+                <FlowId>00000006</FlowId>
+            </Flow>
+        </Flows>
+    </Slice>
+</rootTag>
+

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamLogin>
+    <login loginId="loginId">
+        <loginPassword>loginPassword</loginPassword>
+        <ipAddress>123.145.167.189</ipAddress>
+        <accountName>accountName</accountName>
+        <accountLoginDate>2013/12/31 12:34:56</accountLoginDate>
+        <accountTimeZone>+0900</accountTimeZone>
+    </login>
+</CpfIfParamLogin>

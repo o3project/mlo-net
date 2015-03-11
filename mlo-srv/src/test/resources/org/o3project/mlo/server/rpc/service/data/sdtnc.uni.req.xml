@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamVpath>
+    <vpath>
+        <vlan>
+            <uni>
+                <vVlanVLanIdNniClient>444</vVlanVLanIdNniClient>
+                <vVlanInnerVlanIdNniClient>555</vVlanInnerVlanIdNniClient>
+                <vVlanInnerCosNniClient>666</vVlanInnerCosNniClient>
+                <vVlanOutterCosNniClient>777</vVlanOutterCosNniClient>
+            </uni>
+        </vlan>
+    </vpath>
+</CpfIfParamVpath>

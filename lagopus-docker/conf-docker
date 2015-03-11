@@ -1,0 +1,634 @@
+#!/bin/bash -e 
+# Copyright (C) 2015 HITACHI Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+TOPOCONF=$1
+. ${TOPOCONF:-samples/topo.conf}
+
+[ -z "${SWITCHES}" ] && echo "Error: SWITCHES must be specified" && exit 2
+[ -z "${HOSTS}" ] && echo "Error: HOSTS must be specified" && exit 2
+[ -z "${CONTROLLERS}" ] && echo "Error: CONTROLLERS must be specified" && exit 2
+[ -z "${FLOWS}" ] && echo "Error: FLOWS must be specified" && exit 2
+
+export PORT=${PORT}
+export EDGE_TYPE=${EDGE_TYPE}
+export LINK_TYPE=${LINK_TYPE}
+
+ALL_IP=${ALL_IP:-169.254.0.} 
+INIT_IP=${INIT_IP:-1}
+ALL_MAC=${ALL_MAC:-52:54:00:00:00:}
+INIT_MAC=${INIT_IP:-1}
+INIT_DELAY=${INIT_DELAY:-0ms}
+INIT_BW=${INIT_BW:-1000000kbs}
+CWD=$(pwd)
+WORKDIR=${CWD}/workspace
+CONTDIR=${CWD}/containers
+SRCWRKDIR=/src/workspace
+_START=${WORKDIR}/start
+_STOP=${WORKDIR}/stop
+_HOSTS=${WORKDIR}/hosts
+_LINKS=${WORKDIR}/links
+BRGFILE=${WORKDIR}/bridge.conf
+COUNTFILE=${WORKDIR}/count
+RUNFILE=${WORKDIR}/run
+COUNT=0
+
+rm -f ${WORKDIR}/*
+cp -f "${TOPOCONF:-samples/topo.conf}" "${WORKDIR}/topo.conf"
+
+extract_tag() {
+    local from=`grep "^FROM" Dockerfile | awk '{print $2}'`
+    echo $from | grep ":" >/dev/null
+    if [ $? -eq 0 ]; then
+        local name=`echo $from | sed -e "s/^\([^:]*\):\(.*\)$/\1/"`
+        local tag=`echo $from | sed -e "s/^\([^:]*\):\(.*\)$/\2/"`
+        TAG="${name}"
+        [ -n "${tag}" ] && TAG="${TAG}_${tag}"
+    fi
+}
+extract_tag
+
+dpid2decimal() {
+    local macaddr=`echo $1 | cut -d '.' -f2`
+    local str=
+    local IFS=:
+    for byte in ${macaddr}; do
+        str="${str}${byte}"
+    done
+    echo "$(printf '%d' 0x${str})"
+}
+
+conf_delay() {
+    local port=$1
+    local delay=`expr "$2" : '[^0-9]*\([0-9]*\)'`
+    local dp=`echo ${port} | cut -d '-' -f1`
+    local eth=`echo ${port} | cut -d '-' -f2`
+    local infile=${WORKDIR}/${dp}.sh
+    if [ ${delay} -ne 0 ]; then
+        sed -i -e "/^lagopus/i ${SRCWRKDIR}/delay.sh ${eth} ${delay}" "${infile}"
+    fi
+}
+
+brlist2links() {
+    local brlist=$1
+    for br in ${brlist}; do
+        if [ -z "${LINKS}" ]; then
+            LINKS="${br}"
+        else
+            local new=1
+            for link in ${LINKS}; do
+                if [ ${link} = ${br} ]; then
+                    new=0
+                    break
+                fi
+            done
+            if [ ${new} -eq 1 ]; then
+                LINKS="${LINKS} ${br}"
+            fi
+        fi
+    done
+}
+
+br2ports() {
+    local br=$1
+    local node=$2
+    local eth=$3
+    if [ ! -e "${_LINKS}" ]; then
+        echo "${br}_PORT1=\"${node}-${eth}\""
+    else
+        . "${_LINKS}"
+        eval local port=\${${br}_PORT1:-}
+        if [ "${port}" ]; then
+            echo "${br}_PORT2=\"${node}-${eth}\""
+        else
+            echo "${br}_PORT1=\"${node}-${eth}\""
+        fi
+    fi
+}
+
+conf_ethlist() {
+    local brlist=$1
+    local ethlist=
+    local var=1
+    for br in ${brlist}; do
+        if [ ${var} -eq 1 ]; then
+            ethlist="eth1"
+        else
+            ethlist="${ethlist} eth${var}"
+        fi 
+        var=$((${var}+1))
+    done
+    echo ${ethlist}
+}
+
+conf_lagopus_conf() {
+    local ethlist=$1
+    local dpid=$2
+    local outfile=$3
+    echo "interface {"							>>"${outfile}"
+    echo "    ethernet {"						>>"${outfile}"
+    for eth in ${ethlist}; do
+        echo "        ${eth};"						>>"${outfile}"
+    done
+    echo "    }"							>>"${outfile}"
+    echo "}"								>>"${outfile}"
+    echo "bridge-domains {"						>>"${outfile}"
+    echo "    br0 {"							>>"${outfile}"
+    echo "        dpid ${dpid};"					>>"${outfile}"
+    echo "        port {"						>>"${outfile}"
+    for eth in ${ethlist}; do
+        echo "            ${eth};"					>>"${outfile}"
+    done
+    echo "        }"							>>"${outfile}"
+    echo "        controller {"						>>"${outfile}"
+    echo "            RYU;"						>>"${outfile}"
+    echo "        }"							>>"${outfile}"
+    echo "    }"							>>"${outfile}"
+    echo "}"								>>"${outfile}"
+}
+
+register_mod_lagopus_conf() {
+    echo "mod_lagopus_conf() {"
+    echo "    local name=\$1"
+    echo "    for ((;;)); do"
+    echo "        local ryu_addr=\`docker exec \${name} env\\"
+    echo " | awk -F\"=\" '\$1 == \"OF_PORT_6633_TCP\" { print \$2 }'\\"
+    echo " | sed -e \"s/\/\///\"\`"
+    echo "       [ -n "\"\${ryu_addr}\"" ] && break"
+    echo "       sleep 1"
+    echo "    done"
+    echo "    local ryu_ip=\`echo \${ryu_addr} | awk -F\":\" '{ print \$2 }'\`"
+    echo "    sed -i -e \"s/RYU/\`echo \${ryu_ip}\`/\" ${WORKDIR}/lagopus-\${name}.conf"
+    echo "}"
+    echo
+}
+
+register_docker_run_ryu() {
+    echo "docker_run_ryu() {"
+    echo "    local name=\$1"
+    echo "    docker run --name \${name} -p ${PORT}:8080 -v ${WORKDIR}:${SRCWRKDIR}\\"
+    echo " --expose 6633 --expose 8080\\"
+    echo " -itd ryu:lldp ${SRCWRKDIR}/\${name}.sh >>${CONTDIR}/\${name}"
+    echo "    docker inspect --format=\"{{ .NetworkSettings.IPAddress }}\" \${name}"
+    echo "}"
+    echo
+}
+
+register_docker_run_lagopus_vswitch() {
+   echo "docker_run_lagopus_vswitch() {"
+    echo "    local name=\$1"
+    echo "    for ((;;)); do"
+    echo "        docker run --name \${name} --link ${RYU}:OF --cap-add=NET_ADMIN -v ${WORKDIR}:${SRCWRKDIR}\\"
+    echo " -itd lagopus-vswitch:${TAG} bash >>${CONTDIR}/\${name}"
+    echo "        [ "\"\$?\"" -eq 0 ] && break"
+    echo "        sleep 1"
+    echo "    done"
+    echo "    mod_lagopus_conf \${name}"
+    echo "    docker exec -itd \${name} ${SRCWRKDIR}/\${name}.sh"
+    echo "}"
+    echo
+}
+
+register_docker_attach() {
+    echo "docker_attach() {"
+    echo "    local name=\$1"
+    echo "    docker exec -it \`cat ${CONTDIR}/\${name}\` bash"
+    echo "}"
+    echo
+}
+
+register_docker_quickstart_ryu() {
+    local name=$1
+    echo "docker_quickstart_${name}() {"
+    echo "    docker_run_ryu ${name}"
+    echo "}"
+    echo
+}
+
+register_docker_quickstart_vswitch() {
+    local name=$1
+    echo "docker_quickstart_${name}() {"
+    echo "    docker_run_lagopus_vswitch ${name}"
+}
+
+register_docker_kill() {
+    local name=$1
+    echo "docker_kill_${name}() {"
+    echo "    if [ -e ${CONTDIR}/${name} ]; then"
+    echo "        docker rm -f \`cat ${CONTDIR}/${name}\` >/dev/null 2>&1"
+    echo "        rm -f ${CONTDIR}/${name}"
+    echo "    fi"
+    echo "}"
+    echo
+}
+
+conf_ryu() {
+    for ryu in ${only:-${CONTROLLERS?}}; do
+        local outfile=${WORKDIR}/${ryu}.sh
+        RYU=${ryu}
+        echo "#!/bin/bash -" 						>>"${outfile}"
+        echo "ryu-manager --verbose --observe-links\\" 			>>"${outfile}"
+        echo " --pid-file /var/run/ofctl_rest.pid --nouse-stderr\\"	>>"${outfile}"
+        echo " --log-file /tmp/ofctl_rest.log\\" 			>>"${outfile}"
+        echo " /root/ryu-master/ryu/app/rest_topology.py\\" 		>>"${outfile}"
+        echo " /root/ryu-master/ryu/app/ofctl_rest.py &" 		>>"${outfile}"
+        echo "bash" 							>>"${outfile}"
+        chmod 755 "${outfile}"
+        register_docker_quickstart_ryu ${ryu}
+        register_docker_kill ${ryu}
+        echo "    docker_quickstart_${ryu}" 				>>"${_START}" 
+        echo "    docker_kill_${ryu}" 					>>"${_STOP}" 
+        COUNT=$((${COUNT}+1))
+    done
+}
+
+conf_switch() {
+    for switch in ${only:-${SWITCHES?}}; do
+        local conf_file=${WORKDIR}/lagopus-${switch}.conf
+        local outfile=${WORKDIR}/${switch}.sh
+        eval local brlist=\${${switch}_BR:-}
+        local br_a=(${brlist})
+        eval local dpid=\${${switch}_DPID:-}
+        eval local applist=\${${switch}_APP:-}
+        local ethlist=$(conf_ethlist "${brlist}")
+        conf_lagopus_conf "${ethlist}" ${dpid} "${conf_file}"
+        local eth_a=(${ethlist})
+        echo "#!/bin/bash -" 						>>"${outfile}"
+        for ((i=0; i<${#br_a[@]}; i++)); do
+            echo "${SRCWRKDIR}/pipework --wait -i ${eth_a[i]}"		>>"${outfile}"
+        done
+        echo "install -m 644 ${SRCWRKDIR}/`basename ${conf_file}`\\"	>>"${outfile}"
+        echo " /usr/local/etc/lagopus/lagopus.conf" 			>>"${outfile}"
+        echo "lagopus -d -l /tmp/lagopus.log -- -- -p3 &"		>>"${outfile}"
+        for app in ${applist}; do
+             echo "nohup ${app} &" | tr ! ' '				>>"${outfile}"
+        done
+        echo "#lagosh" 							>>"${outfile}"
+        echo "bash" 							>>"${outfile}"
+        chmod 755 "${outfile}"
+        register_docker_quickstart_vswitch ${switch}
+        brlist2links "${brlist}"
+        for ((i=0; i<${#br_a[@]}; i++)); do
+            local br=${br_a[${i}]}
+            local eth=${eth_a[${i}]}
+            echo "    sudo ${WORKDIR}/pipework ${br} -i ${eth}\\"
+            echo " \`cat ${CONTDIR}/${switch}\` 0.0.0.0/0"
+            br2ports ${br} ${switch} ${eth}				>>"${_LINKS}"
+        done
+        echo "}"
+        echo
+        register_docker_kill ${switch}
+        echo "    docker_quickstart_${switch}" 				>>"${_START}"
+        echo "    docker_kill_${switch}" 				>>"${_STOP}"
+        COUNT=$((${COUNT}+1))
+    done
+}
+
+conf_host() {
+    for host in ${only:-${HOSTS?}}; do
+        local conf_file=${WORKDIR}/lagopus-${host}.conf
+        local outfile=${WORKDIR}/${host}.sh
+        eval local brlist=\${${host}_BR:-}
+        eval local iplist=\${${host}_IP:-$ALL_IP$((${INIT_IP}))}
+        eval local maclist=\${${host}_MAC:-$ALL_MAC$((${INIT_MAC}))}
+        eval local dpid=\${${host}_DPID:-}
+        local ethlist=$(conf_ethlist "${brlist}")
+        conf_lagopus_conf "${ethlist}" ${dpid} "${conf_file}"
+        echo "#!/bin/bash -" 						>>"${outfile}"
+        echo 								>>"${outfile}"
+        for eth in ${ethlist}; do
+            echo "${SRCWRKDIR}/pipework --wait -i ${eth}" 		>>"${outfile}"
+            echo "ip link set dev ${eth} mtu 1454" 			>>"${outfile}"
+        done
+        echo "install -m 644 ${SRCWRKDIR}/`basename ${conf_file}`\\"	>>"${outfile}"
+        echo " /usr/local/etc/lagopus/lagopus.conf" 			>>"${outfile}"
+        echo "lagopus -d -l /tmp/lagopus.log -- -- -p3 &"		>>"${outfile}"
+        register_docker_quickstart_vswitch ${host}
+        brlist2links "${brlist}"
+        local br_a=(${brlist})
+        local eth_a=(${ethlist})
+        local ip_a=(${iplist})
+        local mac_a=(${maclist})
+        [ ${#br_a[@]} -eq ${#ip_a[@]} ] && [ ${#br_a[@]} -eq ${#mac_a[@]} ] || {
+            echo "Error: host ${host} is not validated" 1>&2 && exit 4
+        }
+        for ((i=0; i<${#br_a[@]}; i++)); do
+            local br=${br_a[${i}]}
+            local eth=${eth_a[${i}]}
+            local ip=${ip_a[${i}]}
+            local ipaddr=$(echo ${ip} | cut -d/ -f1)
+            local mac=${mac_a[${i}]}
+            br2ports ${br} ${host} ${eth}				>>"${_LINKS}"
+            if [[ "${br}" =~ ^ovs.* ]]; then 
+                echo "    sudo ovs-vsctl del-br ${br}"			>>"${_START}"
+                echo "    sudo ovs-vsctl add-br ${br}"			>>"${_START}"
+            fi 
+            [ ${ipaddr} = "0.0.0.0" ] || {
+                echo "echo \"${ipaddr} ${host}\" >>/etc/hosts"		>>"${_HOSTS}"
+                echo "echo \"${ipaddr} ${host}-${eth}\" >>/etc/hosts"	>>"${_HOSTS}"
+                echo "    sudo ${WORKDIR}/pipework ${br}\\"
+                echo " -i ${eth} \`cat ${CONTDIR}/${host}\` ${ip} ${mac}"
+            }
+        done
+        echo "}"
+        echo
+        register_docker_kill ${host}
+        echo "    docker_quickstart_${host}" 				>>"${_START}"
+        echo "    docker_kill_${host}" 					>>"${_STOP}"
+        COUNT=$((${COUNT}+1))
+    done
+    for host in ${HOSTS}; do
+        eval local applist=\${${host}_APP:-}
+        local outfile=${WORKDIR}/${host}.sh
+        cat "${_HOSTS}"							>>"${outfile}"
+        for app in ${applist}; do
+            echo "nohup ${app} &" | tr ! ' '				>>"${outfile}"
+        done
+        echo "bash" 							>>"${outfile}"
+        chmod 755 "${outfile}"
+    done
+}
+
+conf_flow() {
+    for flow in ${only:-${FLOWS?}}; do
+        local label=`expr "${flow}" : '[^0-9]*\([0-9]*\)'`
+        [ "${label}" ] || {
+            echo "Error: FLOW MUST include at least one digit" 1>&2 && exit 4
+        }
+        local outfile1=${WORKDIR}/${flow}.conf
+        local outfile2=${WORKDIR}/${flow}.conf.sh
+        eval local brlist=\${${flow}_FLOW:-}
+        . "${BRGFILE}"
+        local eplist=
+        local ep_ethlist=
+        local dplist=
+        local duplist=
+        local ex_dp=
+        local ex_eth=
+        local br_a=(${brlist})
+        for ((i=0; i<${#br_a[@]}; i++)); do
+            local br=${br_a[${i}]}
+            eval local ports=\${${br_a[${i}]}_PORTS:-}
+            local nbr=${br_a[$((${i}+1))]}
+            eval local nports=\${${br_a[$((${i}+1))]}_PORTS:-}
+            local ports_a=(${ports})
+            local nports_a=(${nports})
+            local match=0
+            for ((j=0; j<${#ports_a[@]}; j++)); do
+                local dp=`echo ${ports_a[${j}]} | cut -d '-' -f1`
+                local eth=`echo ${ports_a[${j}]} | cut -d '-' -f2`
+                [ "${dp}" = "${ex_dp}" -a "${eth}" = "${ex_eth}" ] && continue
+                for ((k=0; k<${#nports_a[@]}; k++)); do
+                    local ndp=`echo ${nports_a[${k}]} | cut -d '-' -f1`
+                    local neth=`echo ${nports_a[${k}]} | cut -d '-' -f2`
+                    [ "${dp}" = "${ndp}" ] && match=1 && break
+                done
+                [ ${match} -eq 1 ] && break
+            done
+            # default level of node is 0 whose type is 'host'. 
+            local level=0
+            eval local type=\${${dp}_TYPE:-}
+            if [ "${type}" = "service" ]; then
+                level=-1
+            elif [ "${type}" = "edge" ]; then
+                level=1
+            elif [ "${type}" = "mpls" ]; then
+                level=2
+            else
+                :
+            fi
+            # Detect EP(end point).
+            for ((l=0; l<${#ports_a[@]}; l++)); do
+                local _dp=`echo ${ports_a[${l}]} | cut -d '-' -f1`
+                local _eth=`echo ${ports_a[${l}]} | cut -d '-' -f2`
+                eval local _type=\${${_dp}_TYPE:-}
+                [ "${_dp}" = "${dp}" -o "${_type}" != "host" ] && continue
+                eval local brlist=\${${_dp}_BR:-}
+                local ethlist=$(conf_ethlist "${brlist}")
+                eval local maclist=\${${_dp}_MAC:-}
+                local eth_a=(${ethlist})
+                local mac_a=(${maclist})
+                for ((m=0; m<${#eth_a[@]}; m++)); do
+                    local __eth=${eth_a[${m}]}
+                    if [ "${__eth}" = "${_eth}" ]; then
+                        echo "${dp}_${_dp}_MAC=\"${mac_a[${m}]}\""	>>"${outfile1}"
+                        if [ -z "${eplist}" ]; then
+                            eplist="${_dp}"
+                            ep_ethlist="${_eth}"
+                        else
+                            eplist="${eplist} ${_dp}"
+                            ep_ethlist="${ep_ethlist} ${_eth}"
+                        fi
+                        break
+                    fi
+                done
+            done
+            # Count multiple datapath traverse.
+            ex_dp=${ndp}
+            ex_eth=${neth}
+            local cnt=1
+            if [ -z "${dplist}" -a ${match} -eq 1 ]; then
+                dplist="${dp}"
+                duplist="1"
+            elif [ -n "${dplist}" -a ${match} -eq 1 ]; then
+                local dp_a=(${dplist})
+                for ((n=0; n<${#dp_a[@]}; n++)); do
+                    local dup_a=(${duplist})
+                    local _n=$((${#dp_a[@]}-n-1))
+                    [ "${dp_a[${_n}]}" = "${dp}" ] && cnt=$((${dup_a[${_n}]}+1)) && break
+                done
+                duplist="${duplist} ${cnt}"
+                dplist="${dplist} ${dp}"
+            else
+                :
+            fi
+            # echo "dp=${dp} cnt=${cnt} match=${match}" 1>&2
+            # match should be '1' except for the last dp.
+            if [ ${match} -eq 1 ]; then
+                eval local dpid=\${${dp}_DPID:-}
+                local dpid_n=$(dpid2decimal ${dpid})
+                echo "${dp}_DPID_N=\"${dpid_n}\""			>>"${outfile1}"
+                echo "${dp}_LEVEL=${level}"				>>"${outfile1}"
+                if [ $((${cnt})) -eq 1 ]; then
+                    echo "${dp}_EPAIR=\"${eth} ${neth}\""		>>"${outfile1}"
+                else
+                    echo "${dp}_EPAIR${cnt}=\"${eth} ${neth}\""		>>"${outfile1}"
+                fi
+                # Set label to bridge number.
+                local br_n=`expr "${br}" : '[^0-9]*\([0-9]*\)'`
+                echo "${dp}_${eth}_LABEL=${br_n}"			>>"${outfile1}"
+                br_n=`expr "${nbr}" : '[^0-9]*\([0-9]*\)'`
+                echo "${dp}_${neth}_LABEL=${br_n}"			>>"${outfile1}"
+                eval local protolist=\${${dp}_PROTO:-}
+                echo "${dp}_PROTO=\"${protolist}\""			>>"${outfile1}"
+            fi
+        done
+        echo "EP=\"${eplist}\""						>>"${outfile1}"
+        echo "EP_ETH=\"${ep_ethlist}\""					>>"${outfile1}"
+        echo "DP=\"${dplist}\""						>>"${outfile1}"
+        echo "DUP=\"${duplist}\""					>>"${outfile1}"
+        # Generate outfile2 which is an actual start-up script. 
+        ./conf-ryu "${outfile1}"
+        sed -i -e "s/REST/localhost/g" "${outfile2}"
+    done
+}
+
+conf_bridge_p1() {
+    . "${_LINKS}"
+    echo "LINKS=\"${LINKS}\""						>>"${BRGFILE}"
+    for br in ${LINKS}; do
+        eval local port1=\${${br}_PORT1:-}
+        eval local port2=\${${br}_PORT2:-}
+        if [ -n "${port2}" ]; then
+            echo "${br}_PORTS=\"${port1} ${port2}\""			>>"${BRGFILE}"
+        else
+            echo "Error: link ${br} is not validated" 1>&2 && exit 4
+        fi
+    done
+}
+
+conf_bridge_p2() {
+    for br in ${LINKS}; do
+        eval local ports=\${${br}_PORTS:-}
+        eval local delay=\${${br}_DELAY:-${INIT_DELAY}}
+        eval local bw=\${${br}_BW:-${INIT_BW}}
+        echo "${br}_DELAY=\"${delay}\""					>>"${BRGFILE}"
+        echo "${br}_BW=\"${bw}\""					>>"${BRGFILE}"
+        for port in ${ports}; do
+            conf_delay "${port}" ${delay}
+        done
+    done
+}
+
+register_clean() {
+    echo "clean() {"
+    echo "    rm -f ${CONTDIR}/* ${WORKDIR}/*"
+    echo "    docker rmi -f \$(docker images | awk '/^<none>/ { print \$3 }') >/dev/null 2>&1"
+    echo "}"
+    echo
+}
+
+main() {
+    # banner
+    echo "#!/bin/bash"
+    echo "# run script for VLAN/MPLS switch network emulator"
+    echo "# generated by conf-docker; $(LANG=C date)"
+    echo 
+    echo "quickstart() {"						>>"${_START}"
+    echo "    grep \"RYU\" ${WORKDIR}/*.conf >/dev/null"		>>"${_START}"
+    echo "    [ \$? -ne 0 ] && echo \"Execute conf-docker\" && exit 2"	>>"${_START}"
+    echo "kill_all() {" 						>>"${_STOP}"
+    # configure controllers 
+    register_docker_run_ryu
+    conf_ryu
+    # configure hosts and switches
+    register_docker_run_lagopus_vswitch
+    register_mod_lagopus_conf
+    conf_host
+    conf_switch
+    # configure bridge and flows
+    conf_bridge_p1
+    conf_flow
+    conf_bridge_p2
+    #
+    register_docker_attach
+    register_clean
+    for br in ${LINKS}; do
+        if [[ "${br}" =~ ^ovs.* ]]; then 
+            local br_n=`expr "${br}" : '[^0-9]*\([0-9]*\)'`
+            echo "    sudo ovs-vsctl add-port ${br} eth${br_n}"		>>"${_START}"
+        fi 
+    done
+    echo "}" 								>>"${_START}"
+    echo 								>>"${_START}"
+    cat "${_START}"
+    echo "    docker rm -f \$(docker ps -qa) >/dev/null 2>&1"		>>"${_STOP}"
+    for br in ${LINKS}; do
+        if [[ "${br}" =~ ^br.* ]]; then 
+            echo "    [ -e /sys/class/net/${br} ] && {"			>>"${_STOP}"
+            echo "        sudo ifconfig ${br} down"			>>"${_STOP}"
+            echo "        sudo brctl delbr ${br}"			>>"${_STOP}"
+            echo "    }"						>>"${_STOP}"
+        fi 
+    done
+    echo "}" 								>>"${_STOP}"
+    echo 								>>"${_STOP}"
+    cat "${_STOP}"
+    echo "nargv="
+    echo "var=0"
+    echo "for e in \$*; do"
+    echo "    if [ \${var} -eq 1 ] && [ -z \"\${nargv}\" ]; then"
+    echo "        nargv=\"\${e}\""
+    echo "    elif [ \${var} -ne 0 ] && [ -n \"\${nargv}\" ]; then"
+    echo "        nargv=\"\${nargv} \${e}\""
+    echo "    fi"
+    echo "    var=\$((\$var+1))"
+    echo "done"
+    echo "nargv_a=(\${nargv})"
+    echo
+    echo "command=\$1"
+    echo "case "\${command}" in"
+    echo "    quickstart)"
+    echo "        quickstart"
+    echo "        ;;"
+    echo "    kill_all)"
+    echo "        kill_all"
+    echo "        ;;"
+    echo "    clean)"
+    echo "        clean"
+    echo "        ;;"
+    echo "    attach)"
+    echo "        docker_attach \${nargv_a[0]}"
+    echo "        ;;"
+    echo "    exec)"
+    echo "        docker exec -it \${nargv}"
+    echo "        ;;"
+    echo "    kill)"
+    echo "        docker kill \${nargv_a[0]}"
+    echo "        ;;"
+    echo "    start)"
+    echo "        docker_quickstart_\${nargv_a[0]}"
+    echo "        ;;"
+    echo "    stop)"
+    echo "        docker stop \`cat ${CONTDIR}/\${nargv_a[0]}\` >/dev/null 2>&1"
+    echo "        docker rm -f \`cat ${CONTDIR}/\${nargv_a[0]}\` >/dev/null 2>&1"
+    echo "        rm -f ${CONTDIR}/\${nargv_a[0]} >/dev/null 2>&1"
+    echo "        ;;"
+    echo "    *)"
+    echo "        echo \"Usage: \$0 {quickstart|kill_all}\""
+    echo "        echo \"          {attach|start|stop|kill} <CONTAINER>\""
+    echo "        echo \"          exec <CONTAINER> <COMMAND>...\""
+    echo "        echo \"Example: <CONTAINER> = h1\""
+    echo "        echo \"         <COMMAND> = ping -c 3 h2\""
+    echo "        ;;"
+    echo "esac"
+}
+main >>"${RUNFILE}"
+chmod 755 "${RUNFILE}"
+#
+echo "${COUNT}" >>"${COUNTFILE}"
+#
+cp -f ${CWD}/tools/* "${WORKDIR}/"
+files=${CWD}/rest-client/*
+for f in ${files}; do
+    sed -e "s/REST/localhost/" ${f} >${WORKDIR}/`basename ${f}`
+    sed -i -e "s/PORT/${PORT}/" ${WORKDIR}/`basename ${f}`
+    chmod 755 ${WORKDIR}/`basename ${f}`
+done
+rm -f "${_START}" "${_STOP}" "${_HOSTS}" "${_LINKS}"
+
+echo "Validation OK!"
+
+exit 0

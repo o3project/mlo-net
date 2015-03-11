@@ -1,0 +1,27 @@
+<rootTag>
+    <Common>
+        <Version>1</Version>
+        <SourceComponent>
+            <ComponentName>mloClient</ComponentName>
+        </SourceComponent>
+        <DestComponent>
+            <ComponentName>mlo</ComponentName>
+        </DestComponent>
+        <Operation>Request</Operation>
+    </Common>
+    <Slice>
+        <SliceName>sliceB</SliceName>
+        <Flows>
+            <Flow>
+                <FlowName>fb101</FlowName>
+                <SourceCENodeName>osaka999</SourceCENodeName>
+                <SourceCEPortNo>00000015</SourceCEPortNo>
+                <DestCENodeName>tokyo123</DestCENodeName>
+                <DestCEPortNo>00000012</DestCEPortNo>
+                <RequestBandWidth>5000</RequestBandWidth>
+                <RequestDelay>10</RequestDelay>
+                <ProtectionLevel>0</ProtectionLevel>
+            </Flow>
+        </Flows>
+    </Slice>
+</rootTag>

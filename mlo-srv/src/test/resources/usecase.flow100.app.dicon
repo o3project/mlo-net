@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN" 
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+  <include path="convention.dicon"/>
+  <include path="aop.dicon"/>
+  <include path="j2ee.dicon"/>
+  <include path="s2jdbc.dicon"/>
+  <component name="actionMessagesThrowsInterceptor" class="org.seasar.struts.interceptor.ActionMessagesThrowsInterceptor"/>
+  
+  <!-- MLO componets -->
+  <component name="serdes" class="org.o3project.mlo.server.impl.logic.SerdesImpl" />
+  <component name="orchestrator" 
+      class="org.o3project.mlo.server.impl.logic.OrchestratorImpl" 
+      instance="singleton">
+  </component>
+  <component name="dispatcher" 
+      class="org.o3project.mlo.server.impl.logic.DispatcherImpl" 
+      instance="singleton">
+  </component>
+  <component name="configProvider" 
+      class="org.o3project.mlo.server.impl.logic.ConfigProviderImpl" 
+      instance="singleton">
+      <arg>"default.mlo-srv.properties"</arg>
+      <arg>"org/o3project/mlo/server/test/usecase/usecase.001.mlo-srv.properties"</arg>
+  </component>
+  
+  <component name="componentFactory"
+      class="org.o3project.mlo.server.component.ComponentFactory" 
+      instance="singleton">
+  </component>
+  
+  <component name="topologyRepository" 
+      class="org.o3project.mlo.server.impl.logic.TopologyRepositoryDefaultImpl" 
+      instance="singleton">
+      <initMethod name="init" />
+  </component>
+  <component name="topologyProviderLocalImpl" 
+      class="org.o3project.mlo.server.impl.logic.TopologyProviderLocalImpl" 
+      instance="singleton">
+  </component>
+  
+  <component name="httpRequestInvoker" 
+      class="org.o3project.mlo.server.impl.logic.HttpRequestInvokerImpl" 
+      instance="singleton">
+  </component>
+  <component name="ldService"   
+      class="org.o3project.mlo.server.impl.rpc.service.LdServiceImpl" 
+      instance="singleton">
+  </component>
+  <component name="odenOSConfig" 
+      class="org.o3project.mlo.server.impl.rpc.service.OdenOSConfigImpl" 
+      instance="singleton">
+  </component>
+  <component name="odenosTask" 
+      class="org.o3project.mlo.server.impl.rpc.service.OdenosTask" 
+      instance="singleton">
+  </component>
+  <component name="odenOSAdapterService" 
+      class="org.o3project.mlo.server.impl.rpc.service.DummyOdenOSAdapterServiceImpl" 
+      instance="singleton">
+  </component>
+  <component name="SdtncService" 
+      class="org.o3project.mlo.server.impl.logic.CreatePwFailSdtncServiceImpl" 
+      instance="singleton">
+  </component>
+  <component name="sdtncSerdes" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncSerdesImpl" 
+      instance="singleton">
+  </component>
+  <component name="sdtncConfig" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncConfigImpl" 
+      instance="singleton">
+  </component>
+  <component name="sdtncGetMethod" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncGetMethodImpl" 
+      instance="singleton">
+  </component>
+  <component name="sdtncPostMethod" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncPostMethodImpl" 
+      instance="singleton">
+  </component>
+  <component name="sdtncDeleteMethod" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncDeleteMethodImpl" 
+      instance="singleton">
+  </component>
+  
+  <component name="createSliceValidator" 
+      class="org.o3project.mlo.server.impl.logic.CreateSliceValidator" 
+      instance="request">
+  </component>
+  <component name="updateSliceValidator" 
+      class="org.o3project.mlo.server.impl.logic.UpdateSliceValidator" 
+      instance="request">
+  </component>
+  <component name="deleteSliceValidator" 
+      class="org.o3project.mlo.server.impl.logic.CommonUseSliceValidator" 
+      instance="request">
+  </component>
+  <component name="readSliceValidator" 
+      class="org.o3project.mlo.server.impl.logic.CommonUseSliceValidator" 
+      instance="request">
+  </component>
+  
+  <component name="createSliceTask" 
+      class="org.o3project.mlo.server.impl.logic.CreateSliceTask" 
+      instance="request">
+  </component>
+  <component name="updateSliceTask" 
+      class="org.o3project.mlo.server.impl.logic.UpdateSliceTask" 
+      instance="request">
+  </component>
+  <component name="deleteSliceTask" 
+      class="org.o3project.mlo.server.impl.logic.DeleteSliceTask" 
+      instance="request">
+  </component>
+  <component name="readSliceTask" 
+      class="org.o3project.mlo.server.impl.logic.ReadSliceTask" 
+      instance="request">
+  </component>
+  <component name="slicesGetTask" 
+      class="org.o3project.mlo.server.impl.logic.SlicesGetTask" 
+      instance="request">
+  </component>
+  
+  <component name="debugRestifChecker" 
+      class="org.o3project.mlo.server.impl.logic.DebugRestifChecker" 
+      instance="singleton" />
+  
+  <component name="sliceManager" 
+      class="org.o3project.mlo.server.impl.logic.SliceManager" 
+      instance="singleton" />
+  
+  <component name="equipmentConfiguratorFactory" 
+      class="org.o3project.mlo.server.impl.logic.EquipmentConfiguratorFactoryImpl" 
+      instance="singleton">
+  </component>
+  <component name="equipmentConfiguratorDefaultImpl" 
+      class="org.o3project.mlo.server.impl.logic.EquipmentConfiguratorDefaultImpl" 
+      instance="singleton">
+  </component>
+  <component name="equipmentConfiguratorOtherImpl" 
+      class="org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl" 
+      instance="singleton">
+  </component>
+  <component name="equipmentConfiguratorOptDeviceImpl" 
+      class="org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOptDeviceImpl" 
+      instance="singleton">
+  </component>
+  <component name="equipmentConfiguratorNullImpl" 
+      class="org.o3project.mlo.server.impl.logic.EquipmentConfiguratorNullImpl" 
+      instance="singleton">
+  </component>
+  <component name="sdtncDtoOtherConfig" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncDtoOtherConfigImpl" 
+      instance="singleton">
+  </component>
+  <component name="trueInvoker" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncInvokerDummyImpl" 
+      instance="singleton">
+  </component>
+  <component name="dummyInvoker" 
+      class="org.o3project.mlo.server.impl.rpc.service.SdtncInvokerDummyImpl" 
+      instance="singleton">
+  </component>
+</components>

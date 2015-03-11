@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamVpath>
+    <auth>
+        <token>?</token>
+    </auth>
+    <slice groupIndex="?"/>
+    <vpath>
+        <vObjectName>?</vObjectName>
+        <vObjectDescription>demo</vObjectDescription>
+        <pathRoute lineGroupWorkingProtection="1">
+            <line elementIndex="?">
+            </line>
+        </pathRoute>
+        <pathInfo>
+            <vGrade>0</vGrade>
+        </pathInfo>
+        <pathEndPoint startEndPoint="A">
+            <neId>?</neId>
+            <portId>-1</portId>
+        </pathEndPoint>
+        <pathEndPoint startEndPoint="Z">
+            <neId>?</neId>
+            <portId>-1</portId>
+        </pathEndPoint>
+        <pw>
+            <vPwDownLabel>?</vPwDownLabel>
+            <vPwUpLabel>?</vPwUpLabel>
+        </pw>
+        <qos>
+            <vQoSPriority>1</vQoSPriority>
+            <vQoSSla>5</vQoSSla>
+            <vQoSPir>20</vQoSPir>
+            <vQoSCir>10</vQoSCir>
+        </qos>
+        <vlan>
+            <vVlanTagNum>1</vVlanTagNum>
+            <vVlanTagMode>1</vVlanTagMode>
+            <uni>
+                <vVlanVLanIdNniClient>?</vVlanVLanIdNniClient>
+            </uni>
+        </vlan>
+    </vpath>
+</CpfIfParamVpath>

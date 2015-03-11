@@ -1,0 +1,12 @@
+<root>
+ <head>
+  <sequenceNumber>1</sequenceNumber>
+  <time>2013/10/31 08:30:10.000</time>
+  <majorResponseCode>00</majorResponseCode>
+  <minorResponseCode>00</minorResponseCode>
+  <errorDetail></errorDetail>
+ </head>
+ <login loginId="myUserid">
+  <token>token</token>
+ </login>
+</root>

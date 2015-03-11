@@ -1,0 +1,283 @@
+{
+	"bridges": [
+		{
+			"bw": "1000000kbps",
+			"delay": "0ms",
+			"name": "br1"
+		},
+		{
+			"bw": "1000000kbps",
+			"delay": "0ms",
+			"name": "br3"
+		},
+		{
+			"bw": "1000000kbps",
+			"delay": "0ms",
+			"name": "br11"
+		},
+		{
+			"bw": "1000000kbps",
+			"delay": "0ms",
+			"name": "br12"
+		},
+		{
+			"bw": "1000000kbps",
+			"delay": "0ms",
+			"name": "br2"
+		},
+		{
+			"bw": "1000000kbps",
+			"delay": "0ms",
+			"name": "br4"
+		},
+		{
+			"bw": "1000000kbps",
+			"delay": "0ms",
+			"name": "br21"
+		},
+		{
+			"bw": "10000000kbps",
+			"delay": "10ms",
+			"name": "br5"
+		},
+		{
+			"bw": "10000000kbps",
+			"delay": "10ms",
+			"name": "br7"
+		},
+		{
+			"bw": "100000000kbps",
+			"delay": "1ms",
+			"name": "br8"
+		},
+		{
+			"bw": "10000000kbps",
+			"delay": "10ms",
+			"name": "br6"
+		}
+	],
+	"controllers": [
+		"c0"
+	],
+	"flows": [
+		{
+			"brNames": [
+				"br1",
+				"br3",
+				"br5",
+				"br6",
+				"br4",
+				"br2"
+			],
+			"name": "of1slow"
+		},
+		{
+			"brNames": [
+				"br1",
+				"br3",
+				"br7",
+				"br4",
+				"br2"
+			],
+			"name": "of2fast"
+		},
+		{
+			"brNames": [
+				"br1",
+				"br3",
+				"br8",
+				"br4",
+				"br2"
+			],
+			"name": "of3cutthrough"
+		},
+		{
+			"brNames": [
+				"br11",
+				"br3",
+				"br5",
+				"br6",
+				"br4",
+				"br21"
+			],
+			"name": "osaka11slow"
+		},
+		{
+			"brNames": [
+				"br11",
+				"br3",
+				"br7",
+				"br4",
+				"br21"
+			],
+			"name": "osaka12fast"
+		},
+		{
+			"brNames": [
+				"br11",
+				"br3",
+				"br8",
+				"br4",
+				"br21"
+			],
+			"name": "osaka13cutthrough"
+		},
+		{
+			"brNames": [
+				"br12",
+				"br3",
+				"br5",
+				"br6",
+				"br4",
+				"br21"
+			],
+			"name": "akashi21slow"
+		},
+		{
+			"brNames": [
+				"br12",
+				"br3",
+				"br7",
+				"br4",
+				"br21"
+			],
+			"name": "akashi22fast"
+		},
+		{
+			"brNames": [
+				"br12",
+				"br3",
+				"br8",
+				"br4",
+				"br21"
+			],
+			"name": "akashi23cutthrough"
+		}
+	],
+	"hosts": [
+		{
+			"brNames": [
+				"br1"
+			],
+			"dpid": "0.52:54:00:00:00:1",
+			"ip": "169.254.0.1/24",
+			"mac": "52:54:00:00:00:01",
+			"name": "h1",
+			"portNames": null,
+			"type": "host"
+		},
+		{
+			"brNames": [
+				"br2"
+			],
+			"dpid": "0.52:54:00:00:00:2",
+			"ip": "169.254.0.2/24",
+			"mac": "52:54:00:00:00:02",
+			"name": "h2",
+			"portNames": null,
+			"type": "host"
+		},
+		{
+			"brNames": [
+				"br21"
+			],
+			"dpid": "0.52:54:00:00:00:21",
+			"ip": "169.254.0.21/24",
+			"mac": "52:54:00:00:00:21",
+			"name": "tokyo",
+			"portNames": null,
+			"type": "host"
+		},
+		{
+			"brNames": [
+				"br11"
+			],
+			"dpid": "0.52:54:00:00:00:11",
+			"ip": "169.254.0.11/24",
+			"mac": "52:54:00:00:00:11",
+			"name": "osaka",
+			"portNames": null,
+			"type": "host"
+		},
+		{
+			"brNames": [
+				"br12"
+			],
+			"dpid": "0.52:54:00:00:00:12",
+			"ip": "169.254.0.12/24",
+			"mac": "52:54:00:00:00:12",
+			"name": "akashi",
+			"portNames": null,
+			"type": "host"
+		}
+	],
+	"switches": [
+		{
+			"brNames": [
+				"br1",
+				"br3",
+				"br11",
+				"br12"
+			],
+			"dpid": "0.00:00:00:00:00:01",
+			"ip": null,
+			"mac": null,
+			"name": "s1",
+			"portNames": null,
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br2",
+				"br4",
+				"br21"
+			],
+			"dpid": "0.00:00:00:00:00:02",
+			"ip": null,
+			"mac": null,
+			"name": "s2",
+			"portNames": null,
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br3",
+				"br5",
+				"br7",
+				"br8"
+			],
+			"dpid": "0.00:00:00:00:00:03",
+			"ip": null,
+			"mac": null,
+			"name": "s3",
+			"portNames": null,
+			"type": "mpls"
+		},
+		{
+			"brNames": [
+				"br4",
+				"br6",
+				"br7",
+				"br8"
+			],
+			"dpid": "0.00:00:00:00:00:04",
+			"ip": null,
+			"mac": null,
+			"name": "s4",
+			"portNames": null,
+			"type": "mpls"
+		},
+		{
+			"brNames": [
+				"br5",
+				"br6"
+			],
+			"dpid": "0.00:00:00:00:00:05",
+			"ip": null,
+			"mac": null,
+			"name": "s5",
+			"portNames": null,
+			"type": "mpls"
+		}
+	]
+}

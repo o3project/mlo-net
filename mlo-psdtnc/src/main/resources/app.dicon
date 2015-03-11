@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN" 
+	"http://www.seasar.org/dtd/components24.dtd">
+<components>
+    <include path="convention.dicon"/>
+    <include path="aop.dicon"/>
+    <include path="j2ee.dicon"/>
+    <component name="actionMessagesThrowsInterceptor" class="org.seasar.struts.interceptor.ActionMessagesThrowsInterceptor"/>
+
+    <component name="configProvider" 
+        class="org.o3project.mlo.server.impl.logic.ConfigProviderImpl" 
+        instance="singleton">
+        <arg>"default.mlo-psdtnc.properties"</arg>
+        <arg>"/etc/mlo/mlo-psdtnc.properties"</arg>
+    </component>
+    <component name="ldOperationService" 
+        class="org.o3project.mlo.psdtnc.impl.logic.LdOperationServiceImpl" 
+        instance="singleton">
+        <aspect>traceInterceptor</aspect>
+        <initMethod name="init" />
+        <destroyMethod name="destroy" />
+    </component>
+    <component name="ldOperationServiceDummyLocalImpl" 
+        class="org.o3project.mlo.psdtnc.impl.logic.LdOperationServiceDummyLocalImpl" 
+        instance="singleton">
+        <aspect>traceInterceptor</aspect>
+    </component>
+    <component name="ldConfJsonConverter" 
+        class="org.o3project.mlo.psdtnc.impl.logic.LdConfJsonConverterTopoImpl" 
+        instance="singleton">
+        <aspect>traceInterceptor</aspect>
+    </component>
+    <component name="ldTopologyRepository" 
+        class="org.o3project.mlo.psdtnc.impl.logic.LdTopologyRepositoryImpl" 
+        instance="singleton">
+        <aspect>traceInterceptor</aspect>
+        <initMethod name="init" />
+        <destroyMethod name="destroy" />
+    </component>
+    <component name="pseudoSdtncVrmService" 
+        class="org.o3project.mlo.psdtnc.impl.logic.PseudoSdtncVrmServiceImpl" 
+        instance="singleton">
+        <aspect>traceInterceptor</aspect>
+    </component>
+</components>

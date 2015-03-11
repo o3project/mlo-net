@@ -1,0 +1,5 @@
+<root>
+ <login loginId="myUserid">
+  <loginPassword>myPasswd</loginPassword>
+ </login>
+</root>

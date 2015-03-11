@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamLogin>
+    <head>
+        <sequenceNumber>00000125</sequenceNumber>
+        <time>2013/12/11 12:56:34+0900</time>
+        <majorResponseCode>00000123</majorResponseCode>
+        <minorResponseCode>00000124</minorResponseCode>
+        <errorDetail>errorDetail</errorDetail>
+    </head>
+</CpfIfParamLogin>

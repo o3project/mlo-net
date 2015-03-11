@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
+	<classpathentry kind="src" path="src/development/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="lib/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="lib" path="lib/easymock-2.4.jar" sourcepath="lib/sources/easymock-2.4-sources.jar"/>
+	<classpathentry kind="lib" path="lib/easymockclassextension-2.4.jar" sourcepath="lib/sources/easymockclassextension-2.4-sources.jar"/>
+	<classpathentry kind="lib" path="lib/freemarker-2.3.13.jar"/>
+	<classpathentry kind="lib" path="lib/geronimo-jsp_2.0_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/geronimo-servlet_2.4_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.4.jar" sourcepath="lib/sources/junit-4.4-sources.jar"/>
+	<classpathentry kind="lib" path="lib/s2jdbc-gen-2.4.46.jar"/>
+	<classpathentry kind="lib" path="lib/svnkit-1.2.0.4949.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/antlr-2.7.7.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/aopalliance-1.0.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-beanutils-1.7.0.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/commons-beanutils-1.7.0-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-digester-1.6.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-el-1.0.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/commons-el-1.0-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-fileupload-1.2.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/commons-fileupload-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-validator-1.2.0.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/commons-validator-1.2.0-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/geronimo-annotation_1.0_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/geronimo-ejb_3.0_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/geronimo-interceptor_3.0_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/geronimo-jpa_3.0_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/geronimo-jta_1.1_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/h2-1.0.69.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jakarta-oro-2.0.8.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/jakarta-oro-2.0.8-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jakarta-taglibs-standard-1.1.2.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/jakarta-taglibs-standard-1.1.2-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jstl-1.1.2.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/ognl-2.6.9-patch-20090427.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/poi-3.0-FINAL.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/s2-extension-2.4.46.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/s2-extension-2.4.46-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/s2-framework-2.4.46.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/s2-framework-2.4.46-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/s2-tiger-2.4.46.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/s2-tiger-2.4.46-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/sa-struts-1.0.4-sp9.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/sa-struts-1.0.4-sp9-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/struts-1.2.9.jar" sourcepath="src/main/webapp/WEB-INF/lib/sources/struts-1.2.9-sources.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jsonic-1.3.7.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/odenos-1.0.0p1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/msgpack-0.6.6.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/javassist-3.18.1-GA.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="output" path="src/main/webapp/WEB-INF/classes"/>
+</classpath>

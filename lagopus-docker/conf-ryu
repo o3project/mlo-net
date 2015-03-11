@@ -1,0 +1,634 @@
+#!/bin/bash -e
+
+# Copyright (C) 2015 HITACHI Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+OFCONF=$1
+. ${OFCONF:-}
+
+LABEL=`expr "${OFCONF}" : '[^0-9]*\([0-9]*\)'`
+LAGOPUS_PORT_OFFSET=1
+HTTP_OK=200
+PROTO_8021Q=$(printf '%d' 0x8100)
+PROTO_MPLS=$(printf '%d' 0x8847)
+FILE=/dev/null
+RUNFILE=${OFCONF}.sh
+
+register_flowentry_validate() {
+    echo "flowentry_validate() {"
+    echo "    [ -n \"\${sflag}\" ] && return 0"
+    echo "    local dpid_n=\$1"
+    echo "    local actions=\$2"
+    echo "    local matches=\$3"
+    echo "    local file=\`mktemp\`"
+    echo "    local http_code=\$(curl -s -o \${file} -w "%{http_code}" -X GET http://REST:${PORT}/stats/flow/\${dpid_n})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && return 2"
+    echo "    if [ -e \${file} ]; then"
+    echo "        local idx=0"
+    echo "        for ((;;)); do"
+    echo "            local wc=\`./JSON.sh -b <\${file} | grep -o \"^\[\\\"\${dpid_n}\\\",\${idx},.*].*\" | wc -l\`"
+    echo "            [ \$wc -eq 0 ] && break"
+    echo "            idx=\$((\${idx}+1))"
+    echo "        done"
+    echo "        [ \${idx} -eq 0 ] && return 2"
+    echo "        local index=\$((\${idx}-1))"
+    echo "        local match=0"
+    echo "        for ((i=0; i<\${idx}; i++)); do"
+    echo "            ./JSON.sh -b<\${file} | grep -o \"^\[\\\"\${dpid_n}\\\",\${index},\\\"actions\\\",.*].*\" >>\"\${file}-\${dpid_n}\""
+    echo "            for _action in \${actions}; do"
+    echo "                local action=\`echo \${_action} | tr ! ' '\`"
+    echo "                grep \"\${action}\" \"\${file}-\${dpid_n}\" >/dev/null"
+    echo "                [ \$? -ne 0 ] && match=0 && break"
+    echo "                match=1" 
+    echo "            done"
+    echo "            [ \${match} -eq 0 ] && index=\$((\${index}-1)) && continue"
+    echo "            ./JSON.sh -b<\${file} | grep -o \"^\[\\\"\${dpid_n}\\\",\${index},\\\"match\\\",.*].*\" >>\"\${file}-\${dpid_n}\""
+    echo "            for _match in \${matches}; do"
+    echo "                local match_a=(\`echo \${_match} | tr ! ' '\`)"
+    echo "                grep \"\${match_a[0]}\" \"\${file}-\${dpid_n}\" | grep \"\${match_a[1]}\" >/dev/null"
+    echo "                [ \$? -ne 0 ] && match=0 && break"
+    echo "                match=1" 
+    echo "            done"
+    echo "            if [ \${match} -eq 0 ]; then"
+    echo "                index=\$((\${index}-1))"
+    echo "                continue"
+    echo "            else" 
+    echo "                rm -f \${file} \"\${file}-\${dpid_n}\""
+    echo "               return 0"
+    echo "            fi" 
+    echo "        done"
+    echo "        [ \${match} -eq 0 ] && return 2"
+    echo "    fi"
+    echo "}"
+    echo
+}
+
+register_padding() {
+    echo "padding() {"
+    echo "    local macaddr=\$1"
+    echo "    local IFS=:"
+    echo "    local count=1"
+    echo "    for byte in \${macaddr}; do"
+    echo "        local str=\${byte}"
+    echo "        if [ \${#str} -eq 1 -a \${count} -lt 6 ]; then"
+    echo "            echo -n \"0\${str}:\""
+    echo "        elif [ \${#str} -eq 1 -a \${count} -eq 6 ]; then"
+    echo "            echo -n \"0\${str}\""
+    echo "        elif [ \${#str} -eq 2 -a \${count} -lt 6 ]; then"
+    echo "            echo -n \"\${str}:\""
+    echo "        elif [ \${#str} -eq 2 -a \${count} -eq 6 ]; then"
+    echo "            echo -n \"\${str}\""
+    echo "        else"
+    echo "            exit 2"
+    echo "        fi"
+    echo "        count=\$((\${count}+1))"
+    echo "    done"
+    echo "}"
+    echo
+}
+
+register_ss() {
+    echo "ss() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local oport=\$((\$4+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local dmac=\$(padding \$5)"
+    echo "    local smac=\$(padding \$6)"
+    echo "    local _dmac=\$(padding \$7)"
+    echo "    local _smac=\$(padding \$8)"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_dst\\\": \\\"\${dmac}\\\",\\\"dl_src\\\": \\\"\${smac}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"\${ethertype}\\\"},\\"
+    echo " \\\"actions\\\": [\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"eth_dst\\\", \\\"value\\\": \\\"\${_dmac}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"eth_src\\\", \\\"value\\\": \\\"\${_smac}\\\"},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"SET_FIELD:!{eth_dst:\${_dmac}}\\\" \\\"SET_FIELD:!{eth_src:\${_smac}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+#   echo " \"\\\"dl_dst\\\"!\\\"\${dmac}\\\" \\\"dl_src\\\"!\\\"\${smac}\\\"\""
+    echo " \"\\\"dl_type\\\"!\${ethertype} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"ss Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_push_vlan() {
+    echo "push_vlan() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local oport=\$((\$4+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local vid=\$((${LABEL}+4096))"
+    echo "    local dmac=\$(padding \$6)"
+    echo "    local smac=\$(padding \$7)"
+    echo "    local _dmac=\$(padding \$8)"
+    echo "    local _smac=\$(padding \$9)"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_dst\\\": \\\"\${dmac}\\\",\\\"dl_src\\\": \\\"\${smac}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"\${ethertype}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"PUSH_VLAN\\\",\\"
+    echo " \\\"ethertype\\\": \\\"${PROTO_8021Q}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"vlan_vid\\\", \\\"value\\\": \${vid}},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"eth_dst\\\", \\\"value\\\": \\\"\${_dmac}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"eth_src\\\", \\\"value\\\": \\\"\${_smac}\\\"},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"PUSH_VLAN:${PROTO_8021Q}\\\" \\\"SET_FIELD:!{vlan_vid:\${vid}}\\\" \\\"SET_FIELD:!{eth_dst:\${_dmac}}\\\" \\\"SET_FIELD:!{eth_src:\${_smac}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+  #echo " \"\\\"dl_dst\\\"!\\\"\${dmac}\\\" \\\"dl_src\\\"!\\\"\${smac}\\\"\""
+    echo " \"\\\"dl_type\\\"!\${ethertype} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"push_vlan Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_pop_vlan() {
+    echo "pop_vlan() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local vid=\$((${LABEL}))"
+    echo "    local oport=\$((\$5+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local dmac=\$(padding \$6)"
+    echo "    local smac=\$(padding \$7)"
+    echo "    local _dmac=\$(padding \$8)"
+    echo "    local _smac=\$(padding \$9)"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_dst\\\": \\\"\${dmac}\\\",\\\"dl_src\\\": \\\"\${smac}\\\",\\"
+    echo " \\\"dl_vlan\\\": \\\"\${vid}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"POP_VLAN\\\",\\"
+    echo " \\\"ethertype\\\": \\\"\${ethertype}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"eth_dst\\\", \\\"value\\\": \\\"\${_dmac}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"eth_src\\\", \\\"value\\\": \\\"\${_smac}\\\"},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"POP_VLAN\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+#   echo " \"\\\"dl_dst\\\"!\\\"\${dmac}\\\" \\\"dl_src\\\"!\\\"\${smac}\\\"\""
+    echo " \"\\\"dl_vlan\\\"!\\\"\${vid}\\\" \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"pop_vlan Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_push_mpls_pop_vlan() {
+    echo "push_mpls_pop_vlan() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local vid=\$((${LABEL}))"
+    echo "    local oport=\$((\$5+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local olabel=\$((\$6+${LABEL}))"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_vlan\\\": \\\"\${vid}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"POP_VLAN\\\"},\\"
+    echo " {\\\"type\\\": \\\"PUSH_MPLS\\\",\\"
+    echo " \\\"ethertype\\\": \\\"${PROTO_MPLS}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"mpls_label\\\",\\\"value\\\": \${olabel}},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"POP_VLAN\\\" \\\"PUSH_MPLS:${PROTO_MPLS}\\\" \\\"SET_FIELD:!{mpls_label:\${olabel}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+    echo " \"\\\"dl_vlan\\\"!\\\"\${vid}\\\" \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"push_mpls_pop_vlan Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_push_mpls() {
+    echo "push_mpls() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local oport=\$((\$4+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local olabel=\$((\$5+${LABEL}))"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"\${ethertype}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"PUSH_MPLS\\\",\\"
+    echo " \\\"ethertype\\\": \\\"${PROTO_MPLS}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"mpls_label\\\",\\\"value\\\": \${olabel}},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"PUSH_MPLS:${PROTO_MPLS}\\\" \\\"SET_FIELD:!{mpls_label:\${olabel}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+    echo " \"\\\"dl_type\\\"!\${ethertype} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"push_mpls Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_pop_mpls_push_vlan() {
+    echo "pop_mpls_push_vlan() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local ilabel=\$((\$4+${LABEL}))"
+    echo "    local oport=\$((\$5+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local vid=\$((${LABEL}+4096))"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"${PROTO_MPLS}\\\",\\"
+    echo " \\\"mpls_label\\\": \\\"\${ilabel}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"POP_MPLS\\\",\\"
+    echo " \\\"ethertype\\\": \\\"\${ethertype}\\\"},\\"
+    echo " {\\\"type\\\": \\\"PUSH_VLAN\\\",\\"
+    echo " \\\"ethertype\\\": \\\"${PROTO_8021Q}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\", \\\"field\\\":\\"
+    echo " \\\"vlan_vid\\\", \\\"value\\\": \${vid}},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\"
+    echo " \\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"POP_MPLS:\${ethertype}\\\" \\\"PUSH_VLAN:${PROTO_8021Q}\\\" \\\"SET_FIELD:!{vlan_vid:\${vid}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+    echo " \"\\\"mpls_label\\\"!\${ilabel} \\\"dl_type\\\"!${PROTO_MPLS} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"pop_mpls_push_vlan Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_pop_mpls() {
+    echo "pop_mpls() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local ilabel=\$((\$4+${LABEL}))"
+    echo "    local oport=\$((\$5+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"${PROTO_MPLS}\\\",\\"
+    echo " \\\"mpls_label\\\": \\\"\${ilabel}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"POP_MPLS\\\",\\"
+    echo " \\\"ethertype\\\": \\\"\${ethertype}\\\"},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\"
+    echo " \\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"POP_MPLS:\${ethertype}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+    echo " \"\\\"mpls_label\\\"!\${ilabel} \\\"dl_type\\\"!${PROTO_MPLS} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"pop_mpls Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_swap_mpls() {
+    echo "swap_mpls() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ethertype=\$2"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local ilabel=\$((\$4+${LABEL}))"
+    echo "    local oport=\$((\$5+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local olabel=\$((\$6+${LABEL}))"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"${PROTO_MPLS}\\\",\\"
+    echo " \\\"mpls_label\\\": \\\"\${ilabel}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"SET_FIELD\\\",\\"
+    echo " \\\"field\\\": \\\"mpls_label\\\",\\\"value\\\": \${olabel}},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"SET_FIELD:!{mpls_label:\${olabel}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+    echo " \"\\\"mpls_label\\\"!\${ilabel} \\\"dl_type\\\"!${PROTO_MPLS} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"swap_mpls Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+decode() {
+    local dp=$1
+    local eth=$2
+    eval local label="\${${dp}_${eth}_LABEL}"
+    local port_n=`expr "${eth}" : '[^0-9]*\([0-9]*\)'`
+    label=`echo ${label} | sed -e 's/^0*//'`
+    echo "${port_n} ${label}"
+}
+
+doit() {
+    local dpid=$1
+    local dpid_n=$2
+    local dup=$3
+    local prt=$(printf '%d' $4)
+    local cl=$5
+    local pl=$6
+    local nl=$7
+    local p1=$8
+    local l1=$9
+    shift 4
+    local p2=$6
+    local l2=$7
+    local m1=$8
+    local m2=$9
+    # eth interface  
+    if [ ${dup} -le 2 ]; then
+        eval local epair1="\${${dpid}_EPAIR}"
+        eval local epair2="\${${dpid}_EPAIR2}"
+    else
+        eval local epair1="\${${dpid}_EPAIR$((${dup}-1))}"
+        eval local epair2="\${${dpid}_EPAIR${dup}}"
+    fi
+    local epair1_a=(${epair1})
+    local epair2_a=(${epair2})
+    local _eth1=${epair1_a[1]}
+    local _eth2=${epair2_a[0]}
+    #
+    [ ${cl} -eq 1 ] && [ ${pl} -eq 0 ] && [ ${nl} -eq 0 ] && cl=0
+    [ ${cl} -eq 1 ] && [ "${EDGE_TYPE}" = "simple" ] && cl=0
+    local sfc=0
+    if [ "${LINK_TYPE}" = "PHY" ] && [ ${cl} -eq 1 ] && [ ${pl} -eq 0 ] && [ ${nl} -lt 0 ]; then
+        sfc=1
+    elif [ "${LINK_TYPE}" = "PHY" ] && [ ${cl} -eq 1 ] && [ ${pl} -lt 0 ] && [ ${nl} -eq 0 ]; then
+        sfc=2
+    elif [ "${LINK_TYPE}" = "PYH" ] && [ ${cl} -eq 1 ] && [ ${pl} -lt 0 ] && [ ${nl} -gt 0 ]; then
+        sfc=3
+    elif [ "${LINK_TYPE}" = "PHY" ] && [ ${cl} -eq 1 ] && [ ${pl} -gt 0 ] && [ ${nl} -lt 0 ]; then
+        sfc=4
+    elif [ "${LINK_TYPE}" = "PHY" ] && [ ${cl} -eq 1 ] && [ ${pl} -lt 0 ] && [ ${nl} -lt 0 ]; then
+        sfc=5
+        # post eth interface  
+        eval local epair1="\${${dpid}_EPAIR${dup}}"
+        eval local epair2="\${${dpid}_EPAIR$((${dup}+1))}"
+        epair1_a=(${epair1})
+        epair2_a=(${epair2})
+        local eth1_=${epair1_a[1]}
+        local eth2_=${epair2_a[0]}
+    elif [ ${cl} -eq 3 ] || [ ${nl} -ge ${cl} ]; then
+        local dp=${p1}
+        local dl=${l1}
+        local up=${p2}
+        local ul=${l2}
+        local sm=${m1}
+        local dm=${m2}
+    else
+        local dp=${p2}
+        local dl=${l2}
+        local up=${p1}
+        local ul=${l1}
+        local sm=${m2}
+        local dm=${m1}
+    fi
+    # echo ${dpid} ${dpid_n} ${dup} ${prt} ${cl} ${sfc} ${pl} ${nl} ${dp} ${dl} ${up} ${ul} ${sm} ${dm} 1>&2
+    ### uplink and downlink datapath setup ###
+    case "${cl}" in
+        0) # simple switch 
+            [ ${sfc} -ne 0 ] && {
+                echo "    _m1=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${_eth1}\"\`"
+                echo "    _m2=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${_eth2}\"\`"
+            }
+            case "${sfc}" in
+                0)
+                    echo "    ss ${dpid_n} ${prt} ${dp} ${up} ${dm} ${sm} ${dm} ${sm}"
+                    echo "    ss ${dpid_n} ${prt} ${up} ${dp} ${sm} ${dm} ${sm} ${dm}"
+                    ;;
+                1)
+                    echo "    ss ${dpid_n} ${prt} ${p1} ${p2} ${m2} ${m1} \${_m2} \${_m1}"
+                    echo "    ss ${dpid_n} ${prt} ${p2} ${p1} \${_m1} \${_m2} ${m1} ${m2}"
+                    ;;
+                2) 
+                    echo "    ss ${dpid_n} ${prt} ${p2} ${p1} ${m1} ${m2} \${_m1} \${_m2}"
+                    echo "    ss ${dpid_n} ${prt} ${p1} ${p2} \${_m2} \${_m1} ${m2} ${m1}"
+                    ;;
+                3) 
+                    echo "    ss ${dpid_n} ${prt} ${p1} ${p2} \${_m2} \${_m1} ${m2} ${m1}"
+                    echo "    ss ${dpid_n} ${prt} ${p2} ${p1} ${m1} ${m2} \${_m1} \${_m2}"
+                    ;;
+                4) 
+                    echo "    ss ${dpid_n} ${prt} ${p2} ${p1} \${_m1} \${_m2} ${m1} ${m2}"
+                    echo "    ss ${dpid_n} ${prt} ${p1} ${p2} ${m2} ${m1} \${_m2} \${_m1}"
+                    ;;
+                5) 
+                    echo "    m1_=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${eth1_}\"\`"
+                    echo "    m2_=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${eth2_}\"\`"
+                    echo "    ss ${dpid_n} ${prt} ${p1} ${p2} \${_m2} \${_m1} \${m2_} \${m1_}"
+                    echo "    ss ${dpid_n} ${prt} ${p2} ${p1} \${_m1} \${_m2} \${_m1} \${_m2}"
+                    ;;
+            esac
+            ;;
+        1) # edge switch
+            if [ "${EDGE_TYPE}" = "simple" ]; then
+                echo "    _m1=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${_eth1}\"\`"
+                echo "    _m2=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${_eth2}\"\`"
+                echo "    push_vlan ${dpid_n} ${prt} ${dp} ${up} ${LABEL} \${_m2} \${_m1} ${dm} ${sm}"
+                echo "    pop_vlan ${dpid_n} ${prt} ${up} ${LABEL} ${dp} ${sm} ${dm} \${_m1} \${_m2}"
+            else
+                echo "    push_vlan ${dpid_n} ${prt} ${dp} ${up} ${LABEL} ${dm} ${sm} ${dm} ${sm}"
+                echo "    pop_vlan ${dpid_n} ${prt} ${up} ${LABEL} ${dp} ${sm} ${dm} ${sm} ${dm}"
+            fi
+            ;;
+        2) # mpls metro switch
+            if [ "${EDGE_TYPE}" = "simple" ]; then
+                echo "  push_mpls ${dpid_n} ${prt} ${dp} ${up} ${ul}"
+                echo "  pop_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp}"
+            else
+                echo "  push_mpls_pop_vlan ${dpid_n} ${prt} ${dp} ${LABEL} ${up} ${ul}"
+                echo "  pop_mpls_push_vlan ${dpid_n} ${prt} ${up} ${ul} ${dp} ${LABEL}"
+            fi
+            ;;
+        3) # mpls core switch
+            echo "  swap_mpls ${dpid_n} ${prt} ${dp} ${dl} ${up} ${ul}"
+            echo "  swap_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp} ${dl}"
+            ;;
+        *)
+            ;;
+    esac
+}
+
+setup_datapath() {
+    local dplist=
+    local ep_a=(${EP?})
+    local ep_eth_a=(${EP_ETH?})
+    local dp_a=(${DP?})
+    local dp_s=${#dp_a[@]}
+    local dup_a=(${DUP?})
+    for ((i=0; i<${dp_s}; i++)); do
+        local dup=
+        local dpid=${dp_a[${i}]}
+        [ ${dup_a[${i}]} -ge 2 ] && dup=${dup_a[${i}]}
+        eval local epair=\${${dp_a[${i}]}_EPAIR${dup}:-}
+        [ ${dup_a[${i}]} -eq 1 ] && dup=1 && dplist="${dpid} ${dplist}"
+        #
+        if [ ${i} -eq 0 -a ${dp_s} -gt 1 ]; then
+            eval local m1=\${${dp_a[0]}_${ep_a[0]}_MAC:-}
+            eval local m2=\${${dp_a[$((${dp_s}-1))]}_${ep_a[1]}_MAC:-}
+            echo "docker exec ${ep_a[0]} arp -i ${ep_eth_a[0]} -s ${ep_a[1]}-${ep_eth_a[1]} ${m2}"
+        elif [ ${i} -eq $((${dp_s}-1)) -a ${dp_s} -gt 1 ]; then
+            eval local m1=\${${dp_a[0]}_${ep_a[0]}_MAC:-}
+            eval local m2=\${${dp_a[$((${dp_s}-1))]}_${ep_a[1]}_MAC:-}
+            echo "docker exec ${ep_a[1]} arp -i ${ep_eth_a[1]} -s ${ep_a[0]}-${ep_eth_a[0]} ${m1}"
+        elif [ ${i} -eq 0 -a ${dp_s} -eq 1 ]; then
+            eval local m1=\${${dp_a[0]}_${ep_a[0]}_MAC:-}
+            eval local m2=\${${dp_a[0]}_${ep_a[1]}_MAC:-}
+            echo "docker exec ${ep_a[0]} arp -i ${ep_eth_a[0]} -s ${ep_a[1]}-${ep_eth_a[1]} ${m2}"
+            echo "docker exec ${ep_a[1]} arp -i ${ep_eth_a[1]} -s ${ep_a[0]}-${ep_eth_a[0]} ${m1}"
+        else
+            :
+        fi
+        #
+        eval local cl=\${${dp_a[${i}]}_LEVEL:-}
+        if [ ${i} -eq 0 -a ${dp_s} -eq 1 ]; then
+            local pl=0
+            local nl=0
+        elif [ ${i} -eq 0 ]; then
+            local pl=0
+            eval local nl=\${${dp_a[$((${i}+1))]}_LEVEL:-}
+        elif [ $((${i}+1)) -eq ${dp_s} ]; then
+            eval local pl=\${${dp_a[$((${i}-1))]}_LEVEL:-}
+            local nl=0
+        else
+            eval local pl=\${${dp_a[$((${i}-1))]}_LEVEL:-}
+            eval local nl=\${${dp_a[$((${i}+1))]}_LEVEL:-}
+        fi
+        [ ${cl} -eq 2 -a ${pl} -eq 2 -a ${nl} -eq 2 ] && cl=3
+        #
+        local epair_a=(${epair})
+        local decoded_a=($(decode ${dpid} ${epair_a[0]}))
+        local p1=${decoded_a[0]}
+        local l1=${decoded_a[1]}
+        local decoded_a=($(decode ${dpid} ${epair_a[1]}))
+        local p2=${decoded_a[0]}
+        local l2=${decoded_a[1]}
+        #
+        echo "${dpid}_${dup}() {"
+        eval local dpid_n=\${${dp_a[${i}]}_DPID_N:-}
+        eval local protolist=\${${dp_a[${i}]}_PROTO:-}
+        for prt in ${protolist}; do
+            doit ${dpid} ${dpid_n} ${dup} ${prt} ${cl} ${pl} ${nl} ${p1} ${l1} ${p2} ${l2} ${m1} ${m2}
+        done
+        echo "    :"
+        echo "}"
+        echo
+    done
+    #
+    for dp in ${dplist}; do
+        local max=0
+        for ((i=0; i<${dp_s}; i++)); do
+            local dpid=${dp_a[${i}]}
+            local dup=${dup_a[${i}]}
+            [ ${dp} = ${dpid} -a ${max} -lt ${dup} ] && max=${dup}
+        done
+        echo "${dp}() {"
+        for ((j=0; j<${max}; j++)); do
+            local n=$((${j}+1))
+            echo "    ${dp}_${n}"
+        done
+        echo "}"
+        echo
+    done
+}
+
+main() {
+    # banner
+    echo "#!/bin/bash"
+    echo "# run script for ryu NBI client program"
+    echo "# generated by conf-ryu; $(LANG=C date)"
+    echo
+    register_flowentry_validate
+    register_padding
+    register_ss
+    register_push_vlan
+    register_pop_vlan
+    register_push_mpls_pop_vlan
+    register_pop_mpls_push_vlan
+    register_push_mpls
+    register_pop_mpls
+    register_swap_mpls
+    setup_datapath
+    # argv processing
+    echo "CMD='add'"
+    echo "declare -a argv=()"
+    echo "while (( \$# > 0 ))"
+    echo "do"
+    echo "    case "\$1" in"
+    echo "        -*)"
+    echo "            if [[ "\$1" =~ 's' ]]; then"
+    echo "                sflag='-s'"
+    echo "            fi"
+    echo "            if [[ "\$1" =~ 'd' ]]; then"
+    echo "                sflag='-s'"
+    echo "                CMD='delete'"
+    echo "            fi"
+    echo "            if [[ "\$1" =~ 'e' ]]; then"
+    echo "                eflag='-e'"
+    echo "            fi"
+    echo "            if [[ "\$1" =~ 'h' ]]; then"
+    echo "                hflag='-h'"
+    echo "            fi"
+    echo "            shift"
+    echo "            ;;"
+    echo "        *)"
+    echo "            ((++argc))"
+    echo "            argv=("\${argv[@]}" "\$1")"
+    echo "            shift"
+    echo "            ;;"
+    echo "    esac"
+    echo "done"
+    echo "argv_a=(\${argv[@]})"
+    echo
+    echo "if [ -n \"\${hflag}\" ]; then"
+    echo "    echo \"Usage: \$0 [-h] [-s] [-d] [-e] [DPID]\""
+    echo "    echo \"       -s: skip validation\""
+    echo "    echo \"       -d: delete flow entry\""
+    echo "    echo \"       -e: skip edge flow entry deletion\""
+    echo "elif [ \${#argv_a[@]} -eq 0 ]; then"
+    echo "    dp_a=(${DP})"
+    echo "    for ((k=0; k<\${#dp_a[@]}; k++)); do"
+    echo "        if [ -n \"\${eflag}\" ] && [ \${k} -eq 0 -o \$((\${k}+1)) -eq \${#dp_a[@]} ]; then"
+    echo "            # skip edge flow deletion" 
+    echo "            continue"
+    echo "        else"
+    echo "            \${dp_a[k]}"
+    echo "        fi"
+    echo "    done"
+    echo "else"
+    echo "    for dp in \${argv[@]}; do"
+    echo "        \${dp}"
+    echo "    done"
+    echo "fi"
+}
+main >>"${RUNFILE}"
+chmod 755 "${RUNFILE}"
+
+exit 0

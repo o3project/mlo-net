@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamVpath>
+    <vpath>
+        <qos>
+            <vQoSPriority>888</vQoSPriority>
+            <vQoSSla>777</vQoSSla>
+            <vQoSPir>666</vQoSPir>
+            <vQoSCir>555</vQoSCir>
+        </qos>
+    </vpath>
+</CpfIfParamVpath>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamVpath>
+    <vpath>
+        <lsp>
+            <vLspDownLabel>vLspDownLabel</vLspDownLabel>
+            <vLspUpLabel>vLspUpLabel</vLspUpLabel>
+        </lsp>
+    </vpath>
+</CpfIfParamVpath>

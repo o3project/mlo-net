@@ -1,0 +1,187 @@
+
+#topo-canvas {
+  margin: 0px;
+  border: 0px;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+#topo-canvas .with-lattice {
+}
+
+#topo-canvas > svg {
+  border: 1px solid whitesmoke;
+  background-image: url('../images/lattice.png');
+}
+
+#topo-canvas rect {
+}
+
+#topo-canvas circle {
+  fill: lightblue;
+  stroke: darkblue;
+  stroke-width: 2;
+}
+
+#topo-canvas rect {
+  rx: 4;
+  fill: lightblue;
+  stroke: darkblue;
+  stroke-width: 2;
+}
+
+#topo-canvas .view-node-mpls circle {
+  fill: lightblue;
+  stroke: darkblue;
+  stroke-width: 2;
+}
+
+#topo-canvas .view-node-mpls rect {
+  rx: 4;
+  fill: lightblue;
+  stroke: darkblue;
+  stroke-width: 2;
+}
+
+#topo-canvas .view-node-edge circle {
+  fill: lightgreen;
+  stroke: darkgreen;
+  stroke-width: 2;
+}
+
+#topo-canvas .view-node-edge rect {
+  rx: 4;
+  fill: lightgreen;
+  stroke: darkgreen;
+  stroke-width: 2;
+}
+
+#topo-canvas .view-node-host circle {
+  fill: yellow;
+  stroke: orange;
+  stroke-width: 2;
+}
+
+#topo-canvas .view-node-host rect {
+  fill: yellow;
+  stroke: orange;
+  stroke-width: 2;
+}
+
+#topo-canvas .view-node-edge text, 
+#topo-canvas .view-node-mpls text, 
+#topo-canvas .view-node-metro text, 
+#topo-canvas .view-node-core text, 
+#topo-canvas .view-node-host text {
+  fill: black;
+  font-family: sans-serif;
+  stroke-width: 0;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+#topo-canvas .view-link {
+  fill: none;
+  stroke: darkgray;
+  stroke-width: 2;
+  shape-rendering: crispEdges;
+}
+
+#topo-canvas .view-link.view-link-selected {
+  stroke: orange;
+  stroke-width: 8;
+}
+
+#topo-canvas .view-link rect {
+  fill: rgba(255, 255, 255, 0.75);
+  stroke: black;
+  stroke-width: 0;
+}
+
+#topo-canvas .view-port rect {
+  fill: darkgray;
+  stroke: darkgray;
+  stroke-width: 1;
+}
+
+#topo-canvas .view-port text {
+  font-family: sans-serif;
+  font-size: 9px;
+}
+
+#topo-canvas .tooltip {
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+  padding: 4px 8px 4px 8px;
+  font-family: sans-serif;
+  font-size: 12px;
+  border: 1px solid dimgray;
+  background-color: white;
+  border-radius: 4px;
+  text-align: left;
+}
+
+#topo-canvas .tooltip h1 {
+  border-bottom: solid 1px gray;
+  font-size: 12px;
+}
+
+#topo-canvas .tooltip dd {
+  margin-left: 16px;
+}
+
+.ui-accordion .ui-accordion-content {
+    padding: 0px;
+    border-width: 0px;
+}
+
+.ui-accordion .ui-accordion-header-active {
+  background-color: lightgray;
+  border-color: lightgray;
+}
+
+.flow-list-panel {
+  padding: 4px;
+  width: 240px;
+}
+
+.flow-list-panel.ui-widget-content {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-width: 0;
+}
+
+.flow-list-panel ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.flow-list-panel li {
+  margin: 2px;
+  padding: 4px;
+  height: 18px;
+  font-size: 12px;
+  background-color: #f6f6f6;
+  color: #454545;
+}
+
+.flow-list-panel .ui-selecting {
+  background-color: lightgray;
+}
+
+.flow-list-panel .ui-selected {
+  background-color: #d3d3d3;;
+  color: white;
+}
+
+.flow-list-template {
+  visibility: hidden;
+}
+
+.flow-type-name {
+  visibility: hidden;
+}
+

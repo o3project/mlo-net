@@ -1,0 +1,8 @@
+DaoType=None
+DefaultResourcePath=/mlo-psdtnc/src/main/resources
+DefaultRootPackage=org.o3project.mlo.psdtnc
+DefaultSrcPath=/mlo-psdtnc/src/main/java
+ServletPath=/mlo-psdtnc
+ViewType=SA-Struts
+WebContentsRoot=src/main/webapp/
+eclipse.preferences.version=1

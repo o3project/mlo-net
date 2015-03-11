@@ -1,0 +1,27 @@
+<rootTag>
+    <Common>
+        <Version>1</Version>
+        <SourceComponent>
+            <ComponentName>demoApl</ComponentName>
+        </SourceComponent>
+        <DestComponent>
+            <ComponentName>mlo</ComponentName>
+        </DestComponent>
+        <Operation>Request</Operation>
+    </Common>
+    <Slice>
+        <SliceName>sliceB</SliceName>
+        <Flows>
+            <Flow>
+                <FlowName>fa101</FlowName>
+                <SourceCENodeName>tokyo</SourceCENodeName>
+                <SourceCEPortNo>00000001</SourceCEPortNo>
+                <DestCENodeName>osaka</DestCENodeName>
+                <DestCEPortNo>00000004</DestCEPortNo>
+                <RequestBandWidth>5000</RequestBandWidth>
+                <RequestDelay>9999</RequestDelay>
+                <ProtectionLevel>0</ProtectionLevel>
+            </Flow>
+        </Flows>
+    </Slice>
+</rootTag>

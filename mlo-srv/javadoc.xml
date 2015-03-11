@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc 
+        	access="package" 
+        	additionalparam="-encoding &quot;utf-8&quot; -charset &quot;utf-8&quot; " 
+        	author="false" 
+        	Overview="src/main/java/org/o3project/mlo/server/overview.html"  
+        	classpath="src/main/webapp/WEB-INF/lib/antlr-2.7.7.jar;lib/junit-4.4.jar;lib/cglib-nodep-2.1_3.jar;lib/svnkit-1.2.0.4949.jar;src/main/webapp/WEB-INF/lib/commons-digester-1.6.jar;src/main/webapp/WEB-INF/lib/geronimo-jpa_3.0_spec-1.0.jar;src/main/webapp/WEB-INF/lib/commons-validator-1.2.0.jar;src/main/webapp/WEB-INF/lib/odenos-lib-0.5.1.jar;src/main/webapp/WEB-INF/lib/geronimo-interceptor_3.0_spec-1.0.jar;src/main/webapp/WEB-INF/lib/commons-beanutils-1.7.0.jar;src/main/webapp/WEB-INF/lib/geronimo-annotation_1.0_spec-1.0.jar;lib/geronimo-servlet_2.4_spec-1.0.jar;lib/easymock-2.4.jar;src/main/webapp/WEB-INF/lib/javassist-3.4.ga.jar;src/main/webapp/WEB-INF/lib/jakarta-taglibs-standard-1.1.2.jar;src/main/webapp/WEB-INF/lib/poi-3.0-FINAL.jar;src/main/webapp/WEB-INF/lib/geronimo-jta_1.1_spec-1.0.jar;src/main/webapp/WEB-INF/lib/s2-extension-2.4.46.jar;src/main/webapp/WEB-INF/lib/sa-struts-1.0.4-sp9.jar;src/main/webapp/WEB-INF/lib/commons-logging-1.1.jar;lib/freemarker-2.3.13.jar;src/main/webapp/WEB-INF/lib/struts-1.2.9.jar;target/test-classes;src/main/webapp/WEB-INF/lib/s2-tiger-2.4.46.jar;src/main/webapp/WEB-INF/lib/ognl-2.6.9-patch-20090427.jar;src/main/webapp/WEB-INF/lib/aopalliance-1.0.jar;src/main/webapp/WEB-INF/lib/s2-framework-2.4.46.jar;src/main/webapp/WEB-INF/lib/jakarta-oro-2.0.8.jar;src/main/webapp/WEB-INF/lib/log4j-1.2.13.jar;src/main/webapp/WEB-INF/lib/h2-1.0.69.jar;src/main/webapp/WEB-INF/lib/commons-collections-3.1.jar;src/main/webapp/WEB-INF/lib/commons-el-1.0.jar;src/main/webapp/WEB-INF/lib/commons-io-1.3.2.jar;src/main/webapp/WEB-INF/lib/jstl-1.1.2.jar;lib/geronimo-jsp_2.0_spec-1.0.jar;lib/easymockclassextension-2.4.jar;src/main/webapp/WEB-INF/lib/commons-fileupload-1.2.jar;src/main/webapp/WEB-INF/lib/geronimo-ejb_3.0_spec-1.0.jar;lib/s2jdbc-gen-2.4.46.jar;src/main/webapp/WEB-INF/lib/on-api2-2.0.0.jar" 
+        	destdir="doc/javadoc" 
+        	nodeprecated="false" 
+        	nodeprecatedlist="false" 
+        	noindex="false" 
+        	nonavbar="false" 
+        	notree="false" 
+        	excludepackagenames="org.o3project.mlo.server.impl.*" 
+        	sourcepath="src/main/resources;src/main/java" 
+        	splitindex="true" 
+        	use="true" 
+        	windowtitle="Multi-Layer Orchestrator" 
+        	version="true"/>
+    </target>
+</project>

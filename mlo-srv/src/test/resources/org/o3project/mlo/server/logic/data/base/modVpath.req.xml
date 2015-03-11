@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <head>
+        <sequenceNumber>00000101</sequenceNumber>
+        <time>timeStr</time>
+        <majorResponseCode>00000423</majorResponseCode>
+        <minorResponseCode>00000554</minorResponseCode>
+        <errorDetail>errorDetail</errorDetail>
+    </head>
+    <slice groupIndex="groupIndex" />
+    <vpath vObjectIndex="vObjectIndex">
+        <vObjectName>vObjectName</vObjectName>
+        <vObjectStatus>1</vObjectStatus>
+        <vObjectDescription>vObjectDescription</vObjectDescription>
+        <resourceIndex>1</resourceIndex>
+        <pathEndPoint startEndPoint="1">
+            <neId>neId</neId>
+            <portId>30</portId>
+        </pathEndPoint>
+        <qos>
+            <vQoSPir>1</vQoSPir>
+            <vQoSCir>1</vQoSCir>
+        </qos>
+        <vlan>
+            <vVlanTagNum>1</vVlanTagNum>
+            <vVlanTagMode>1</vVlanTagMode>
+            <uni>
+                <vVlanVLanIdNniClient>1</vVlanVLanIdNniClient>
+                <vVlanInnerVlanIdNniClient>1</vVlanInnerVlanIdNniClient>
+                <vVlanInnerCosNniClient>1</vVlanInnerCosNniClient>
+                <vVlanOutterCosNniClient>1</vVlanOutterCosNniClient>
+            </uni>
+            <nni>
+                <vVlanVlanIdNniLine>1</vVlanVlanIdNniLine>
+                <vVlanOutterCosNniLine>1</vVlanOutterCosNniLine>
+            </nni>
+        </vlan>
+    </vpath>
+</root>

@@ -1,0 +1,19 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  font-size: 14px;
+  color: #333;
+  width: 100%;
+}
+
+h1, h2, h3 {
+  font-size: normal;
+}
+
+
+

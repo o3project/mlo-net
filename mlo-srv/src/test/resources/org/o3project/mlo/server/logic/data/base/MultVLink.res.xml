@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <head>
+        <sequenceNumber>00000101</sequenceNumber>
+        <time>timeStr</time>
+        <majorResponseCode>00000423</majorResponseCode>
+        <minorResponseCode>00000554</minorResponseCode>
+        <errorDetail></errorDetail>
+    </head>
+    <auth>
+        <token>token</token>
+    </auth>
+    <slice groupIndex="groupIndex" />
+    <vlink vObjectIndex="vObjectIndex">
+        <vObjectName>vObjectName</vObjectName>
+        <vObjectStatus>1</vObjectStatus>
+        <vObjectDescription>vObjectDescription</vObjectDescription>
+        <resourceIndex>1</resourceIndex>
+        <vLineSource>vLineSource</vLineSource>
+        <vLineSink>vLineSink</vLineSink>
+    </vlink>
+    <vlink vObjectIndex="vObjectIndex">
+        <vObjectName>vObjectName</vObjectName>
+        <vObjectStatus>1</vObjectStatus>
+        <vObjectDescription>vObjectDescription</vObjectDescription>
+        <resourceIndex>1</resourceIndex>
+        <vLineSource>vLineSource</vLineSource>
+        <vLineSink>vLineSink</vLineSink>
+    </vlink>
+    <vlink vObjectIndex="vObjectIndex">
+        <vObjectName>vObjectName</vObjectName>
+        <vObjectStatus>1</vObjectStatus>
+        <vObjectDescription>vObjectDescription</vObjectDescription>
+        <resourceIndex>1</resourceIndex>
+        <vLineSource>vLineSource</vLineSource>
+        <vLineSink>vLineSink</vLineSink>
+    </vlink>
+</root>

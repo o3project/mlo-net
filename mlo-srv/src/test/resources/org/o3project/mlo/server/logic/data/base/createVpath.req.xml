@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamVpath>
+    <auth>
+        <token>token</token>
+    </auth>
+    <slice groupIndex="groupIndex" />
+    <vpath>
+        <vObjectName>vObjectName</vObjectName>
+        <vObjectDescription>vObjectDescription</vObjectDescription>
+        <resourceIndex>1</resourceIndex>
+        <pathInfo>
+            <vGrade>0</vGrade>
+        </pathInfo>
+        <pathEndPoint startEndPoint="1">
+            <neId>neId</neId>
+            <portId>30</portId>
+        </pathEndPoint>
+        <pw>
+            <vPwDownLabel>vPwDownLabel</vPwDownLabel>
+            <vPwUpLabel>vPwUpLabel</vPwUpLabel>
+        </pw>
+        <qos>
+            <vQoSPriority>1</vQoSPriority>
+            <vQoSSla>1</vQoSSla>
+            <vQoSPir>1</vQoSPir>
+            <vQoSCir>1</vQoSCir>
+        </qos>
+        <vlan>
+            <vVlanTagNum>1</vVlanTagNum>
+            <vVlanTagMode>1</vVlanTagMode>
+            <uni>
+                <vVlanVLanIdNniClient>1</vVlanVLanIdNniClient>
+                <vVlanInnerVlanIdNniClient>1</vVlanInnerVlanIdNniClient>
+                <vVlanInnerCosNniClient>1</vVlanInnerCosNniClient>
+                <vVlanOutterCosNniClient>1</vVlanOutterCosNniClient>
+            </uni>
+            <nni>
+                <vVlanVlanIdNniLine>1</vVlanVlanIdNniLine>
+                <vVlanOutterCosNniLine>1</vVlanOutterCosNniLine>
+            </nni>
+        </vlan>
+    </vpath>
+</CpfIfParamVpath>

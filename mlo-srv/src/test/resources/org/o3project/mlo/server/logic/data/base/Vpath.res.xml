@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <head>
+        <sequenceNumber>00000101</sequenceNumber>
+        <time>timeStr</time>
+        <majorResponseCode>00000423</majorResponseCode>
+        <minorResponseCode>00000554</minorResponseCode>
+        <errorDetail>errorDetail</errorDetail>
+    </head>
+    <slice groupIndex="groupIndex" />
+    <vpath vObjectIndex="vObjectIndex" resourceIndex="resourceIndex">
+        <vObjectName>vObjectName</vObjectName>
+        <vObjectStatus>1</vObjectStatus>
+        <vObjectDescription>vObjectDescription</vObjectDescription>
+        <pathRoute lineGroupWorkingProtection="63">
+            <line elementIndex="eIndex">
+                <lineSequence>3</lineSequence>
+            </line>
+        </pathRoute>
+        <pathInfo>
+            <vGrade>0</vGrade>
+        </pathInfo>
+        <pathEndPoint startEndPoint="1">
+            <neId>neId</neId>
+            <portId>30</portId>
+        </pathEndPoint>
+        <lsp>
+            <vLspDownLabel>vLspDownLabel</vLspDownLabel>
+            <vLspUpLabel>vLspUpLabel</vLspUpLabel>
+        </lsp>
+        <pw>
+            <vPwDownLabel>vPwDownLabel</vPwDownLabel>
+            <vPwUpLabel>vPwUpLabel</vPwUpLabel>
+        </pw>
+        <qos>
+            <vQoSPriority>1</vQoSPriority>
+            <vQoSSla>1</vQoSSla>
+            <vQoSPir>1</vQoSPir>
+            <vQoSCir>1</vQoSCir>
+        </qos>
+        <vlan>
+            <vVlanTagNum>1</vVlanTagNum>
+            <vVlanTagMode>1</vVlanTagMode>
+            <uni>
+                <vVlanVLanIdNniClient>425</vVlanVLanIdNniClient>
+                <vVlanInnerVlanIdNniClient>1</vVlanInnerVlanIdNniClient>
+                <vVlanInnerCosNniClient>1</vVlanInnerCosNniClient>
+                <vVlanOutterCosNniClient>1</vVlanOutterCosNniClient>
+            </uni>
+            <nni>
+                <vVlanVlanIdNniLine>1</vVlanVlanIdNniLine>
+                <vVlanOutterCosNniLine>1</vVlanOutterCosNniLine>
+            </nni>
+        </vlan>
+    </vpath>
+</root>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <head>
+        <sequenceNumber>00000101</sequenceNumber>
+        <time>timeStr</time>
+        <majorResponseCode>00000423</majorResponseCode>
+        <minorResponseCode>00000554</minorResponseCode>
+        <errorDetail>errorDetail</errorDetail>
+    </head>
+    <vpath vObjectIndex="vObjectIndex" >
+        <pw>
+            <vPwDownLabel>00050</vPwDownLabel>
+            <vPwUpLabel>00050</vPwUpLabel>
+        </pw>
+    </vpath>
+</root>

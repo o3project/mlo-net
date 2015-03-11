@@ -1,0 +1,7 @@
+<CpfIfParamLogin>
+    <login loginId="myUserid" >
+        <loginPassword>myPasswd</loginPassword>
+        <ipAddress>123.145.167.189</ipAddress>
+        <accountTimeZone>+0900</accountTimeZone>
+    </login>
+</CpfIfParamLogin>

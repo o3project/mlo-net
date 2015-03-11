@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <head>
+        <sequenceNumber>00000101</sequenceNumber>
+        <time>timeStr</time>
+        <majorResponseCode>00000423</majorResponseCode>
+        <minorResponseCode>00000554</minorResponseCode>
+        <errorDetail></errorDetail>
+    </head>
+    <auth>
+        <token>token</token>
+    </auth>
+    <login loginId="loginId">
+        <loginPassword>loginPassword</loginPassword>
+        <ipAddress>ipAddress</ipAddress>
+        <accountName>accountName</accountName>
+        <accountLoginDate>accountLoginDate</accountLoginDate>
+        <accountTimeZone>accountTimeZone</accountTimeZone>
+    </login>
+</root>

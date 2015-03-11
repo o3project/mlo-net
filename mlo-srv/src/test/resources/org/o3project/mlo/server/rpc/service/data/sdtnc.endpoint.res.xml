@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <vpath>
+        <pathEndPoint startEndPoint="startEndPoint">
+            <neId>neId</neId>
+            <portId>333</portId>
+        </pathEndPoint>
+    </vpath>
+</root>

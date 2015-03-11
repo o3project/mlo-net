@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <vpath>
+        <pw>
+            <vPwUpLabel>vPwUpLabel</vPwUpLabel>
+            <vPwDownLabel>vPwDownLabel</vPwDownLabel>
+        </pw>
+    </vpath>
+</root>

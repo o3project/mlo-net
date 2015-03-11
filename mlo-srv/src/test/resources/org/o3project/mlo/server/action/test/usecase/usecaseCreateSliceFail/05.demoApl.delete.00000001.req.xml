@@ -1,0 +1,15 @@
+<rootTag>
+    <Common>
+        <Version>1</Version>
+        <SourceComponent>
+            <ComponentName>demoApl</ComponentName>
+        </SourceComponent>
+        <DestComponent>
+            <ComponentName>mlo</ComponentName>
+        </DestComponent>
+        <Operation>Request</Operation>
+    </Common>
+    <Slice>
+        <SliceId>00000001</SliceId>
+    </Slice>
+</rootTag>

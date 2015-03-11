@@ -1,0 +1,19 @@
+<root>
+    <head>
+        <sequenceNumber>12</sequenceNumber>
+        <time>2013/12/11 12:56:34+0900</time>
+        <majorResponseCode>34</majorResponseCode>
+        <minorResponseCode>56</minorResponseCode>
+        <errorDetail>myErrorDetail</errorDetail>
+    </head>
+    <auth>
+        <token>myToken</token>
+    </auth>
+    <login loginId="myUserid" >
+        <loginPassword>myPasswd</loginPassword>
+        <ipAddress>123.145.167.189</ipAddress>
+        <accountName>myAccountName</accountName>
+        <accountLoginDate>2013/12/31 12:34:56</accountLoginDate>
+        <accountTimeZone>+0900</accountTimeZone>
+    </login>
+</root>

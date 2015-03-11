@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamVpath>
+    <vpath vObjectIndex="vObjectIndex" resourceIndex="resourceIndex">
+        <vObjectName>vObjectName</vObjectName>
+        <vObjectStatus>126</vObjectStatus>
+        <vObjectDescription>vObjectDescription</vObjectDescription>
+        <pathRoute/>
+        <pathInfo/>
+        <pathEndPoint/>
+        <lsp/>
+        <pw/>
+        <qos/>
+        <vlan/>
+    </vpath>
+</CpfIfParamVpath>

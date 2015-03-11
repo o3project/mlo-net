@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CpfIfParamLogin>
+    <login loginId="admin">
+        <loginPassword>Admin</loginPassword>
+        <ipAddress>123.234.123.234</ipAddress>
+        <accountTimeZone>JST</accountTimeZone>
+    </login>
+</CpfIfParamLogin>

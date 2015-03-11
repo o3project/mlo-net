@@ -1,0 +1,3 @@
+baseDir=/mlo-srv/src/main/resources/data
+eclipse.preferences.version=1
+initDB=/mlo-srv/src/main/resources/data

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sdtncResponseDto>
+    <vlink vObjectIndex="123">
+        <vObjectName>234</vObjectName>
+        <vObjectStatus>345</vObjectStatus>
+        <vObjectDescription>456</vObjectDescription>
+        <resourceIndex>567</resourceIndex>
+        <vLineSource>678</vLineSource>
+        <vLineSink>789</vLineSink>
+    </vlink>
+</sdtncResponseDto>

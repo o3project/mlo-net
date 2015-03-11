@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <auth>
+        <token>token</token>
+    </auth>
+    <slice groupIndex="groupIndex" />
+    <vpath vObjectIndex="vObjectIndex">
+        <resourceIndex>1</resourceIndex>
+    </vpath>
+</root>
