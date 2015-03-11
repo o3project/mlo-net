@@ -275,7 +275,7 @@ final class ConfigDefinition implements ConfigConstants, TopologyConfigConstants
 		props.put(PROP_KEY_LD_CONNECTION_TIMEOUT_MSEC, "30000");
 		props.put(PROP_KEY_LD_READ_TIMEOUT_MSEC,       "1200000");
 		props.put(PROP_KEY_LD_LD_TOPO_URI,     "http://127.0.0.1:8080/nbiService/etc/ld/topo");
-		props.put(PROP_KEY_LD_RY_SWITCHES_URI, "http://127.0.0.1:8080/nbiService/etc/ryu/topology/switches");
-		props.put(PROP_KEY_LD_RY_LINKS_URI,    "http://127.0.0.1:8080/nbiService/etc/ryu/topology/links");
+		props.put(PROP_KEY_LD_RY_SWITCHES_URI, "http://127.0.0.1:8888/v1.0/topology/switches");
+		props.put(PROP_KEY_LD_RY_LINKS_URI,    "http://127.0.0.1:8888/v1.0/topology/links");
 	}
 }

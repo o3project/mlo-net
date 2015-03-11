@@ -18,8 +18,8 @@ import org.seasar.framework.util.ResourceUtil;
 class HttpRequestInvokerDummyImpl implements HttpRequestInvoker {
 	
 	static final String DEFAULT_LD_TOPO_URI = "http://127.0.0.1:8080/nbiService/etc/ld/topo";
-	static final String DEFAULT_RY_SWITCHES_URI = "http://127.0.0.1:8080/nbiService/etc/ryu/topology/switches";
-	static final String DEFAULT_RY_LINKS_URI = "http://127.0.0.1:8080/nbiService/etc/ryu/topology/links";
+	static final String DEFAULT_RY_SWITCHES_URI = "http://127.0.0.1:8888/v1.0/topology/switches";
+	static final String DEFAULT_RY_LINKS_URI    = "http://127.0.0.1:8888/v1.0/topology/links";
 
 	static final String DATA_DIR_PATH = "org/o3project/mlo/server/rpc/service/data/";
 	static final String DATA_LD_TOPO     = "dummy.topo.conf.default.json";
