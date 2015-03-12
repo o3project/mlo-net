@@ -1,6 +1,6 @@
 /**
  * LdFlowDto.java
- * (C) 2015, Hitachi Solutions, Ltd.
+ * (C) 2015, Hitachi, Ltd.
  */
 package org.o3project.mlo.server.dto;
 
