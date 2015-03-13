@@ -4,6 +4,9 @@
 sudo apt-get install openjdk-7-jdk -y
 sudo apt-get install maven -y
 
+# lagopus-docker installation
+(cd lagopus-docker;./lagopus-docker.sh install)
+
 # for odenos
 sudo apt-get install redis-server -y
 REDIS_CONF=etc/redis/redis.conf
@@ -22,6 +25,5 @@ CRON_TOMCAT6=etc/logrotate.d/tomcat6
 sudo cp -f conf/$CRON_TOMCAT6 /$CRON_TOMCAT6
 sudo chown root:root /$CRON_TOMCAT6
 sudo chmod 644 /$CRON_TOMCAT6
-sudo service tomcat6 restart
 
 
