@@ -8,7 +8,7 @@ git clone -b 1.0.0 https://github.com/o3project/odenos.git odenos-1.0.0
 mvn clean package $M2_EXTRA_OPTS -f odenos-1.0.0/pom.xml
 
 # lagopus-docker install
-(cd lagopus-docker;./lagopus-docker.sh install)
+#(cd lagopus-docker;./lagopus-docker.sh install)
 
 # Deploys MLO
 mvn clean install -Pproduct $M2_EXTRA_OPTS -f mlo-srv/pom.xml
