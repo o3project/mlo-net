@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright (C) 2015 HITACHI Ltd.
+# Copyright (C) 2015 Hitachi, Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ register_push_vlan() {
     echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
     echo "    flowentry_validate \${dpid_n}\\"
     echo " \"\\\"PUSH_VLAN:${PROTO_8021Q}\\\" \\\"SET_FIELD:!{vlan_vid:\${vid}}\\\" \\\"SET_FIELD:!{eth_dst:\${_dmac}}\\\" \\\"SET_FIELD:!{eth_src:\${_smac}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
-  #echo " \"\\\"dl_dst\\\"!\\\"\${dmac}\\\" \\\"dl_src\\\"!\\\"\${smac}\\\"\""
+#   echo " \"\\\"dl_dst\\\"!\\\"\${dmac}\\\" \\\"dl_src\\\"!\\\"\${smac}\\\"\""
     echo " \"\\\"dl_type\\\"!\${ethertype} \\\"in_port\\\"!\${iport}\""
     echo "    [ \$? -ne 0 ] && echo \"push_vlan Validatinon NG!\" && exit 2"
     echo "}"
