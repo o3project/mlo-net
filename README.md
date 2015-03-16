@@ -7,11 +7,11 @@ Supported platform
 - CPU architecture: x64
 - Memory: 1GB or more
 - HDD space: 8GB or more.
-- Operation system: Ubuntu 14.04 LTS (Trusty Tahr)
+- Operating system: Ubuntu 14.04 LTS (Trusty Tahr)
 
-The easiest way to prepare your platform is to construct it on 
-virtual machine environment.
-Especially, for convenience, it is strongly recommened that mlo-net 
+The easiest way to prepare your environment is to construct it on 
+virtual machine.
+Especially, for convenience, it is strongly recommended that mlo-net 
 envirionment is constructed as guest OS on Oracle VM VirtualBox 
 installed on Windows 7 or 8.1.
 
