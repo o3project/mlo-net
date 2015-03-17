@@ -5,7 +5,7 @@
 package org.o3project.mlo.psdtnc.logic;
 
 /**
- * SSH チャネルの結果クラスです。
+ * This class is the result class of SSH channel.
  */
 public class SshChannelResult {
 	
@@ -15,12 +15,12 @@ public class SshChannelResult {
 	}
 	
 	/**
-	 * シェルコマンド
+	 * Shell commands.
 	 */
 	public final String shellCommand;
 	
 	/**
-	 * exit ステータス
+	 * exit status.
 	 */
 	public final Integer exitStatus;
 }

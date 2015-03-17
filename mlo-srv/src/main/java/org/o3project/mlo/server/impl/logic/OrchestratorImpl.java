@@ -104,7 +104,7 @@ public class OrchestratorImpl implements Orchestrator, NbiConstants {
 
 	/**
 	 * Creates an error response DTO.
-	 * @param srcComponentName　Request source component name.
+	 * @param srcComponentName Request source component name.
 	 * @param dstComponentName Request destination component name.
 	 * @param e Failure in processing.
 	 * @return Response DTO.

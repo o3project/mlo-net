@@ -94,7 +94,7 @@ public class OdenOSAdapterServiceImpl implements OdenOSAdapterService, OdenOSLis
 		}
 	}
 	
-	/* (非 Javadoc)
+	/* (non Javadoc)
 	 * @see org.o3project.mlo.server.rpc.service.LinkLayerizerService#init()
 	 */
 	@Override
@@ -115,7 +115,7 @@ public class OdenOSAdapterServiceImpl implements OdenOSAdapterService, OdenOSLis
 		}
 	}
 	
-	/* (非 Javadoc)
+	/* (non Javadoc)
 	 * @see org.o3project.mlo.server.rpc.service.LinkLayerizerService#dispose()
 	 */
 	@Override

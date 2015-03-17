@@ -42,7 +42,6 @@ final class ConfigDefinition implements ConfigConstants, TopologyConfigConstants
 	}
 
 	/**
-	 * コンフィギュレーションのデフォルト値を定義します。
 	 * Defines default values of configuration.
 	 * @param props Default values.
 	 */

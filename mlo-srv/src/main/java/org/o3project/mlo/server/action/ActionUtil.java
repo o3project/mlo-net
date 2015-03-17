@@ -33,8 +33,8 @@ public class ActionUtil {
 
     /**
      * Checks whether a specified HTTP method is supported or not. 
-     * @param httpMethod　Requested HTTP method.
-     * @param supportingMethod　Supported HTTP method.
+     * @param httpMethod Requested HTTP method.
+     * @param supportingMethod Supported HTTP method.
      * @return true if supported, otherwise false. 
      */
     static boolean isSupportingHttpMethod(String httpMethod, String supportingMethod) {
@@ -43,8 +43,8 @@ public class ActionUtil {
     
     /**
      * Checks whether specified HTTP method is supported or not. 
-     * @param httpMethod　Requested HTTP method.
-     * @param supportingMethod　Supported HTTP method.
+     * @param httpMethod Requested HTTP method.
+     * @param supportingMethod Supported HTTP method.
      * @return true if supported, otherwise false. 
      */
     static boolean isSupportingHttpMethod(String httpMethod, String[] supportingMethods) {

@@ -99,7 +99,7 @@ public class EquipmentConfiguratorOptDeviceImpl implements EquipmentConfigurator
 	/**
 	 * Requests to put odenos link.
 	 * @param newFlowDto New flow DTO.
-	 * @throws MloException　Failed in processing.
+	 * @throws MloException Failed in processing.
 	 */
 	void requestOdenOSLink(FlowDto newFlowDto) throws MloException {
 		FlowDto fwFlowDto = newFlowDto;
@@ -115,7 +115,7 @@ public class EquipmentConfiguratorOptDeviceImpl implements EquipmentConfigurator
 	 * Puts or updates odenos flow.
 	 * @param newFlowDto New flow DTO. 
 	 * @param reqFlowDto Requested flow DTO. 
-	 * @throws MloException　Failure in processing. For example, odenos task is not run.
+	 * @throws MloException Failure in processing. For example, odenos task is not run.
 	 */
 	void putOdenOSFlow(FlowDto newFlowDto, FlowDto reqFlowDto) throws MloException {
 		

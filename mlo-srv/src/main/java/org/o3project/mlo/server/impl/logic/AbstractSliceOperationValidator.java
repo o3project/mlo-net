@@ -48,7 +48,7 @@ public abstract class AbstractSliceOperationValidator implements Validator {
 			throw new ApiCallException(ERROR_DETAIL_PREFIX + "CommonIsUndefined");
 		}
 
-		// Version:1～255
+		// Version:1 - 255
 		checkNumRange(dto.version, 1, MAX_VERSION, "Version");
 
 		// SourceComponent
@@ -87,7 +87,6 @@ public abstract class AbstractSliceOperationValidator implements Validator {
 	}
 	
 	/**
-	 * 数値項目の範囲チェック
 	 * Validates numeric range.
 	 * @param target the validation target.
 	 * @param min the minimum value.

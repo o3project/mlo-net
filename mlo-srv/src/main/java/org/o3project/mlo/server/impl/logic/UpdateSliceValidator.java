@@ -33,7 +33,7 @@ public class UpdateSliceValidator extends AbstractSliceOperationValidator {
 			throw new ApiCallException(ERROR_DETAIL_PREFIX + "SliceIsUndefined");
 		}
 		
-		// SliceId：Up to 8-digit.
+		// SliceId: Up to 8-digit.
 		checkNumRange(dto.slice.id, 0, MAX_ID, "SliceId");
 
 		// Slice part. 
@@ -41,7 +41,7 @@ public class UpdateSliceValidator extends AbstractSliceOperationValidator {
 			throw new ApiCallException(ERROR_DETAIL_PREFIX + "FlowsIsUndefined");
 		}
 		
-		// The number of flows： between 1 and 200
+		// The number of flows:  between 1 and 200
 		checkNumRange(dto.slice.flows.size(), 1, MAX_FLOW_LEN, "FlowsSizeOver");
 
 		for (FlowDto flowDto : dto.slice.flows) {
@@ -54,26 +54,26 @@ public class UpdateSliceValidator extends AbstractSliceOperationValidator {
 			}
 			
 			if (!REQUEST_TYPE_ADD.equals(flowDto.type)) {
-				// FlowId： Up to 8-digit
+				// FlowId:  Up to 8-digit
 				checkNumRange(flowDto.id, 0, MAX_ID, "FlowId");
 			}
 			
 			if (!REQUEST_TYPE_DEL.equals(flowDto.type)) {
 
-				// FlowName： Up to 32 bytes.
+				// FlowName:  Up to 32 bytes.
 				checkLength(flowDto.name, MAX_LEN_32, "FlowName");
 				
-				// SourceCENodeName： Up to 32 bytes.可変英数字32byte	
+				// SourceCENodeName:  Up to 32 bytes.	
 				checkLength(flowDto.srcCENodeName, MAX_LEN_32, "SourceCENodeName");
 				
-				// SourceCEPortNo： Up to 8 bytes.	
+				// SourceCEPortNo:  Up to 8 bytes.	
 				//checkFixedLength8Num(flowDto.srcCEPortNo, "SourceCEPortNo");
 				checkLength(flowDto.srcCEPortNo, MAX_LEN_8, "SourceCEPortNo");
 				
-				// DestCENodeName： Up to 32 bytes.	
+				// DestCENodeName:  Up to 32 bytes.	
 				checkLength(flowDto.dstCENodeName, MAX_LEN_32, "DestCENodeName");
 				
-				// DestCEPortNo： Up to 8 bytes.
+				// DestCEPortNo:  Up to 8 bytes.
 				//checkFixedLength8Num(flowDto.dstCEPortNo, "DestCEPortNo");
 				checkLength(flowDto.dstCEPortNo, MAX_LEN_8, "DestCEPortNo");
 

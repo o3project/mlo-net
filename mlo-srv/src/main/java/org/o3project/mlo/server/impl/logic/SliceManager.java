@@ -60,7 +60,7 @@ public class SliceManager implements NbiConstants {
 	 * Creates a slice from {@link RestifRequestDto}.
 	 * @param reqDto Request DTO. 
 	 * @param equConf Equipment configurator class.
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	final RestifResponseDto createSlice(RestifRequestDto reqDto, EquipmentConfigurator equConf) throws MloException {
@@ -89,7 +89,7 @@ public class SliceManager implements NbiConstants {
 	 * Updates a slice.
 	 * @param reqDto Request DTO. 
 	 * @param equConf Equipment configurator class.
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	final RestifResponseDto updateSlice(RestifRequestDto reqDto, EquipmentConfigurator equConf) throws MloException {
@@ -113,7 +113,7 @@ public class SliceManager implements NbiConstants {
 	 * Deletes a slice.
 	 * @param reqDto Request DTO. 
 	 * @param equConf Equipment configurator class.
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	final RestifResponseDto deleteSlice(RestifRequestDto reqDto, EquipmentConfigurator equConf) throws MloException {
@@ -131,7 +131,7 @@ public class SliceManager implements NbiConstants {
 	/**
 	 * Reads a slice by slice ID.
 	 * @param reqDto Request DTO. 
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	final RestifResponseDto readSlice(RestifRequestDto reqDto) throws MloException {
@@ -159,7 +159,7 @@ public class SliceManager implements NbiConstants {
 	 * Creates a slice.
 	 * @param reqDto Request DTO. 
 	 * @param equConf Equipment configurator class.
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	private RestifResponseDto createSliceInternal(RestifRequestDto reqDto, EquipmentConfigurator equConf) throws MloException {
@@ -234,7 +234,7 @@ public class SliceManager implements NbiConstants {
 	 * Updates a slice.
 	 * @param reqDto Request DTO. 
 	 * @param equConf Equipment configurator class.
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	private RestifResponseDto updateSliceInternal(RestifRequestDto reqDto, EquipmentConfigurator equConf) throws MloException {
@@ -321,7 +321,7 @@ public class SliceManager implements NbiConstants {
 		RestifResponseDto resDto = new RestifResponseDto();
 		resDto.common = createResponseCommonDto(reqDto.common);
 		SliceDto resSliceDto = createSimplifiedSliceDto(sliceDto);
-		resSliceDto.name = null; // update では slice.name は返さない。
+		resSliceDto.name = null; // In updating, slice.name is not returned.
 		resDto.slices = Arrays.asList(resSliceDto);
 		
 		return  resDto;
@@ -331,7 +331,7 @@ public class SliceManager implements NbiConstants {
 	 * Deletes a slice. 
 	 * @param reqDto Request DTO. 
 	 * @param equConf Equipment configurator class.
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	private RestifResponseDto deleteSliceInternal(RestifRequestDto reqDto, EquipmentConfigurator equConf) throws MloException {
@@ -377,7 +377,7 @@ public class SliceManager implements NbiConstants {
 	/**
 	 * Reads a slice.
 	 * @param reqDto Request DTO. 
-	 * @return　Response DTO.
+	 * @return Response DTO.
 	 * @throws MloException An MLO exception. 
 	 */
 	private RestifResponseDto readSliceInternal(RestifRequestDto reqDto) throws MloException {
@@ -488,8 +488,8 @@ public class SliceManager implements NbiConstants {
 
 	/**
 	 * Creates common header DTO.
-	 * @param reqCommonDto　
-	 * @return　RestifCommonDto
+	 * @param reqCommonDto 
+	 * @return RestifCommonDto
 	 * @throws ApiCallException
 	 */
 	private RestifCommonDto createResponseCommonDto(RestifCommonDto reqCommonDto) throws ApiCallException {
@@ -508,8 +508,8 @@ public class SliceManager implements NbiConstants {
 	/**
 	 * Creates simplified slice DTO.
 	 * New slice DTO has only name and id fields.
-	 * @param sliceDto　
-	 * @return　SliceDto
+	 * @param sliceDto 
+	 * @return SliceDto
 	 */
 	private SliceDto createSimplifiedSliceDto(SliceDto sliceDto) {
 		SliceDto dto = new SliceDto();

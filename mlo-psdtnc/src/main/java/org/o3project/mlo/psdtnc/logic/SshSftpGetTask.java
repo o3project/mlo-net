@@ -23,7 +23,7 @@ import com.jcraft.jsch.SftpProgressMonitor;
 import com.jcraft.jsch.UserInfo;
 
 /**
- * SSH 接続の実行タスククラスです。
+ * This class is the SFTP task class.
  */
 public class SshSftpGetTask implements Callable<SshTaskResult> {
 	
@@ -38,9 +38,9 @@ public class SshSftpGetTask implements Callable<SshTaskResult> {
 	private SshInputStreamTextHandler inputStreamTextHandler;
 
 	/**
-	 * SSH 接続の実行タスクインスタンスを作成します。
-	 * @param config 接続先情報
-	 * @param shellCommands 実行コマンド配列
+	 * A constructor.
+	 * @param config the setting configuration.
+	 * @param shellCommands the array of shell commands.
 	 */
 	public SshSftpGetTask(SshNodeConfig config, String[] shellCommands) {
 		this.config = config;
@@ -48,9 +48,9 @@ public class SshSftpGetTask implements Callable<SshTaskResult> {
 	}
 	
 	/**
-	 * SSH 接続の実行タスクインスタンスを作成します。
-	 * @param config 接続先情報
-	 * @param shellCommand 実行コマンド
+	 * A constructor.
+	 * @param config the setting configuration.
+	 * @param shellCommand the shell command.
 	 */
 	public SshSftpGetTask(SshNodeConfig config, String shellCommand) {
 		this(config, new String[]{shellCommand});
@@ -165,9 +165,9 @@ public class SshSftpGetTask implements Callable<SshTaskResult> {
 	}
 	
 	/**
-	 * ユーザ情報文字列を取得します。
-	 * @param accNodeConfig 装置コンフィグ
-	 * @return ユーザ情報文字列
+	 * Obtains user information.
+	 * @param accNodeConfig the configuration.
+	 * @return User information.
 	 */
 	static String getSshInfo(SshNodeConfig accNodeConfig) {
 		String sshInfo = null;
@@ -181,8 +181,8 @@ public class SshSftpGetTask implements Callable<SshTaskResult> {
 	}
 	
 	/**
-	 * ユーザ情報を作成します。
-	 * @return ユーザ情報
+	 * Creates user information.
+	 * @return User information.
 	 */
 	UserInfo createUserInfo() {
 		UserInfo ui = new UserInfo() {

@@ -16,7 +16,7 @@
         	sourcepath="src/main/resources;src/main/java" 
         	splitindex="true" 
         	use="true" 
-        	windowtitle="検証アプリ" 
+        	windowtitle="mlo-psdtnc" 
         	version="true"/>
     </target>
 </project>

@@ -25,7 +25,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 
 /**
- * SSH 接続の実行タスククラスです。
+ * This class is the SSH connection task class.
  */
 public class SshTask implements Callable<SshTaskResult> {
 	
@@ -40,9 +40,9 @@ public class SshTask implements Callable<SshTaskResult> {
 	private SshInputStreamTextHandler inputStreamTextHandler;
 
 	/**
-	 * SSH 接続の実行タスクインスタンスを作成します。
-	 * @param config 接続先情報
-	 * @param shellCommands 実行コマンド配列
+	 * A constructor.
+	 * @param config the configuration.
+	 * @param shellCommands the array of shell commands.
 	 */
 	public SshTask(SshNodeConfig config, String[] shellCommands) {
 		this.config = config;
@@ -50,9 +50,9 @@ public class SshTask implements Callable<SshTaskResult> {
 	}
 	
 	/**
-	 * SSH 接続の実行タスクインスタンスを作成します。
-	 * @param config 接続先情報
-	 * @param shellCommand 実行コマンド
+	 * A constructor.
+	 * @param config the configuration.
+	 * @param shellCommand the shell command.
 	 */
 	public SshTask(SshNodeConfig config, String shellCommand) {
 		this(config, new String[]{shellCommand});
@@ -118,12 +118,12 @@ public class SshTask implements Callable<SshTaskResult> {
 	}
 
 	/**
-	 * ひとつのシェルコマンドを実行します。
-	 * @param session SSH セッション
-	 * @param shellCommand シェルコマンド
-	 * @return 実行結果
-	 * @throws JSchException SSH 実行時異常
-	 * @throws IOException IO 異常
+	 * Executes a shell command.
+	 * @param session the SSH session.
+	 * @param shellCommand the shell command.
+	 * @return the result.
+	 * @throws JSchException SSH execution failure.
+	 * @throws IOException IO failure.
 	 */
 	SshChannelResult doChannelExec(Session session, String shellCommand)
 			throws JSchException, IOException {
@@ -241,9 +241,9 @@ public class SshTask implements Callable<SshTaskResult> {
 	}
 	
 	/**
-	 * ユーザ情報文字列を取得します。
-	 * @param config 装置コンフィグ
-	 * @return ユーザ情報文字列
+	 * Obtains user information.
+	 * @param config the configuration.
+	 * @return User information.
 	 */
 	static String getSshInfo(SshNodeConfig config) {
 		String sshInfo = null;
@@ -259,8 +259,8 @@ public class SshTask implements Callable<SshTaskResult> {
 	}
 	
 	/**
-	 * ユーザ情報を作成します。
-	 * @return ユーザ情報
+	 * Creates user information.
+	 * @return the user information.
 	 */
 	UserInfo createUserInfo() {
 		UserInfo ui = new UserInfo() {

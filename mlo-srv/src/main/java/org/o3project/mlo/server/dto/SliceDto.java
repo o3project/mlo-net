@@ -14,21 +14,20 @@ import org.o3project.mlo.server.logic.XmlIdAdapter;
 
 
 /**
- * スライス情報のDTOクラスです。
- *
+ * This class is the DTO class of slice.
  */
 public class SliceDto {
 	
-	/** サービス利用者が命名したスライス名 */
+	/** Slice name, named by user. */
 	@XmlElement(name = "SliceName")
 	public String name;
 	
-	/** スライス名に紐付くID */
+	/** Slice ID. */
 	@XmlElement(name = "SliceId")
 	@XmlJavaTypeAdapter(XmlIdAdapter.class)
 	public Integer id;
 	
-	/** フローを示すタグ */
+	/** Flows. */
 	@XmlElementWrapper(name = "Flows")
 	@XmlElement(name = "Flow")
 	public List<FlowDto> flows;

@@ -9,8 +9,7 @@ import org.o3project.mlo.server.dto.RestifResponseDto;
 import org.o3project.mlo.server.logic.EquipmentConfigurator;
 
 /**
- * {@link SliceManager} クラスを利用した、スライス変更操作タスククラスです
- *
+ * This is the implementation class to update slice in {@link SliceManager} class.
  */
 public class UpdateSliceTask extends SliceOperationBaseTask {
 	

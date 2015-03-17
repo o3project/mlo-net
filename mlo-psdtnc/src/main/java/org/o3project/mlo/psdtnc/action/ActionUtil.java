@@ -9,7 +9,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 境界層で使用する処理のユーティリティクラスです。
+ * This is an utility class used in processing for application boundary layer.
  */
 public final class ActionUtil {
 	
@@ -18,20 +18,20 @@ public final class ActionUtil {
 	}
 
     /**
-     * サポートしている HTTP メソッドを判定します。
-     * @param httpMethod　要求された HTTP メソッド
-     * @param supportingMethod　サポートする HTTP メソッド
-     * @return 判定結果
+     * Checks whether a specified HTTP method is supported or not. 
+     * @param httpMethod Requested HTTP method.
+     * @param supportingMethod Supported HTTP method.
+     * @return true if supported, otherwise false. 
      */
     static boolean isSupportingHttpMethod(String httpMethod, String supportingMethod) {
     	return isSupportingHttpMethod(httpMethod, new String[]{supportingMethod});
     }
     
     /**
-     * サポートしている HTTP メソッドを判定します。
-     * @param httpMethod　要求された HTTP メソッド
-     * @param supportingMethods　サポートする HTTP メソッドの配列
-     * @return 判定結果
+     * Checks whether specified HTTP method is supported or not. 
+     * @param httpMethod Requested HTTP method.
+     * @param supportingMethod Supported HTTP method.
+     * @return true if supported, otherwise false. 
      */
     static boolean isSupportingHttpMethod(String httpMethod, String[] supportingMethods) {
     	boolean bIsSupporting = false;

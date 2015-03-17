@@ -53,7 +53,7 @@ public class DebugRestifChecker implements ConfigConstants {
 	}
 	
 	/**
-	 * {@link ConfigProvider} setter method (for DI setter injection)。
+	 * {@link ConfigProvider} setter method (for DI setter injection).
 	 * @param configProvider The instance. 
 	 */
 	public void setConfigProvider(ConfigProvider configProvider) {

@@ -244,8 +244,6 @@
       classpathref="classpath">
         <jvmarg value="${vmarg.encoding}"/>
     </migrate>
-    <!-- セキュリティの設定によっては以下の refresh タスクに時間がかかる場合があります．
-      その場合は refresh タスクを削除してください．-->
     <refresh projectName="mlo-srv"/>
   </target>
 
@@ -260,8 +258,6 @@
       classpathref="classpath">
         <jvmarg value="${vmarg.encoding}"/>
     </dump-data>
-    <!-- セキュリティの設定によっては以下の refresh タスクに時間がかかる場合があります．
-      その場合は refresh タスクを削除してください．-->
     <refresh projectName="mlo-srv"/>
   </target>
 

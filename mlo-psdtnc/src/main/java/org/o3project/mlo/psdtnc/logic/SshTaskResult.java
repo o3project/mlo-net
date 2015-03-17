@@ -5,12 +5,12 @@
 package org.o3project.mlo.psdtnc.logic;
 
 /**
- * SSH 実行タスクの実行結果クラス
+ * This class designates SSH execution result. 
  */
 public class SshTaskResult {
 	
 	/**
-	 * SSH チャネル実行結果の配列
+	 * The array of SSH channel execution result.
 	 */
 	public SshChannelResult[] channelResults;
 }

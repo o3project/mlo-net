@@ -15,15 +15,15 @@ import org.o3project.mlo.psdtnc.logic.ConfigConstants;
 import org.o3project.mlo.server.impl.logic.ConfigProviderImpl;
 
 /**
- * ConfigDefinition
- *
+ * This class defines the default configuration of mlo-psdtnd.
  */
 class ConfigDefinition implements ConfigConstants {
 	private static final Log LOG = LogFactory.getLog(ConfigDefinition.class);
 
 	/**
-	 * コンフィグレーションのデフォルトプロパティファイルを出力するメインメソッドです。 
-	 * @param args 引数（未使用）
+	 * Main method.
+	 * This method outputs the default property file.
+	 * @param args Not in used. 
 	 */
 	public static void main(String[] args) {
 		try {
@@ -37,8 +37,8 @@ class ConfigDefinition implements ConfigConstants {
 	}
 
 	/**
-	 * コンフィグレーションのデフォルト値を定義します。
-	 * @param props デフォルト値を登録するプロパティマップ
+	 * Defines the default property values.
+	 * @param props the default property map.
 	 */
 	static void defineProps(Map<String, String> props) {
 		props.put(PROP_KEY_SSH_SESSION_CONNECTION_TIMEOUT_MSEC, "180000"); // 3 min.

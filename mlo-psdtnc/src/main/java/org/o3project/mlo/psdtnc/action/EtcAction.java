@@ -125,8 +125,8 @@ public class EtcAction {
 	}
     
     /**
-     * アクセスログを採取します。
-     * @param req HTTP 要求オブジェクト
+     * Logs access log.
+     * @param req HTTP request.
      */
     static void logAccess(HttpServletRequest req) {
     	if (LOG.isInfoEnabled()) {

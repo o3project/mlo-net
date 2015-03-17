@@ -277,7 +277,7 @@ public class EquipmentConfiguratorOtherImpl implements EquipmentConfigurator, Sd
 	 * @param sliceId Slice ID.
 	 * @param vLinkId Vlink ID.
 	 * @return vlink object.
-	 * @throws MloException Failed in processing.　
+	 * @throws MloException Failed in processing.
 	 */
 	private SdtncResponseDto doSdtncGetVLink(String token, String sliceId, String vLinkId) throws MloException {
 		HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -360,7 +360,7 @@ public class EquipmentConfiguratorOtherImpl implements EquipmentConfigurator, Sd
 	/**
 	 * Obtains PW label (upstream-downstream common) from FlowDto.id.
 	 * @param flowDto Flow DTO.
-	 * @return　PW label.
+	 * @return PW label.
 	 */
 	String createVPwLabel(FlowDto flowDto) {
 		return String.format("%06x", (PW_LABEL_OFFSET + flowDto.id));

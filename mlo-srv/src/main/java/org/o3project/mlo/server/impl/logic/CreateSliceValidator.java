@@ -25,7 +25,7 @@ public class CreateSliceValidator extends AbstractSliceOperationValidator {
 			throw new ApiCallException(ERROR_DETAIL_PREFIX + "SliceIsUndefined");
 		}
 		
-		// SliceName: up to 32 bytes.：
+		// SliceName: up to 32 bytes.
 		checkLength(dto.slice.name, MAX_LEN_32, "SliceName");
 
 		// Slice part.
@@ -38,20 +38,20 @@ public class CreateSliceValidator extends AbstractSliceOperationValidator {
 
 		for (FlowDto flowDto : dto.slice.flows) {
 			
-			// FlowName：Up to 32 bytes.
+			// FlowName: Up to 32 bytes.
 			checkLength(flowDto.name, MAX_LEN_32, "FlowName");
 			
-			// SourceCENodeName: Up to 32 bytes.：
+			// SourceCENodeName: Up to 32 bytes.: 
 			checkLength(flowDto.srcCENodeName, MAX_LEN_32, "SourceCENodeName");
 			
-			// SourceCEPortNo： Up to 8 bytes. 
+			// SourceCEPortNo:  Up to 8 bytes. 
 			//checkFixedLength8Num(flowDto.srcCEPortNo, "SourceCEPortNo");
 			checkLength(flowDto.srcCEPortNo, MAX_LEN_8, "SourceCEPortNo");
 			
-			// DestCENodeName: up to 32 bytes.：
+			// DestCENodeName: up to 32 bytes.: 
 			checkLength(flowDto.dstCENodeName, MAX_LEN_32, "DestCENodeName");
 			
-			// DestCEPortNo: Up to 8 bytes：
+			// DestCEPortNo: Up to 8 bytes: 
 			//checkFixedLength8Num(flowDto.dstCEPortNo, "DestCEPortNo");
 			checkLength(flowDto.dstCEPortNo, MAX_LEN_8, "DestCEPortNo");
 			
