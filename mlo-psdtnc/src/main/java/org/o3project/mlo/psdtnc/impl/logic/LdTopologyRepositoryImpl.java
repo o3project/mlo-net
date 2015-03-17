@@ -123,6 +123,7 @@ public class LdTopologyRepositoryImpl implements LdTopologyRepository, ConfigCon
 	
 	void setUp() throws LdOperationException {
 		LdOperationService service = getAvailableLdOperationService();
+		service.doStop();
 		service.doStart();
 		Integer status = service.doStatus();
 		if (status == null || status == 4) {
