@@ -143,6 +143,8 @@
 }
 
 .flow-list-panel {
+  position: absolute;
+  display: block;
   padding: 4px;
   width: 240px;
 }

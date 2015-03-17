@@ -356,7 +356,8 @@ APP.view.init = function () {
         view.$flowListPanel.position({
             of: $('#topo-canvas'),
             my: 'left top',
-            at: 'left top'
+            at: 'left top',
+            collision: 'none none'
         });
         view.setUpFlowListAsSelectable(view.$flowListPanel.find('ul'));
 
