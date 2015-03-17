@@ -12,7 +12,7 @@ check_user() {
 
 extract_tag() {
     local from=`grep "^FROM" Dockerfile | awk '{print $2}'`
-    echo $from | grep ":"  > /dev/null
+    echo $from | grep ":"  >/dev/null
     if [ $? -eq 0 ]; then
         local name=`echo $from | sed -e "s/^\([^:]*\):\(.*\)$/\1/"`
         local tag=`echo $from | sed -e "s/^\([^:]*\):\(.*\)$/\2/"`
@@ -85,7 +85,7 @@ case "$1" in
     start)
         do_status stop
         [ $? -eq 0 ] || stop
-        for ((;;)); do	
+        for ((;;)); do
             do_status stop
             [ $? -eq 0 ] && break
             sleep 1
