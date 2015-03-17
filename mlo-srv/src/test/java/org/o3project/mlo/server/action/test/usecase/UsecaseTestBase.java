@@ -201,7 +201,6 @@ public abstract class UsecaseTestBase extends S2TestCase {
 			Map<String, String> paramMap, OutputStream ostream) {
     	RestifResponseDto resDto = null;
     	try {
-    		// 要求実行
     		resDto = orchestrator.handle(sliceOpTask, paramMap);
     	} finally {
     		if (resDto != null) {

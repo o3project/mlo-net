@@ -32,44 +32,43 @@ public class UsecaseCreateSliceFailTest extends UsecaseTestBase {
 	}
 
 	/**
-	 * スライス変更(mod)でPW削除に成功した後、PW作成に失敗、さらにスライス変更(add)でPW作成に失敗するケース
-	 * 
+	 * Successfully deletes PW in modifying slice, failed to create PW, and then failed to create PW in adding flow.
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase01() throws Exception {
 		
-		// sliceA を demoApl で作成できる。
+		// Can create sliceA by demoApl.
 		_assertMloAction(
 				"CREATE", "usecaseCreateSliceFail/01.demoApl.create.req.xml", 
 				"usecaseCreateSliceFail/01.demoApl.create.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecaseCreateSliceFail/demoApl.read.00000001.req.xml", 
 				"usecaseCreateSliceFail/02.demoApl.read.00000001.res.xml");
 		
-		// demoApl で SliceA@DemoAplの変更(フロー変更)に失敗する
+		// Cannot modify flow in SliceA@DemoApl by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecaseCreateSliceFail/03.demoApl.update.mod.req.xml", 
 				"usecaseCreateSliceFail/03.demoApl.update.mod.res.error.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecaseCreateSliceFail/demoApl.read.00000001.req.xml", 
 				"usecaseCreateSliceFail/02.demoApl.read.00000001.res.xml");
 		
-		// demoApl で SliceA@DemoAplの変更(フロー追加)に失敗する
+		// Cannot add flow in SliceA@DemoApl by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecaseCreateSliceFail/04.demoApl.update.add.req.xml", 
 				"usecaseCreateSliceFail/04.demoApl.update.add.res.error.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecaseCreateSliceFail/demoApl.read.00000001.req.xml", 
 				"usecaseCreateSliceFail/02.demoApl.read.00000001.res.xml");
 		
-		// demoApl で SliceA@DemoAplを削除する
+		// Can delete SliceA@DemoApl by demoApl.
 		_assertMloAction(
 				"DELETE", "usecaseCreateSliceFail/05.demoApl.delete.00000001.req.xml", 
 				"usecaseCreateSliceFail/05.demoApl.delete.res.error.xml");

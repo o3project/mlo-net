@@ -29,7 +29,7 @@ public class DtoTestUtils {
 	private static final Log LOG = LogFactory.getLog(DtoTestUtils.class);
 
 	/**
-	 * 共通ヘッダの正常値設定
+	 * Sets normal values to common header.
 	 * @param dto
 	 */
 	public static void setNormalCommonDto(RestifRequestDto dto) {
@@ -43,7 +43,7 @@ public class DtoTestUtils {
 	}
 
 	/**
-	 * スライス部の正常値設定。フローの件数指定可能。
+	 * Sets normal values to slice part. The number of flows can be specified.
 	 * @param dto
 	 * @param count
 	 */
@@ -73,12 +73,12 @@ public class DtoTestUtils {
 	}
 	
 	/**
-	 * XML ファイルからリクエスト DTO を読み込む。
-	 * @param serdes {@link Serdes} インスタンス
-	 * @param dirName xml ファイルのディレクトリ
-	 * @param xmlFileName xml ファイルのファイル名
-	 * @return リクエスト DTO
-	 * @throws Throwable 読み込み中の異常例外
+	 * Reads request DTO from XML file.
+	 * @param serdes the {@link Serdes} instance.
+	 * @param dirName xml file directory. 
+	 * @param xmlFileName xml file name.
+	 * @return the request DTO.
+	 * @throws Throwable Failure in reading.
 	 */
 	public static RestifRequestDto readReqFromXml(Serdes serdes, String dirName, String xmlFileName) throws Throwable {
 		File xmlfile = new File(dirName, xmlFileName);
@@ -96,13 +96,13 @@ public class DtoTestUtils {
 	}
 
 	/**
-	 * レスポンス DTO の内容が XML ファイルと同じかどうか。
-	 * @param serdes {@link Serdes} インスタンス
-	 * @param resDto {@link RestifResponseDto} インスタンス
-	 * @param dirName xml ファイルのディレクトリ
-	 * @param xmlFileName xml ファイルのファイル名
-	 * @return 同じか否か。同じならば true を返す。
-	 * @throws Throwable 処理中の異常例外
+	 * Designates whether response DTO has same contents as specified xml file.
+	 * @param serdes the {@link Serdes} instance.
+	 * @param resDto {@link RestifResponseDto} instance.
+	 * @param dirName xml file directory.
+	 * @param xmlFileName xml file name.
+	 * @return true if those are same.
+	 * @throws Throwable Failure in processing.
 	 */
 	public static boolean isSameResAsXml(Serdes serdes, RestifResponseDto resDto, String dirName, String xmlFileName) throws Throwable {
 		String resXml = null;
@@ -175,13 +175,13 @@ public class DtoTestUtils {
 	}
 
 	/**
-	 * 入力ストリームから得られる XML が同じものかどうか判断する。
-	 * @param istream1 比較対象 xml 1
-	 * @param istream2 比較対象 xml 2
-	 * @return true の場合、同じ XML。false の場合、異なる XML
-	 * @throws ParserConfigurationException パーサコンフィギュレーション異常
-	 * @throws SAXException パース中の異常
-	 * @throws IOException 読み込み時異常
+	 * Checks whether contents in xml stream is same as xml.
+	 * @param istream1 the input stream.
+	 * @param istream2 the input stream.
+	 * @return true if those are same.
+	 * @throws ParserConfigurationException Parser configuration error.
+	 * @throws SAXException Failure in parsing.
+	 * @throws IOException Failure in reading.
 	 */
 	public static boolean isSameXml(InputStream istream1, InputStream istream2)
 			throws ParserConfigurationException, SAXException, IOException {

@@ -252,12 +252,12 @@ public class SdtncResponseDtoTest {
             e.printStackTrace();
         }
         // XML => DTO
-        // SdtncSerdesImpl　呼び出し。
+        // Calls SdtncSerdesImpl
         ByteArrayInputStream istream = new ByteArrayInputStream(resXml.getBytes());
         SdtncSerdesImpl serdesImple = new SdtncSerdesImpl();
         SdtncResponseDto request_unmarshaled = serdesImple.deserializeFromXml(istream);
 
-        // 確認　（前DTO　= 後DTO）
+        // Checks DTO (before = after)
         assertEquals(request_unmarshaled.head.sequenceNumber, responceDto.head.sequenceNumber);
         assertEquals(request_unmarshaled.head.time, responceDto.head.time);
         assertEquals(request_unmarshaled.head.majorResponseCode, responceDto.head.majorResponseCode);

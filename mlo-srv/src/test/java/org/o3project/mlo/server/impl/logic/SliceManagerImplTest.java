@@ -532,11 +532,11 @@ public class SliceManagerImplTest implements NbiConstants {
 	}
 	
 	/**
-	 * debug.restif.enable を false に設定する。
+	 * Sets debug.restif.enable to false.
 	 */
 	private void setDebugOff() {
 		// debug.restif.enable = false
-		// この場合はダミー例外が発生してはならない。
+		// In this case, dummy exception must not occur.
 		ConfigProviderImpl configProvider = ConfigProviderImplTest.createConfigProviderImpl((new File(DATA_PATH, "mlo-srv.debug-off.properties")).getAbsolutePath());
 		DebugRestifChecker debugRestifChecker = new DebugRestifChecker();
 		debugRestifChecker.setConfigProvider(configProvider);

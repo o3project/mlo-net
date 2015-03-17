@@ -78,7 +78,7 @@ public class SdtncReqPostLoginDtoTest {
         ByteArrayOutputStream ostream = null;
         ostream = new ByteArrayOutputStream();
 
-        // SdtncSerdesImpl　呼び出し。
+        // Calls SdtncSerdesImpl
         SdtncSerdesImpl serdesImple = new SdtncSerdesImpl();
         serdesImple.serializeToXml(obj, ostream);
 
@@ -93,7 +93,7 @@ public class SdtncReqPostLoginDtoTest {
         ByteArrayInputStream istream = new ByteArrayInputStream(reqXml.getBytes());
         SdtncReqPostLoginDto request_unmarshaled = JAXB.unmarshal(istream, SdtncReqPostLoginDto.class);
 
-        // 確認　（前DTO　= 後DTO）
+        // Checks DTO (before = after)
         assertEquals(request_unmarshaled.login.loginId, obj.login.loginId);
         assertEquals(request_unmarshaled.login.loginPassword, obj.login.loginPassword);
         assertEquals(request_unmarshaled.login.ipAddress, obj.login.ipAddress);

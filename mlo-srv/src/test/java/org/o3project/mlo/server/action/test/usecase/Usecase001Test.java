@@ -115,17 +115,17 @@ public class Usecase001Test extends UsecaseTestBase {
 	
 	@Test
 	public void testUsecase_anomaly_CreateSlice_BadRequest() throws Exception {
-		// サポート外のソース CE ノード名
+		// Invalid source CE node name.
 		_assertMloAction(
 				"CREATE", "usecase001/61.create.req.xml", 
 				"usecase001/61.create.res.xml");
 		
-		// サポート外のディスティネーション CE ノード名
+		// Invalid destination CE node name.
 		_assertMloAction(
 				"CREATE", "usecase001/62.create.req.xml", 
 				"usecase001/62.create.res.xml");
 		
-		// 帯域幅が大きすぎる
+		// Too large band width.
 		_assertMloAction(
 				"CREATE", "usecase001/63.create.req.xml", 
 				"usecase001/63.create.res.xml");
@@ -134,12 +134,12 @@ public class Usecase001Test extends UsecaseTestBase {
 	@Test
 	public void testUsecase_anomaly_UpdateSlice_BadRequest() throws Exception {
 		
-		// セットアップ
+		// Sets up
 		_assertMloAction(
 				"CREATE", "usecase001/71.create.req.xml", 
 				"usecase001/71.create.res.xml");
 		
-		// 確認
+		// Test
 		_assertMloAction(
 				"READ", "usecase001/read.00000001.req.xml", 
 				"usecase001/72.read.00000001.res.xml");
@@ -149,7 +149,7 @@ public class Usecase001Test extends UsecaseTestBase {
 				"UPDATE", "usecase001/73.update.add.req.xml", 
 				"usecase001/73.update.add.res.xml");
 		
-		// フローが増えていないことを確認
+		// Checks that flow has not been added.
 		_assertMloAction(
 				"READ", "usecase001/read.00000001.req.xml", 
 				"usecase001/72.read.00000001.res.xml");
@@ -159,32 +159,32 @@ public class Usecase001Test extends UsecaseTestBase {
 				"UPDATE", "usecase001/74.update.mod.req.xml", 
 				"usecase001/74.update.mod.res.xml");
 		
-		// フローが増えていないことを確認
+		// Checks that flow has not been added.
 		_assertMloAction(
 				"READ", "usecase001/read.00000001.req.xml", 
 				"usecase001/72.read.00000001.res.xml");
 		
-		// セットアップ (fa101 削除)
+		// Sets up (deletes fa101)
 		_assertMloAction(
 				"UPDATE", "usecase001/75.update.del.req.xml", 
 				"usecase001/75.update.del.res.xml");
 		
-		// 確認
+		// Test
 		_assertMloAction(
 				"READ", "usecase001/read.00000001.req.xml", 
 				"usecase001/76.read.00000001.res.xml");
 		
-		// 削除済みフローの変更
+		// Tries to modify deleted flow.
 		_assertMloAction(
 				"UPDATE", "usecase001/77.update.mod.req.xml", 
 				"usecase001/77.update.mod.res.xml");
 		
-		// 削除済みフローの削除
+		// Tries to delete deleted flow.
 		_assertMloAction(
 				"UPDATE", "usecase001/78.update.del.req.xml", 
 				"usecase001/78.update.del.res.xml");
 		
-		// 他のデータが変更されていないことを確認
+		// Checks that any other data have not been modified.
 		_assertMloAction(
 				"READ", "usecase001/read.00000001.req.xml", 
 				"usecase001/76.read.00000001.res.xml");

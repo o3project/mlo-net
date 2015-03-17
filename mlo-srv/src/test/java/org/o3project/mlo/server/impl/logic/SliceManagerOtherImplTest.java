@@ -667,18 +667,18 @@ public class SliceManagerOtherImplTest {
 	}
 	
 	/**
-	 * debug.restif.enable を false に設定する。
+	 * Sets debug.restif.enable to false.
 	 */
 	private void setDebugOff() {
 		// debug.restif.enable = false
-		// この場合はダミー例外が発生してはならない。
+		// In this case, dummy exception must not occur.
 		ConfigProviderImpl configProvider = ConfigProviderImplTest.createConfigProviderImpl((new File(DATA_PATH, "mlo-srv.debug-off.properties")).getAbsolutePath());
 		DebugRestifChecker debugRestifChecker = new DebugRestifChecker();
 		debugRestifChecker.setConfigProvider(configProvider);
 		obj.setDebugRestifChecker(debugRestifChecker);
 	}
 	
-	// 連携用ダミーInvoker
+	// Dummy Invoker for test.
 	private class DummyInvoker implements SdtncInvoker {
 
 		private static final String PATH_LOGIN = "login";
@@ -728,7 +728,7 @@ public class SliceManagerOtherImplTest {
 				istream = new FileInputStream(xmlFile);
 				resDto = JAXB.unmarshal(istream, SdtncResponseDto.class);
 			} catch (FileNotFoundException e) {
-				// 基本、このルートには入らない
+				// Never pass here.
 				throw new InternalException("templete file is not found [file = " + xmlFile.getName() +"]");
 			} finally {
 				if (istream != null) {
@@ -746,7 +746,7 @@ public class SliceManagerOtherImplTest {
 	}
 	
 	
-	// 連携用ダミードライバー
+	// Dummy driver for test.
 	public class DummyDriver implements OdenOSDriver {
 
 		private PTLinkEntity getLinkResponse = null;

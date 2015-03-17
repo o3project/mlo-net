@@ -42,7 +42,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_common_Version_255() throws Exception {
+	public void testValivate_NORMAL_common_Version_255() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -55,7 +55,7 @@ public class CommonUseSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -64,7 +64,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_Version_0() throws Exception {
+	public void testValivate_ANOMALY_common_Version_0() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -75,7 +75,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/Version");
@@ -87,7 +87,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_Version_null() throws Exception {
+	public void testValivate_ANOMALY_common_Version_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -98,7 +98,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/Version");
@@ -110,7 +110,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_SourceComponent_null() throws Exception {
+	public void testValivate_ANOMALY_common_SourceComponent_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -121,7 +121,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceComponent");
@@ -133,7 +133,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_SourceComponent_ComponentName_33桁() throws Exception {
+	public void testValivate_ANOMALY_common_SourceComponent_ComponentName_Length33() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -144,7 +144,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceComponent_ComponentName");
@@ -156,7 +156,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_SourceComponent_ComponentName_空データ() throws Exception {
+	public void testValivate_ANOMALY_common_SourceComponent_ComponentName_Empty() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -167,7 +167,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceComponent_ComponentName");
@@ -179,7 +179,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_SourceComponent_ComponentName_null() throws Exception {
+	public void testValivate_ANOMALY_common_SourceComponent_ComponentName_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -190,7 +190,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceComponent_ComponentName");
@@ -202,7 +202,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_DestComponent_null() throws Exception {
+	public void testValivate_ANOMALY_common_DestComponent_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -213,7 +213,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestComponent");
@@ -225,7 +225,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_DestComponent_ComponentName_33桁() throws Exception {
+	public void testValivate_ANOMALY_common_DestComponent_ComponentName_Length33() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -236,7 +236,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestComponent_ComponentName");
@@ -248,7 +248,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_DestComponent_ComponentName_空データ() throws Exception {
+	public void testValivate_ANOMALY_common_DestComponent_ComponentName_Empty() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -259,7 +259,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestComponent_ComponentName");
@@ -271,7 +271,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_common_Operation_Responce() throws Exception {
+	public void testValivate_NORMAL_common_Operation_Responce() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -284,7 +284,7 @@ public class CommonUseSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -293,7 +293,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_Operation_不正値() throws Exception {
+	public void testValivate_ANOMALY_common_Operation_InvalidValue() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -304,7 +304,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/Operation");
@@ -316,7 +316,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_Operation_空データ() throws Exception {
+	public void testValivate_ANOMALY_common_Operation_Empty() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -327,7 +327,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/Operation");
@@ -339,7 +339,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_Operation_null() throws Exception {
+	public void testValivate_ANOMALY_common_Operation_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -350,7 +350,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/Operation");
@@ -362,7 +362,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_common_DestComponent_ComponentName_null() throws Exception {
+	public void testValivate_ANOMALY_common_DestComponent_ComponentName_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -373,7 +373,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestComponent_ComponentName");
@@ -385,7 +385,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_SliceId_99999999() throws Exception {
+	public void testValivate_NORMAL_SliceId_99999999() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -397,7 +397,7 @@ public class CommonUseSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -406,7 +406,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_SliceId_0() throws Exception {
+	public void testValivate_NORMAL_SliceId_0() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -418,7 +418,7 @@ public class CommonUseSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -427,7 +427,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SliceId_100000000() throws Exception {
+	public void testValivate_ANOMALY_SliceId_100000000() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -437,7 +437,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceId");
@@ -449,7 +449,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SliceId_マイナス1() throws Exception {
+	public void testValivate_ANOMALY_SliceId_Minus_1() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -459,7 +459,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceId");
@@ -471,7 +471,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SliceId_null() throws Exception {
+	public void testValivate_ANOMALY_SliceId_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -481,7 +481,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceId");
@@ -493,7 +493,7 @@ public class CommonUseSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_Slice_null() throws Exception {
+	public void testValivate_ANOMALY_Slice_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -502,7 +502,7 @@ public class CommonUseSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceIsUndefined");

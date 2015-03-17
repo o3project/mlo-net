@@ -35,152 +35,148 @@ public class Usecase003Test extends UsecaseTestBase {
 	}
 
 	/**
-	 * コンポーネント名 demoApl と mloClient の分割確認。
-	 * 
-	 * コンポーネント名が違う場合、同じスライス名のスライスが作成 (/DEMO/CREATE) できる。
-	 * コンポーネント名が違うスライス情報を読み込めない (/DEMO/READ)。
-	 * 
+	 * Checks that slice space is separated by component name, demoApl and mloClient.
+	 *
+	 * The same slices can be created (/DEMO/CREATE) if component names are different.
+	 * The slice information of anothe component name must not have been read (/DEMO/READ).
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase01() throws Exception {
 		
-		// sliceA を demoApl で作成できる。
+		// Can create sliceA by demoApl.
 		_assertMloAction(
 				"CREATE", "usecase003/01.01.demoApl.create.req.xml", 
 				"usecase003/01.01.demoApl.create.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecase003/demoApl.read.00000001.req.xml", 
 				"usecase003/01.02.demoApl.read.00000001.res.xml");
 		
-		// sliceA を mloClient で作成できる。
+		// Can create sliceA by mloClient.
 		_assertMloAction(
 				"CREATE", "usecase003/01.03.mloClient.create.req.xml", 
 				"usecase003/01.03.mloClient.create.res.xml");
 		
-		// mloClient で sliceA@mloClient を読み込める。
+		// Can read sliceA@mloClient by mloClient.
 		_assertMloAction(
 				"READ", "usecase003/mloClient.read.00000002.req.xml", 
 				"usecase003/01.04.mloClient.read.00000002.res.xml");
 		
-		// demoApl で sliceA@mloClient を読み込むことができない。
+		// Must not read sliceA@mloClient by demoApl.
 		_assertMloAction(
 				"READ", "usecase003/demoApl.read.00000002.req.xml", 
 				"usecase003/demoApl.read.NoData.res.xml");
 		
-		// mloClient で sliceA@demoApl を読み込むことができない。
+		// Must not read sliceA@demoApl by mloClient.
 		_assertMloAction(
 				"READ", "usecase003/mloClient.read.00000001.req.xml", 
 				"usecase003/mloClient.read.NoData.res.xml");
 	}
 	
 	/**
-	 * コンポーネント名 demoApl と mloClient の分割確認。
-	 * 
-	 * コンポーネント名が違う場合、スライスを削除 (/DEMO/DELETE) できない。
-	 * 
+	 * Checks that slice space is separated by component name, demoApl and mloClient.
+	 *
+	 * The slice information of another component name must not have been deleted (/DEMO/DELETE).
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase02() throws Exception {
 	
-		// 準備: sliceA@demoApl を作成する。
+		// Setups: Creates sliceA@demoApl
 		_assertMloAction(
 				"CREATE", "usecase003/01.01.demoApl.create.req.xml", 
 				"usecase003/01.01.demoApl.create.res.xml");
 		
-		// 準備: sliceA@mloClient を作成する。
+		// Setups: Creates sliceA@mloClient
 		_assertMloAction(
 				"CREATE", "usecase003/01.03.mloClient.create.req.xml", 
 				"usecase003/01.03.mloClient.create.res.xml");
 
 		
-		// demoApl から sliceA@mloClient を削除することができない。
+		// Must not delete sliceA@mloClient by demoApl.
 		_assertMloAction(
 				"DELETE", "usecase003/02.01.demoApl.delete.00000002.req.xml", 
 				"usecase003/demoApl.delete.AlreadyDeleted.res.xml");
 		
-		// mloClient から sliceA@demoApl を削除することができない。
+		// Must not delete sliceA@demoApl by mloClient.
 		_assertMloAction(
 				"DELETE", "usecase003/02.02.mloClient.delete.00000001.req.xml", 
 				"usecase003/mloClient.delete.AlreadyDeleted.res.xml");
 		
-		// demoApl から sliceA@demoApl を削除することができる。
+		// Can delete sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"DELETE", "usecase003/02.03.demoApl.delete.00000001.req.xml", 
 				"usecase003/02.03.demoApl.delete.00000001.res.xml");
 		
-		// mloClient から sliceA@mloClient を削除することができる。
+		// Can delete sliceA@mloClient by mloClient.
 		_assertMloAction(
 				"DELETE", "usecase003/02.04.mloClient.delete.00000002.req.xml", 
 				"usecase003/02.04.mloClient.delete.00000002.res.xml");
 	}
 	
 	/**
-	 * コンポーネント名 demoApl と mloClient の分割確認。
-	 * 
-	 * コンポーネント名が違う場合、スライスを変更 (/DEMO/UPDATE) できない。
-	 * 
+	 * Checks that slice space is separated by component name, demoApl and mloClient.
+	 *
+	 * The slice information of another component name must not have been updated (/DEMO/UPDATE).
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase03() throws Exception {
 	
-		// 準備: sliceA@demoApl を作成する。
+		// Setup : Creates sliceA@demoApl
 		_assertMloAction(
 				"CREATE", "usecase003/01.01.demoApl.create.req.xml", 
 				"usecase003/01.01.demoApl.create.res.xml");
 		
-		// 準備: sliceA@mloClient を作成する。
+		// Setup: Creates sliceA@mloClient
 		_assertMloAction(
 				"CREATE", "usecase003/01.03.mloClient.create.req.xml", 
 				"usecase003/01.03.mloClient.create.res.xml");
 
 		
-		// demoApl から sliceA@mloClient を更新することができない。
+		// Must not update sliceA@mloClient by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecase003/03.01.demoApl.update.mod.00000002.req.xml", 
 				"usecase003/03.01.demoApl.update.SliceIdDoesNotExist.res.xml");
 		
-		// mloClient から sliceA@demoApl を更新することができない。
+		// Must not update sliceA@demoApl by mloClient.
 		_assertMloAction(
 				"UPDATE", "usecase003/03.02.mloClient.update.mod.00000001.req.xml", 
 				"usecase003/03.02.mloClient.update.SliceIdDoesNotExist.res.xml");
 		
-		// demoApl から sliceA@demoApl を更新することができる。
+		// Can update sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecase003/03.03.demoApl.update.mod.00000001.req.xml", 
 				"usecase003/03.03.demoApl.update.mod.00000001.res.xml");
 		
-		// mloClient から sliceA@mloClient を更新することができる。
+		// Can update  sliceA@mloClient by mloClient.
 		_assertMloAction(
 				"UPDATE", "usecase003/03.04.mloClient.update.mod.00000002.req.xml", 
 				"usecase003/03.04.mloClient.update.mod.00000002.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込んだ結果が正しい。
+		// Can read correct data of sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecase003/demoApl.read.00000001.req.xml", 
 				"usecase003/03.05.demoApl.read.00000001.res.xml");
 
-		// mloClient で sliceA@mloClient を読み込んだ結果が正しい。
+		// Can read correct data of sliceA@mloClient by mloClient.
 		_assertMloAction(
 				"READ", "usecase003/mloClient.read.00000002.req.xml", 
 				"usecase003/03.06.mloClient.read.00000002.res.xml");
 	}
 
 	/**
-	 * コンポーネント名 demoApl と mloClient の分割確認。
-	 * 
-	 * コンポーネント名が違う場合、スライス一覧を取得できない。
-	 * 
+	 * Checks that slice space is separated by component name, demoApl and mloClient.
+	 *
+	 * The slice list of another component name must not have been obtained (/DEMO/slices).
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase04_slicesGet() throws Exception {
 	
-		// 準備: sliceA, sliceB @demoApl を作成する。
+		// Setup: Creates sliceA, sliceB @demoApl
 		_assertMloAction(
 				"CREATE", "usecase003/04.01.demoApl.create.req.xml", 
 				"usecase003/04.01.demoApl.create.res.xml");
@@ -188,7 +184,7 @@ public class Usecase003Test extends UsecaseTestBase {
 				"CREATE", "usecase003/04.02.demoApl.create.req.xml", 
 				"usecase003/04.02.demoApl.create.res.xml");
 		
-		// 準備: sliceC, sliceD @mloClient を作成する。
+		// Setup: Creates sliceC, sliceD @mloClient
 		_assertMloAction(
 				"CREATE", "usecase003/04.03.mloClient.create.req.xml", 
 				"usecase003/04.03.mloClient.create.res.xml");
@@ -196,14 +192,14 @@ public class Usecase003Test extends UsecaseTestBase {
 				"CREATE", "usecase003/04.04.mloClient.create.req.xml", 
 				"usecase003/04.04.mloClient.create.res.xml");
 		
-		// demoApl は sliceA, sliceB は取れるが sliceC, sliceD は取れない。
+		// demoApl can retrieve sliceA, sliceB, but not sliceC, sliceD.
 		Map<String, String> demoAplParamMap = new HashMap<String, String>();
 		demoAplParamMap.put("owner", "demoApl");
 		_assertMloSlicesGetAction(demoAplParamMap, 
 				"usecase003/04.05.demoApl.get.slices.res.xml");
 		demoAplParamMap = null;
 		
-		// mloClient は sliceC, sliceD は取れるが sliceA, sliceB は取れない。
+		// mloClient can retrieve sliceC, sliceD, but not sliceA, sliceB.
 		Map<String, String> mloClientParamMap = new HashMap<String, String>();
 		mloClientParamMap.put("owner", "mloClient");
 		_assertMloSlicesGetAction(mloClientParamMap, 

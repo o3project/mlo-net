@@ -28,12 +28,12 @@ import org.w3c.dom.Document;
 public class SdtncTestUtil {
 
     /**
-    * XML ファイルからリクエスト DTO を読み込む。
-    * @param serdes {@link Serdes} インスタンス
-    * @param dirName xml ファイルのディレクトリ
-    * @param xmlFileName xml ファイルのファイル名
-    * @return リクエスト DTO
-    * @throws Throwable 読み込み中の異常例外
+    * Loads the request DTO from XML file.
+    * @param serdes {@link Serdes} instance.
+    * @param dirName xml file directory.
+    * @param xmlFileName xml file name.
+    * @return the request DTO
+    * @throws Throwable Failure in loading.
     */
     public static SdtncResponseDto readResFromXml(SdtncSerdes serdes, String dirName, String xmlFileName) throws Throwable {
         File xmlfile = new File(dirName, xmlFileName);
@@ -51,12 +51,12 @@ public class SdtncTestUtil {
     }
 
     /**
-     * XML ファイルからリクエスト DTO を読み込む。
-     * @param serdes {@link Serdes} インスタンス
-     * @param dirName xml ファイルのディレクトリ
-     * @param xmlFileName xml ファイルのファイル名
-     * @return リクエスト DTO
-     * @throws Throwable 読み込み中の異常例外
+    * Loads the request DTO from XML file.
+     * @param serdes {@link Serdes} instance.
+     * @param dirName xml file directory.
+     * @param xmlFileName xml file name.
+     * @return the request DTO
+     * @throws Throwable Failure in loading.
      */
     public static SdtncRequestDto readReqFromXml(SdtncSerdes serdes, String dirName, String xmlFileName) throws Throwable {
         File xmlfile = new File(dirName, xmlFileName);
@@ -74,13 +74,13 @@ public class SdtncTestUtil {
     }
 
     /**
-     * リクエスト DTO の内容が XML ファイルと同じかどうか。
-     * @param serdes {@link Serdes} インスタンス
-     * @param reqDto {@link SdtncRequestDto} インスタンス
-     * @param dirName xml ファイルのディレクトリ
-     * @param xmlFileName xml ファイルのファイル名
-     * @return 同じか否か。同じならば true を返す。
-     * @throws Throwable 処理中の異常例外
+     * Checks whether contents of request DTO is same as the contents in XML file.
+     * @param serdes {@link Serdes} instance.
+     * @param reqDto {@link SdtncRequestDto} instance.
+     * @param dirName xml file directory.
+     * @param xmlFileName xml file name.
+     * @return true if those are same.
+     * @throws Throwable Failure in processing.
      */
     public static boolean isSameXmlAs(SdtncSerdes serdes, SdtncRequestDto reqDto, String dirName, String xmlFileName) throws Throwable {
         String resXml = null;
@@ -129,12 +129,12 @@ public class SdtncTestUtil {
     
 
     /**
-     * リクエスト DTO の内容が XML ファイルと同じかどうか。
-     * @param reqDto {@link SdtncResponseDto} インスタンス
-     * @param dirName xml ファイルのディレクトリ
-     * @param xmlFileName xml ファイルのファイル名
-     * @return 同じか否か。同じならば true を返す。
-     * @throws Throwable 処理中の異常例外
+     * Checks whether contents of request DTO is same as contents in XML file.
+     * @param reqDto {@link SdtncResponseDto} instance.
+     * @param dirName xml file directory.
+     * @param xmlFileName xml file name.
+     * @return true if those are same.
+     * @throws Throwable Failure in processing.
      */
     public static boolean isSameXmlAs(SdtncResponseDto resDto, String dirName, String xmlFileName) throws Throwable {
         String resXml = null;

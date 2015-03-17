@@ -32,39 +32,38 @@ public class UsecaseDeleteSliceFailTest extends UsecaseTestBase {
 	}
 
 	/**
-	 * スライス変更でフロー削除に失敗し、スライス削除でも失敗するケース
-	 * 
+	 * In the case that flow cannot be deleted and the slice cannot be deleted.
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase01() throws Exception {
 		
-		// sliceA を demoApl で作成できる。
+		// Can create sliceA by demoApl.
 		_assertMloAction(
 				"CREATE", "usecaseDeleteSliceFail/01.demoApl.create.req.xml", 
 				"usecaseDeleteSliceFail/01.demoApl.create.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecaseDeleteSliceFail/demoApl.read.00000001.req.xml", 
 				"usecaseDeleteSliceFail/02.demoApl.read.00000001.res.xml");
 		
-		// demoApl で SliceA@DemoAplの変更(フロー削除)に失敗する
+		// Cannot delete flow in SliceA@DemoApl by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecaseDeleteSliceFail/03.demoApl.update.del.req.xml", 
 				"usecaseDeleteSliceFail/03.demoApl.update.del.res.error.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecaseDeleteSliceFail/demoApl.read.00000001.req.xml", 
 				"usecaseDeleteSliceFail/02.demoApl.read.00000001.res.xml");
 				
-		// demoApl で スライス削除に失敗する。
+		// Cannot delete the slice by demoApl.
 		_assertMloAction(
 				"DELETE", "usecaseDeleteSliceFail/04.demoApl.delete.00000001.req.xml", 
 				"usecaseDeleteSliceFail/04.demoApl.delete.00000001.res.error.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl in demoApl.
 		_assertMloAction(
 				"READ", "usecaseDeleteSliceFail/demoApl.read.00000001.req.xml", 
 				"usecaseDeleteSliceFail/02.demoApl.read.00000001.res.xml");

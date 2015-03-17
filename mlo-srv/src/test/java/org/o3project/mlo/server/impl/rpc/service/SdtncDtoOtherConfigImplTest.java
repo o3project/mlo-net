@@ -68,9 +68,9 @@ public class SdtncDtoOtherConfigImplTest {
 	}
 
 	/**
-	 * オブジェクトをセットアップする。
-	 * @param dataDir データディレクトリ
-	 * @param propFileName プロパティファイル名
+	 * Sets up object.
+	 * @param dataDir the data directory.
+	 * @param propFileName Property file name.
 	 */
 	private void setUpObj(String dataDir, String propFileName) {
 		File propFile = new File(dataDir, propFileName);

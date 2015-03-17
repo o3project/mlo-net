@@ -39,7 +39,7 @@ public class SdtncDtoUtilTest {
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.rpc.service.SdtncDtoUtil#createLoginReqDto()}.
-	 * 他社連携ログイン
+	 * Login by demoApl
 	 */
 	@Test
 	public void createLoginReqDtoTest1(){
@@ -61,7 +61,7 @@ public class SdtncDtoUtilTest {
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.rpc.service.SdtncDtoUtil#createLoginReqDto()}.
-	 * 日立連携ログイン
+	 * Login by mloClient
 	 */
 	@Test
 	public void createLoginReqDtoTest2(){
@@ -83,7 +83,7 @@ public class SdtncDtoUtilTest {
 
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.rpc.service.SdtncDtoUtil#createLogoutReqDto()}.
-	 * ログアウト
+	 * Logout
 	 */
 	@Test
 	public void createLogoutReqDtoTest(){
@@ -100,7 +100,7 @@ public class SdtncDtoUtilTest {
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.rpc.service.SdtncDtoUtil#creatAddPwReqDto()}.
-	 * PW生成
+	 * Creating PW
 	 */
 	@Test
 	public void creatAddPwReqDtoTest(){

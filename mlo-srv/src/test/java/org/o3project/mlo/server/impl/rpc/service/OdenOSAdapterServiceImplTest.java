@@ -438,7 +438,7 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
         getLogger().addAppender(appender);
         getLogger().setAdditivity(false);
         try{
-            // 何かしらのログを出力する処理
+            // Outputs any log
    			String linkId1 = OdenOSConstants.LINK_TL_1;
     		String linkId2 = OdenOSConstants.LINK_TL_2;
 			try {
@@ -447,12 +447,12 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
     		} catch (Exception e) {
     			fail();
     		}
-            // エラーログのテスト
+            // Checks error log
             String logString = writer.toString();
             assertTrue(logString.contains("notifyLinkChanged Incorrect response : " + linkId2));
 
         }finally{
-            // ログアペンダを消す
+            // Removes log appender
             getLogger().removeAppender(appender);
             getLogger().setAdditivity(true);
         }
@@ -468,7 +468,7 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
         getLogger().addAppender(appender);
         getLogger().setAdditivity(false);
         try{
-            // 何かしらのログを出力する処理
+            // Outputs any log
     		try {
     			String linkId = OdenOSConstants.LINK_TL_1;
 				obj.setLinkQueue(linkId);
@@ -476,12 +476,12 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
     		} catch (Exception e) {
     			fail();
     		}
-            // エラーログのテスト
+            // Checks error log
             String logString = writer.toString();
             assertTrue(logString.contains("notifyLinkChanged Incorrect response : "));
 
         }finally{
-            // ログアペンダを消す
+            // Removes log appender
             getLogger().removeAppender(appender);
             getLogger().setAdditivity(true);
         }
@@ -580,19 +580,19 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
         getLogger().addAppender(appender);
         getLogger().setAdditivity(false);
         try{
-            // 何かしらのログを出力する処理
+            // Outputs any log
     		try {
     			obj.setDeleteFlowQueue("test");
     			obj.notifyFlowDeleted("test2");
     		} catch (Exception e) {
     			fail();
     		}
-            // エラーログのテスト
+            // Checks error log
             String logString = writer.toString();
             assertTrue(logString.contains("notifyFlowDeleted Incorrect response : " + "test2"));
 
         }finally{
-            // ログアペンダを消す
+            // Removes log appender
             getLogger().removeAppender(appender);
             getLogger().setAdditivity(true);
         }
@@ -608,19 +608,19 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
         getLogger().addAppender(appender);
         getLogger().setAdditivity(false);
         try{
-            // 何かしらのログを出力する処理
+            // Outputs any log
     		try {
     			obj.setDeleteFlowQueue("test");
     			obj.notifyFlowDeleted(null);
     		} catch (Exception e) {
     			fail();
     		}
-            // エラーログのテスト
+            // Checks error log
             String logString = writer.toString();
             assertTrue(logString.contains("notifyFlowDeleted Incorrect response : "));
 
         }finally{
-            // ログアペンダを消す
+            // Removes log appender
             getLogger().removeAppender(appender);
             getLogger().setAdditivity(true);
         }
@@ -812,16 +812,6 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
 
 	/**
 	 * Test method for
-	 * {@link org.o3project.mlo.server.impl.rpc.service.OdenOSAdapterServiceImpl#requestLink(org.o3project.mlo.server.rpc.entity.PTLinkEntity)}
-	 * .
-	 */
-	// @Test
-	// public void testRequestLink_response_vacant() {
-	// テスト不可能
-	// }
-	
-	/**
-	 * Test method for
 	 * {@link org.o3project.mlo.server.impl.rpc.service.OdenOSAdapterServiceImpl#notifyLinkChanged(java.lang.String)}
 	 * .
 	 */
@@ -918,25 +908,6 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
 
 	/**
 	 * Test method for
-	 * {@link org.o3project.mlo.server.impl.rpc.service.OdenOSAdapterServiceImpl#putFlow(org.o3project.mlo.server.rpc.entity.PTFlowEntity)}
-	 * .
-	 */
-	// MloExceptionにCatchされてExceptionまで届かないためテスト不可能
-	// @Test
-	// public void testPutFlow_Exception2() {
-	// try {
-	// PTFlowEntity req = new PTFlowEntity(OdenOSConstants.FlowInfo.FLOW1,
-	// 10000, 9999);
-	// driver.setPutFlowWait(-1);
-	// String ret = obj.putFlow(req);
-	// fail();
-	// } catch (MloException e) {
-	// assertTrue(e instanceof InternalException);
-	// }
-	// }
-
-	/**
-	 * Test method for
 	 * {@link org.o3project.mlo.server.impl.rpc.service.OdenOSAdapterServiceImpl#notifyFlowChanged(java.lang.String)}
 	 * .
 	 */
@@ -962,21 +933,6 @@ public class OdenOSAdapterServiceImplTest implements TopologyConfigConstants {
 			getLogger().setAdditivity(true);
 		}
 	}
-
-	/**
-	 * Test method for
-	 * {@link org.o3project.mlo.server.impl.rpc.service.OdenOSAdapterServiceImpl#notifyFlowChanged(java.lang.String)}
-	 * .
-	 */
-	// @Test
-	// public void testnotifyFlowChanged_InterruptedException() {
-	//
-	// putFlow()にて
-	// flowChangedQueueMap.putを行うので
-	// notifyFlowChanged()にてinterruptを起こす前に
-	// putFlow()無いで例外が起こり目的の箇所に到達することができない。
-	//
-	// }
 
 	/**
 	 * @return

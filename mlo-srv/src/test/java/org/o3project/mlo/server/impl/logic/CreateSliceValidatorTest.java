@@ -42,7 +42,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_Flows_1件() throws Exception {
+	public void testValivate_NORMAL_Flows_1data() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -51,10 +51,10 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			System.out.println("【正常終了】" + Thread.currentThread().getStackTrace()[1].getMethodName());
+			System.out.println("[Successfully done]" + Thread.currentThread().getStackTrace()[1].getMethodName());
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -63,7 +63,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_Flows_200件() throws Exception {
+	public void testValivate_NORMAL_Flows_200data() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -72,10 +72,10 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			System.out.println("【正常終了】" + Thread.currentThread().getStackTrace()[1].getMethodName());
+			System.out.println("[Successfully done]" + Thread.currentThread().getStackTrace()[1].getMethodName());
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -84,7 +84,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_Flows_0件() throws Exception {
+	public void testValivate_ANOMALY_Flows_0data() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -93,7 +93,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/FlowsSizeOver");
@@ -105,7 +105,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_Flows_201件() throws Exception {
+	public void testValivate_ANOMALY_Flows_201data() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -114,7 +114,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/FlowsSizeOver");
@@ -126,7 +126,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_Flows_Null() throws Exception {
+	public void testValivate_ANOMALY_Flows_Null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -137,7 +137,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/FlowsIsUndefined");
@@ -149,7 +149,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_Slice_Null() throws Exception {
+	public void testValivate_ANOMALY_Slice_Null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -157,7 +157,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceIsUndefined");
@@ -169,13 +169,13 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_Common_Null() throws Exception {
+	public void testValivate_ANOMALY_Common_Null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/CommonIsUndefined");
@@ -187,7 +187,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SliceName_33桁() throws Exception {
+	public void testValivate_ANOMALY_SliceName_33Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -197,7 +197,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceName");
@@ -209,7 +209,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SliceName_空データ() throws Exception {
+	public void testValivate_ANOMALY_SliceName_EmptyData() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -219,7 +219,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceName");
@@ -231,7 +231,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SliceName_null() throws Exception {
+	public void testValivate_ANOMALY_SliceName_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -240,7 +240,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SliceName");
@@ -252,7 +252,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_FlowName_33桁() throws Exception {
+	public void testValivate_ANOMALY_FlowName_33Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -262,7 +262,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/FlowName");
@@ -274,7 +274,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_FlowName_空データ() throws Exception {
+	public void testValivate_ANOMALY_FlowName_EmptyData() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -284,7 +284,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/FlowName");
@@ -296,7 +296,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_FlowName_null() throws Exception {
+	public void testValivate_ANOMALY_FlowName_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -306,7 +306,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/FlowName");
@@ -318,7 +318,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SourceCENodeName_33桁() throws Exception {
+	public void testValivate_ANOMALY_SourceCENodeName_33Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -328,7 +328,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceCENodeName");
@@ -340,7 +340,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SourceCENodeName_空データ() throws Exception {
+	public void testValivate_ANOMALY_SourceCENodeName_EmptyData() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -350,7 +350,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceCENodeName");
@@ -362,7 +362,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SourceCENodeName_null() throws Exception {
+	public void testValivate_ANOMALY_SourceCENodeName_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -372,7 +372,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceCENodeName");
@@ -384,7 +384,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SourceCEPortNo_9桁() throws Exception {
+	public void testValivate_ANOMALY_SourceCEPortNo_9Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -394,7 +394,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceCEPortNo");
@@ -406,7 +406,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	//@Test
-	public void testValivate_異常_SourceCEPortNo_1桁() throws Exception {
+	public void testValivate_ANOMALY_SourceCEPortNo_1Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -416,7 +416,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceCEPortNo");
@@ -428,7 +428,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SourceCEPortNo_空データ() throws Exception {
+	public void testValivate_ANOMALY_SourceCEPortNo_EmptyData() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -438,7 +438,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceCEPortNo");
@@ -450,7 +450,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_SourceCEPortNo_null() throws Exception {
+	public void testValivate_ANOMALY_SourceCEPortNo_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -460,7 +460,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/SourceCEPortNo");
@@ -472,7 +472,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_DestCENodeName_33桁() throws Exception {
+	public void testValivate_ANOMALY_DestCENodeName_33Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -482,7 +482,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestCENodeName");
@@ -494,7 +494,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_DestCENodeName_空データ() throws Exception {
+	public void testValivate_ANOMALY_DestCENodeName_EmptyData() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -504,7 +504,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestCENodeName");
@@ -516,7 +516,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_DestCENodeName_null() throws Exception {
+	public void testValivate_ANOMALY_DestCENodeName_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -526,7 +526,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestCENodeName");
@@ -538,7 +538,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_DestCEPortNo_9桁() throws Exception {
+	public void testValivate_ANOMALY_DestCEPortNo_9Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -548,7 +548,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestCEPortNo");
@@ -560,7 +560,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	//@Test
-	public void testValivate_異常_DestCEPortNo_1桁() throws Exception {
+	public void testValivate_ANOMALY_DestCEPortNo_1Length() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -570,7 +570,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestCEPortNo");
@@ -582,7 +582,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_DestCEPortNo_空データ() throws Exception {
+	public void testValivate_ANOMALY_DestCEPortNo_EmptyData() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -592,7 +592,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestCEPortNo");
@@ -604,7 +604,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_DestCEPortNo_null() throws Exception {
+	public void testValivate_ANOMALY_DestCEPortNo_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -614,7 +614,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/DestCEPortNo");
@@ -626,7 +626,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_RequestBandWidth_99999999() throws Exception {
+	public void testValivate_NORMAL_RequestBandWidth_99999999() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -638,7 +638,7 @@ public class CreateSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -647,7 +647,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_RequestBandWidth_0() throws Exception {
+	public void testValivate_NORMAL_RequestBandWidth_0() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -659,7 +659,7 @@ public class CreateSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -668,7 +668,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_RequestBandWidth_100000000() throws Exception {
+	public void testValivate_ANOMALY_RequestBandWidth_100000000() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -678,7 +678,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/RequestBandWidth");
@@ -690,7 +690,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_RequestBandWidth_マイナス1() throws Exception {
+	public void testValivate_ANOMALY_RequestBandWidth_Minus_1() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -700,7 +700,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/RequestBandWidth");
@@ -712,7 +712,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_RequestBandWidth_null() throws Exception {
+	public void testValivate_ANOMALY_RequestBandWidth_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -722,7 +722,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/RequestBandWidth");
@@ -734,7 +734,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_RequestDelay_9999() throws Exception {
+	public void testValivate_NORMAL_RequestDelay_9999() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -746,7 +746,7 @@ public class CreateSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -755,7 +755,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_RequestDelay_0() throws Exception {
+	public void testValivate_NORMAL_RequestDelay_0() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -767,7 +767,7 @@ public class CreateSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -776,7 +776,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_RequestDelay_100000000() throws Exception {
+	public void testValivate_ANOMALY_RequestDelay_100000000() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -786,7 +786,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/RequestDelay");
@@ -798,7 +798,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_RequestDelay_マイナス1() throws Exception {
+	public void testValivate_ANOMALY_RequestDelay_Minus_1() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -808,7 +808,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/RequestDelay");
@@ -820,7 +820,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_RequestDelay_null() throws Exception {
+	public void testValivate_ANOMALY_RequestDelay_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -830,7 +830,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/RequestDelay");
@@ -842,7 +842,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_ProtectionLevel_0() throws Exception {
+	public void testValivate_NORMAL_ProtectionLevel_0() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -854,7 +854,7 @@ public class CreateSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -863,7 +863,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_正常_ProtectionLevel_1() throws Exception {
+	public void testValivate_NORMAL_ProtectionLevel_1() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -875,7 +875,7 @@ public class CreateSliceValidatorTest {
 			obj.validate(dto);
 		} catch (ApiCallException e) {
 			e.printStackTrace();
-			fail("異常終了");
+			fail("Failed in test.");
 		}
 	}
 
@@ -884,7 +884,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_ProtectionLevel_2() throws Exception {
+	public void testValivate_ANOMALY_ProtectionLevel_2() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -894,7 +894,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/ProtectionLevel");
@@ -906,7 +906,7 @@ public class CreateSliceValidatorTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testValivate_異常_ProtectionLevel_null() throws Exception {
+	public void testValivate_ANOMALY_ProtectionLevel_null() throws Exception {
 		
 		RestifRequestDto dto = new RestifRequestDto();
 		
@@ -916,7 +916,7 @@ public class CreateSliceValidatorTest {
 		
 		try {
 			obj.validate(dto);
-			fail("異常終了");
+			fail("Failed in test.");
 		} catch (ApiCallException e) {
 			e.printStackTrace();
 			assertEquals(e.getMessage(), "BadRequest/InvalidData/ProtectionLevel");

@@ -70,7 +70,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	private static final int QOS_CIR = 1000;
 	private static final int QOS_PIR = 1200;
 	
-	// リンク
+	// Link
 	private int LINK_ID_TL1 = 50000012;
 	private int LINK_ID_TL2 = 50000023;
 	private int LINK_ID_TL3 = 50000013;
@@ -83,11 +83,11 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	String AMN64002_NODE_NAME = "AMN64002";
 	String AMN64003_NODE_NAME = "AMN64003";
 	
-	// リクエスト
+	// Request
 	RestifRequestDto restifRequestDto;
 	EquipmentConfiguratorOtherImpl obj;
 	
-	// 定数
+	// Consts
 	public final String vPathId = "vPathId";
 	
 	public String vPathId2 = "vPathId2";
@@ -97,7 +97,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	private static final String DATA_FILE_002 = "sdtnc.dto.config.002.properties";
 	private static final String DATA_FILE_003 = "sdtnc.dto.config.003.properties";
 	
-	// パラメータMapキー
+	// Parameter map key
 	public String PARAM_KEY_TOKEN = "token";
 	public String PARAM_KEY_SLICE_ID = "groupIndex";
 	public String PARAM_KEY_VPATH_ID = "vObjectIndex";
@@ -200,7 +200,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P1→P2→P3(リンク未設定)
+	 * P1->P2->P3 (link does not exist)
 	 */
 	@Test
 	public void testAddFlow1() {
@@ -212,18 +212,18 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// bandwidthとdelayの上書き確認
+			// Overwrites bandwidth and delay
 			assertEquals(addedFlowDto.usedBandWidth, reqDto.reqBandWidth);
 			assertEquals(addedFlowDto.delayTime, reqDto.reqDelay);
 			
-			// OdenOS メソッド呼び出し確認
+			// Confirms whether OdenOS is called.
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Confirms whether SDTNC is called.
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -232,37 +232,37 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.contains(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.contains(linkEntityTl4.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.contains(linkEntityTl2.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.contains(linkEntityTl5.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl1);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(2), linkEntityTl5);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(3), linkEntityTl4);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow1);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow2);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 			
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID), HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -275,10 +275,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 			
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -288,7 +288,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P3→P2→P1(リンク未設定)
+	 * P3->P2->P1 (link does not exist)
 	 */
 	@Test
 	public void testAddFlow2() {
@@ -301,14 +301,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -317,37 +317,37 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl4.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl2.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl5);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(2), linkEntityTl1);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(3), linkEntityTl2);
 
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow1);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -361,10 +361,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -374,7 +374,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P1→P3(リンク未設定)
+	 * P1->P3 (link does not exist)
 	 */
 	@Test
 	public void testAddFlow3() {
@@ -387,14 +387,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -403,33 +403,33 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl3.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl6.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl3);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl6);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow3);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow4);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -443,10 +443,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 						
 		} catch (MloException e) {
@@ -456,7 +456,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P3→P1(リンク未設定)
+	 * P3->P1 (link does not exist)
 	 */
 	@Test
 	public void testAddFlow4() {
@@ -468,14 +468,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -484,33 +484,33 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl6.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl3.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl6);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl3);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow4);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow3);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -524,10 +524,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -537,7 +537,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P1→P2→P3(リンク設定済)
+	 * P1->P2->P3 (link exists)
 	 */
 	@Test
 	public void testAddFlow5() {
@@ -552,14 +552,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -567,30 +567,30 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callCreatePw == true);
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl2.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl4.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow1);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow2);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -604,10 +604,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -617,7 +617,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P3→P2→P1(リンク設定済)
+	 * P3->P2->P1 (link exists)
 	 */
 	@Test
 	public void testAddFlow6() {
@@ -633,14 +633,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -649,30 +649,30 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl4.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl2.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow1);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -686,10 +686,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -699,7 +699,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P1→P3(リンク未設定)
+	 * P1->P3 (link does not exist)
 	 */
 	@Test
 	public void testAddFlow7() {
@@ -715,14 +715,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -731,27 +731,27 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl3.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl6.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow3);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow4);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -765,10 +765,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -778,7 +778,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P3→P1(リンク設定済)
+	 * P3->P1 (link exists)
 	 */
 	@Test
 	public void testAddFlow8() {
@@ -794,14 +794,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -810,28 +810,28 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl6.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl3.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow4);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow3);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -845,10 +845,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -858,12 +858,12 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * P1→P3(リンク未設定) LSP情報が取得できなかった場合
+	 * P1->P3 (link does not exist) LSP can not be obtained.
 	 */
 	@Test
 	public void testAddFlow9() {
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.successGetLspResource = false;								// LSP取得を失敗するように設定
+		sampleSdtnc.successGetLspResource = false;								// Setting for LSP obtaining-failure.
 		obj.setSdtncService(sampleSdtnc);
 		
 		int flowId = 3;
@@ -874,13 +874,13 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == false);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -889,20 +889,20 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 
-			// pathId登録確認
+			// pathId checking
 			assertNull(obj.getPathIdMap().get(flowId));
 			
 		} catch (MloException e) {
@@ -912,7 +912,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * slaModeが1以外の場合
+	 * In the case that slaMode is not 1.
 	 */
 	@Test
 	public void testAddFlow10() {
@@ -931,14 +931,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -947,37 +947,37 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl2.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl4.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl1);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(2), linkEntityTl5);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(3), linkEntityTl4);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow1);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow2);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 			
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID), HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -990,10 +990,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == QOS_PIR);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 			
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1003,7 +1003,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * slaModeが1以外の場合
+	 * In the case that slaMode is not 1.
 	 */
 	@Test
 	public void testAddFlow11_putVPath_workarround_vlanid421() {
@@ -1025,14 +1025,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1041,37 +1041,37 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl2.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl4.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl1);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(2), linkEntityTl5);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(3), linkEntityTl4);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow1);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow2);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 			
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID), HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1084,10 +1084,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == QOS_PIR);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 			
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 			
@@ -1098,7 +1098,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * slaModeが1以外の場合
+	 * In the case that slaMode is not 1.
 	 */
 	@Test
 	public void testAddFlow11_putVPath_workarround_vlanid422() {
@@ -1125,14 +1125,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.addFlow(addedFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1141,37 +1141,37 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl2.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl4.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl1);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(2), linkEntityTl5);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(3), linkEntityTl4);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), addedFlowDto.name + "_1", flowEntityFlow1);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), addedFlowDto.name + "_2", flowEntityFlow2);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId,LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword,LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 			
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID), HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertEquals(expectedVlanid, resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient);
@@ -1184,10 +1184,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == QOS_PIR);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 			
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1197,7 +1197,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * LSPリソース取得：失敗 ログアウト：成功
+	 * Failed to obtain LSP resource. Successfully logout.
 	 */
 	@Test
 	public void testAddFlowError1() {
@@ -1206,7 +1206,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		FlowDto addedFlowDto = createFlowDto(flowId, AMN64003_NODE_NAME, AMN64001_NODE_NAME, Arrays.asList(LINK_ID_TL6));
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.getLspFailFlag = true;										// LSP取得時にエラーを発生させる
+		sampleSdtnc.getLspFailFlag = true;										// Sets error in getting LSP
 		obj.setSdtncService(sampleSdtnc);
 		
 		FlowDto reqDto = getCreateReqDto();
@@ -1222,7 +1222,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * LSPリソース取得：失敗 ログアウト：失敗
+	 * Failed to obtain LSP resource. Failed to logout.
 	 */
 	@Test
 	public void testAddFlowError2() {
@@ -1231,8 +1231,8 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		FlowDto addedFlowDto = createFlowDto(flowId, AMN64003_NODE_NAME, AMN64001_NODE_NAME, Arrays.asList(LINK_ID_TL6));
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.getLspFailFlag = true;										// LSP取得時にエラーを発生させる
-		sampleSdtnc.logoutFailFlag = true;										// ログアウト時にエラーを発生させる
+		sampleSdtnc.getLspFailFlag = true;										// Sets error in getting LSP.
+		sampleSdtnc.logoutFailFlag = true;										// Sets error in logouting.
 		obj.setSdtncService(sampleSdtnc);
 		
 		FlowDto reqDto = getCreateReqDto();
@@ -1248,7 +1248,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * ログイン：失敗
+	 * Login failure.
 	 */
 	@Test
 	public void testAddFlowError3() {
@@ -1257,7 +1257,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		FlowDto addedFlowDto = createFlowDto(flowId, AMN64003_NODE_NAME, AMN64001_NODE_NAME, Arrays.asList(LINK_ID_TL6));
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.loginFailFlag = true;										// ログイン時にエラーを発生させる
+		sampleSdtnc.loginFailFlag = true;										// Sets error in logining.
 		obj.setSdtncService(sampleSdtnc);
 		
 		FlowDto reqDto = getCreateReqDto();
@@ -1274,7 +1274,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * VlanIDエラー1
+	 * VlanID error 1
 	 */
 	@Test
 	public void testAddFlowError4() {
@@ -1299,7 +1299,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * VlanIDエラー2
+	 * VlanID error 2
 	 */
 	@Test
 	public void testAddFlowError5() {
@@ -1324,7 +1324,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * VlanIDエラー3
+	 * VlanID error 3
 	 */
 	@Test
 	public void testAddFlowError6() {
@@ -1352,7 +1352,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P1→P2→P3(リンク未設定)
+	 * P1->P2->P3 (link does not exist)
 	 */
 	@Test
 	public void testModFlow1() {
@@ -1369,18 +1369,18 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// bandwidthとdelayの上書き確認
+			// Overwrites bandwidth and delay
 			assertEquals(modFlowDto.usedBandWidth, reqDto.reqBandWidth);
 			assertEquals(modFlowDto.delayTime, reqDto.reqDelay);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1389,42 +1389,42 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl2.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl4.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl1);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(2), linkEntityTl5);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(3), linkEntityTl4);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow1);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow2);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1438,10 +1438,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1451,7 +1451,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P3→P2→P1(リンク未設定)
+	 * P3->P2->P1 (link does not exist)
 	 */
 	@Test
 	public void testModFlow2() {
@@ -1467,14 +1467,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1483,42 +1483,42 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl4.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl2.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl5);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl4);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(2), linkEntityTl1);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(3), linkEntityTl2);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow1);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1532,10 +1532,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1545,7 +1545,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P1→P3(リンク未設定)
+	 * P1->P3 (link does not exist)
 	 */
 	@Test
 	public void testModFlow3() {
@@ -1561,14 +1561,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1577,38 +1577,38 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl3.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl6.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl3);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl6);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow3);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow4);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1622,10 +1622,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1635,7 +1635,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P3→P1(リンク未設定)
+	 * P3->P1 (link does not exist)
 	 */
 	@Test
 	public void testModFlow4() {
@@ -1652,14 +1652,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == true);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1668,38 +1668,38 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl6.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl3.linkId));
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultPtLinkList.size(), 2);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(0), linkEntityTl6);
 			compareLinkEntity(resultSampleAdp.resultPtLinkList.get(1), linkEntityTl3);
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow4);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow3);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1713,10 +1713,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1726,7 +1726,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P1→P2→P3(リンク設定済)
+	 * P1->P2->P3 (link exists)
 	 */
 	@Test
 	public void testModFlow5() {
@@ -1746,14 +1746,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1762,35 +1762,35 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl2.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl4.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow1);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow2);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1804,10 +1804,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1817,7 +1817,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P3→P2→P1(リンク設定済)
+	 * P3->P2->P1 (link exists)
 	 */
 	@Test
 	public void testModFlow6() {
@@ -1837,14 +1837,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1853,35 +1853,35 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl4.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl2.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow1);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1895,10 +1895,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1908,7 +1908,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P1→P3（リンク設定済）
+	 * P1->P3 (Links exists)
 	 */
 	@Test
 	public void testModFlow7() {
@@ -1928,14 +1928,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -1944,33 +1944,33 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl3.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl6.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow3);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow4);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -1984,10 +1984,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -1997,7 +1997,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P3→P1(リンク設定済)
+	 * P3->P1 (link exists)
 	 */
 	@Test
 	public void testModFlow8() {
@@ -2017,14 +2017,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -2033,33 +2033,33 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl6.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl3.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow4);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow3);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -2073,10 +2073,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -2086,7 +2086,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P3→P2→P1(リンク設定済) 古いフロー情報あり
+	 * P3->P2->P1 (link exists) Old flow information exists.
 	 */
 	@Test
 	public void testModFlow9() {
@@ -2112,14 +2112,14 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == true);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -2128,38 +2128,38 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// deleteFlow 引数確認
-			assertEquals(2, resultSampleAdp.resultDeleteFlowId.size()); // deleteFlow が呼ばれていること
+			// deleteFlow arguments checking
+			assertEquals(2, resultSampleAdp.resultDeleteFlowId.size()); // deleteFlow call checking.
 			
-			// requestLink 引数確認
+			// requestLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 4);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl5.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl4.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(2).equals(linkEntityTl1.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(3).equals(linkEntityTl2.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow1);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 			
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -2173,10 +2173,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -2186,7 +2186,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P3→P1 PW削除成功後、PW作成に失敗⇒再実行で成功
+	 * P3->P1 Successfully PW deleted, and then failed to create PW. But next trial is successfully done.
 	 */
 	@Test
 	public void testModFlow11() {
@@ -2202,7 +2202,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		obj.setPathIdMap(map);
 		
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.createPwFailFlag = true;									// PW作成時にエラーを発生させる
+		sampleSdtnc.createPwFailFlag = true;									// Sets error in creating PW
 		obj.setSdtncService(sampleSdtnc);
 		
 		FlowDto reqDto = getUpdateReqDto();
@@ -2213,28 +2213,28 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		} catch (MloException e) {
 			assertTrue(e instanceof InternalException);
 			assertEquals(e.getMessage(), "createPw error");
-			// pathId登録確認
+			// pathId checking
 			assertNull(obj.getPathIdMap().get(flowId));
 		}
 		
-		//再実行
+		// Retry
 		SampleOdenOsAdp sampleAdp2 = new SampleOdenOsAdp();
 		sampleAdp2.getLinkFlag = true;
 		obj.getEquipmentConfiguratorOptDeviceImpl().setOdenOSAdapterService(sampleAdp2);
 		SampleSdtncService sampleSdtnc2 = new SampleSdtncService();
-		sampleSdtnc2.createPwFailFlag = false;									// PW作成時にエラーを発生させる
+		sampleSdtnc2.createPwFailFlag = false;									// Sets error in creating PW
 		obj.setSdtncService(sampleSdtnc2);
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			assertTrue(resultSampleAdp.resultPutFlow == true);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -2243,28 +2243,28 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 
-			// getLink 引数確認
+			// getLink arguments checking
 			assertEquals(resultSampleAdp.resultLinkIdList.size(), 2);
 			assertTrue(resultSampleAdp.resultLinkIdList.get(0).equals(linkEntityTl6.linkId));
 			assertTrue(resultSampleAdp.resultLinkIdList.get(1).equals(linkEntityTl3.linkId));
 			
-			// putFlow 引数確認
+			// putFlow arguments checking
 			assertEquals(resultSampleAdp.resultPutFlowEntity.size(), 2);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(0), modFlowDto.name + "_1", flowEntityFlow4);
 			compareFlowEntity(resultSampleAdp.resultPutFlowEntity.get(1), modFlowDto.name + "_2", flowEntityFlow3);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == true);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),CUT_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 						
-			// sdtncService.createPw 引数確認
+			// sdtncService.createPw arguments checking
 			assertEquals(resultSmpleSdt.addPwDto.slice.groupIndex,SLICE_ID);
 			assertEquals(resultSmpleSdt.addPwDto.auth.token,"token");
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).vlan.uni.vVlanVLanIdNniClient == VLANID_A);
@@ -2278,10 +2278,10 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSPir == 0);
 			assertTrue(resultSmpleSdt.addPwDto.vpath.get(0).qos.vQoSCir == QOS_CIR);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertEquals(obj.getPathIdMap().get(flowId), vPathId);
 			
 		} catch (MloException e) {
@@ -2292,7 +2292,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * LSPリソース取得：失敗 ログアウト：成功
+	 * Getting LSP: failure, Logout: success
 	 */
 	@Test
 	public void testModFlowError1() {
@@ -2305,7 +2305,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		obj.setPathIdMap(map);
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.getLspFailFlag = true;										// LSP取得時にエラーを発生させる
+		sampleSdtnc.getLspFailFlag = true;										// Sets error in creating LSP
 		obj.setSdtncService(sampleSdtnc);
 		
 		FlowDto reqDto = getUpdateReqDto();
@@ -2321,7 +2321,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * LSPリソース取得：失敗 ログアウト：失敗
+	 * Getting LSP: failure, Logout: failure
 	 */
 	@Test
 	public void testModFlowError2() {
@@ -2334,8 +2334,8 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		obj.setPathIdMap(map);
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.getLspFailFlag = true;										// LSP取得時にエラーを発生させる
-		sampleSdtnc.logoutFailFlag = true;										// ログアウト時にエラーを発生させる
+		sampleSdtnc.getLspFailFlag = true;										// Sets error in creating LSP
+		sampleSdtnc.logoutFailFlag = true;										// Sets error in logouting.
 		obj.setSdtncService(sampleSdtnc);
 		
 		FlowDto reqDto = getUpdateReqDto();
@@ -2351,7 +2351,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#addFlow()}.
-	 * ログイン：失敗
+	 * Login: failure
 	 */
 	@Test
 	public void testModFlowError3() {
@@ -2364,7 +2364,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		obj.setPathIdMap(map);
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.loginFailFlag = true;										// ログイン時にエラーを発生させる
+		sampleSdtnc.loginFailFlag = true;										// Sets error in logining.
 		obj.setSdtncService(sampleSdtnc);
 		
 		FlowDto reqDto = getUpdateReqDto();
@@ -2380,7 +2380,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * VlanIDエラー1
+	 * VlanID error 1
 	 */
 	@Test
 	public void testModFlowError4() {
@@ -2405,7 +2405,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * VlanIDエラー2
+	 * VlanID error 2
 	 */
 	@Test
 	public void testModFlowError5() {
@@ -2430,7 +2430,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * VlanIDエラー3
+	 * VlanID error 3
 	 */
 	@Test
 	public void testModFlowError6() {
@@ -2483,12 +2483,12 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#modFlow()}.
-	 * P1→P2→P3(リンク未設定) LSP情報取得失敗
+	 * P1->P2->P3 (link does not exist) Failed to retrieve LSP.
 	 */
 	@Test
 	public void testModFlow10() {
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.successGetLspResource = false;								// LSP取得を失敗するように設定
+		sampleSdtnc.successGetLspResource = false;								// Sets error in getting LSP
 		obj.setSdtncService(sampleSdtnc);
 		
 		int flowId = 100;
@@ -2499,13 +2499,13 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.modFlow(modFlowDto, reqDto, restifRequestDto);
 			
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == false);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == false);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -2514,17 +2514,17 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.getLspResource 引数確認
+			// sdtncService.getLspResource arguments checking
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_SLICE_ID),SLICE_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_VLINK_ID),HOP_LINK_ID);
 			assertEquals(resultSmpleSdt.getLspMap.get(PARAM_KEY_TOKEN),"token");
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
 			
@@ -2535,7 +2535,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#delFlow()}.
-	 * 未削除の状態
+	 * Not deleted yet.
 	 */
 	@Test
 	public void testDelFlow1() {
@@ -2554,13 +2554,13 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.delFlow(delFlowDto, restifRequestDto);
 
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -2569,26 +2569,26 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// deleteFlow 引数確認
+			// deleteFlow arguments checking
 			assertEquals(resultSampleAdp.resultDeleteFlowId.size(), 2);
 			assertTrue(resultSampleAdp.resultDeleteFlowId.get(0).equals(odenOsFlowId1));
 			assertTrue(resultSampleAdp.resultDeleteFlowId.get(1).equals(odenOsFlowId2));
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == false);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertNull(obj.getPathIdMap().get(flowId));
 			
 		} catch (MloException e) {
@@ -2598,7 +2598,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#delFlow()}.
-	 * 削除済
+	 * Already deleted.
 	 */
 	@Test
 	public void testDelFlow2() {
@@ -2620,7 +2620,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == false);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -2629,20 +2629,20 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == true);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.deletePw 引数確認
+			// sdtncService.deletePw arguments checking
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_SLICE_ID), SLICE_ID);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_VPATH_ID), vPathId2);
 			assertEquals(resultSmpleSdt.delPwMap.get(PARAM_KEY_TOKEN), "token");
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
-			// pathId登録確認
+			// pathId checking
 			assertNull(obj.getPathIdMap().get(flowId));
 			
 		} catch (MloException e) {
@@ -2652,7 +2652,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#delFlow()}.
-	 * PW削除済みのスキップ確認
+	 * Checks that already-deleted PW is skipped.
 	 */
 	@Test
 	public void testDelFlow3() {
@@ -2667,13 +2667,13 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		try {
 			obj.delFlow(delFlowDto, restifRequestDto);
 
-			// OdenOS メソッド呼び出し確認
+			// OdenOS methods call checking
 			SampleOdenOsAdp resultSampleAdp = (SampleOdenOsAdp) obj.getEquipmentConfiguratorOptDeviceImpl().getOdenOSAdapterService(); 
 			assertTrue(resultSampleAdp.resultGetLinkId == false);
 			assertTrue(resultSampleAdp.resultDeleteFlow == true);
 			assertTrue(resultSampleAdp.resultRequestLink == false);
 			
-			// Sdtnc メソッド呼び出し確認
+			// Sdtnc methods call checking
 			SampleSdtncService resultSmpleSdt = (SampleSdtncService)obj.getSdtncService();
 			assertTrue(resultSmpleSdt.callLogin == true);
 			assertTrue(resultSmpleSdt.callLogout == true);
@@ -2682,18 +2682,18 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 			assertTrue(resultSmpleSdt.callDeleatPw == false);
 			assertTrue(resultSmpleSdt.callGetPw == false);
 			
-			// deleteFlow 引数確認
+			// deleteFlow arguments checking
 			assertEquals(resultSampleAdp.resultDeleteFlowId.size(), 2);
 			assertTrue(resultSampleAdp.resultDeleteFlowId.get(0).equals(odenOsFlowId1));
 			assertTrue(resultSampleAdp.resultDeleteFlowId.get(1).equals(odenOsFlowId2));
 			assertTrue(obj.getEquipmentConfiguratorOptDeviceImpl().isFlowId(flowId) == false);
 			
-			// sdtncService.login 引数確認
+			// sdtncService.login arguments checking
 			assertEquals(resultSmpleSdt.loginDto.login.loginId, LOGIN_ID);
 			assertEquals(resultSmpleSdt.loginDto.login.loginPassword, LOGIN_PASS);
 			assertEquals(resultSmpleSdt.loginDto.login.ipAddress, LOGIN_IP_ADDRESS);
 
-			// sdtncService.logout 引数確認
+			// sdtncService.logout arguments checking
 			assertEquals(resultSmpleSdt.logoutDto.login.loginId,LOGIN_ID);
 			
 		} catch (MloException e) {
@@ -2703,7 +2703,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#delFlow()}.
-	 * LSPリソース取得：失敗 ログアウト：成功
+	 * Getting LSP: failure, Logout: success
 	 */
 	@Test
 	public void testDelFlowError1() {
@@ -2716,7 +2716,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		obj.setPathIdMap(map);
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.delPwFailFlag = true;										// PW取得時にエラーを発生させる
+		sampleSdtnc.delPwFailFlag = true;										// Sets error in getting PW
 		obj.setSdtncService(sampleSdtnc);
 		
 		try {
@@ -2730,7 +2730,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#delFlow()}.
-	 * LSPリソース取得：失敗 ログアウト：失敗
+	 * Getting LSP: failure, Logout: failure.
 	 */
 	@Test
 	public void testDelFlowError2() {
@@ -2743,8 +2743,8 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		obj.setPathIdMap(map);
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.delPwFailFlag = true;										// PW削除時にエラーを発生させる
-		sampleSdtnc.logoutFailFlag = true;										// ログアウト時にエラーを発生させる
+		sampleSdtnc.delPwFailFlag = true;										// Sets error in deleting PW
+		sampleSdtnc.logoutFailFlag = true;										// Sets error in logouting
 		obj.setSdtncService(sampleSdtnc);
 		
 		try {
@@ -2758,7 +2758,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 	
 	/**
 	 * Test method for {@link org.o3project.mlo.server.impl.logic.EquipmentConfiguratorOtherImpl#delFlow()}.
-	 * ログイン：失敗
+	 * Login: failure
 	 */
 	@Test
 	public void testDelFlowError3() {
@@ -2767,7 +2767,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		FlowDto delFlowDto = createFlowDto(flowId, AMN64003_NODE_NAME, AMN64001_NODE_NAME, Arrays.asList(LINK_ID_TL6));
 
 		SampleSdtncService sampleSdtnc = new SampleSdtncService();
-		sampleSdtnc.loginFailFlag = true;										// ログイン時にエラーを発生させる
+		sampleSdtnc.loginFailFlag = true;										// Sets error in logining
 		obj.setSdtncService(sampleSdtnc);
 		
 		try {
@@ -2817,7 +2817,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		return newFlowDto;
 	}
 	
-	// 要求フロー情報作成(追加)
+	// Creates request for flow (add flow)
 	public FlowDto getCreateReqDto(){
 		FlowDto flowDto = new FlowDto();
 		flowDto.name = "flow1";
@@ -2831,7 +2831,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		return flowDto;
 	}
 	
-	// 要求フロー情報作成(変更)
+	// Creates request for flow (modify flow)
 	public FlowDto getUpdateReqDto(){
 		FlowDto flowDto = new FlowDto();
 		flowDto.type = "mod";
@@ -2856,7 +2856,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		return odenOSTopology.createPTLinkEntity(linkName, bandWidth, delay, configProvider);
 	}
 	
-	// JUnit用のOdenOSAdapterServiceImpl
+	// OdenOSAdapterServiceImpl for JUnit
 	public class SampleOdenOsAdp implements OdenOSAdapterService{
 		
 		public boolean resultGetLinkId;
@@ -2945,7 +2945,7 @@ public class EquipmentConfiguratorOtherImplTest implements TopologyConfigConstan
 		
 	} 
 	
-	// JUnit用のSdtncServiceImpe
+	// SdtncServiceImpe for JUnit
 	public class SampleSdtncService implements SdtncService{
 
 		public boolean callLogin = false;

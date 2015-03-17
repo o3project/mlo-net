@@ -186,7 +186,7 @@ public class SdtncReqPostCreatePwDtoTest {
         ByteArrayOutputStream ostream = null;
         ostream = new ByteArrayOutputStream();
 
-        // SdtncSerdesImpl　呼び出し。
+        // Calls SdtncSerdesImpl
         SdtncSerdesImpl serdesImple = new SdtncSerdesImpl();
         serdesImple.serializeToXml(obj, ostream);
 
@@ -201,7 +201,7 @@ public class SdtncReqPostCreatePwDtoTest {
         ByteArrayInputStream istream = new ByteArrayInputStream(reqXml.getBytes());
         SdtncReqPostCreatePwDto request_unmarshaled = JAXB.unmarshal(istream, SdtncReqPostCreatePwDto.class);
 
-        // 確認　（前DTO　= 後DTO）
+        // Checks DTO (before = after)
         assertEquals(request_unmarshaled.slice.groupIndex, obj.slice.groupIndex);
         assertEquals(request_unmarshaled.vpath.get(0).lsp.vLspDownLabel, obj.vpath.get(0).lsp.vLspDownLabel);
         assertEquals(request_unmarshaled.vpath.get(0).lsp.vLspUpLabel, obj.vpath.get(0).lsp.vLspUpLabel);

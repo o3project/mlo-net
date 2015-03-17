@@ -18,8 +18,7 @@ import org.o3project.mlo.server.rpc.service.SdtncInvoker;
 import org.o3project.mlo.server.rpc.service.SdtncMethod;
 
 /**
- * {@link SdtncInvoker} インタフェースの実装クラスです。
- *
+ * This class is the dummy implementation of {@link SdtncInvoker} interface.
  */
 public class SdtncInvokerImplDummy implements SdtncInvoker {
 
@@ -49,14 +48,14 @@ public class SdtncInvokerImplDummy implements SdtncInvoker {
     }
 
     /**
-     * 実行処理の内部実装です。
-     * @param method メソッドインスタンス
-     * @param reqDto リクエストインスタンス
-     * @param path URL パス
-     * @param paramMap クエリパラメタ
-     * @return レスポンスインスタンス
-     * @throws IOException IO 例外
-     * @throws MloException API 異常例外
+     * Executes
+     * @param method the method instance.
+     * @param reqDto the request instance.
+     * @param path URL path
+     * @param paramMap the query parameter map.
+     * @return the response.
+     * @throws IOException IO failure.
+     * @throws MloException API error.
      */
     private SdtncResponseDto invokeInternal(SdtncMethod method,
             SdtncRequestDto reqDto, String path, Map<String, String> paramMap)
@@ -71,7 +70,7 @@ public class SdtncInvokerImplDummy implements SdtncInvoker {
         return resDto;
     }
 
-    // 期待レスポンスXML指定
+    // Specifies expected response XML.
     public void setXmlName(String xmlName) {
         this.xmlName = xmlName;
     }

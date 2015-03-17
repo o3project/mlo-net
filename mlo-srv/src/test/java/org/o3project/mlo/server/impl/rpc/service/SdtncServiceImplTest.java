@@ -61,10 +61,10 @@ public class SdtncServiceImplTest {
     @Test
     public void loginTest() {
         try {
-            dummyInvoker.setXmlName("login.res.xml");// 受信レスポンスファイル指定
-            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// ダミークラス設定
-            SdtncRequestDto requestDto = createTempDto("login.req.xml", SdtncReqPostLoginDto.class);//　リクエストXML DTO変換
-            SdtncResponseDto responseDto = sdtncServiceImpl.login(requestDto); // 実行
+            dummyInvoker.setXmlName("login.res.xml");// Specifies received response file
+            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// Specifies dummy class
+            SdtncRequestDto requestDto = createTempDto("login.req.xml", SdtncReqPostLoginDto.class); // Converts request XML DTO
+            SdtncResponseDto responseDto = sdtncServiceImpl.login(requestDto); // Execute
             assertEquals(responseDto.head.errorDetail, "");
         } catch (MloException e) {
             fail();
@@ -77,10 +77,10 @@ public class SdtncServiceImplTest {
     @Test
     public void logoutTest() {
         try {
-            dummyInvoker.setXmlName("logout.res.xml");// 受信レスポンスファイル指定
-            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// ダミークラス設定
-            SdtncRequestDto requestDto = createTempDto("logout.req.xml", SdtncReqPostLogoutDto.class);//　リクエストXML DTO変換
-            SdtncResponseDto responseDto = sdtncServiceImpl.logout(requestDto);// 実行
+            dummyInvoker.setXmlName("logout.res.xml");// Specifies received response file
+            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// Specifies dummy class
+            SdtncRequestDto requestDto = createTempDto("logout.req.xml", SdtncReqPostLogoutDto.class); // Converts request XML DTO
+            SdtncResponseDto responseDto = sdtncServiceImpl.logout(requestDto);// Execute
             assertEquals(responseDto.head.errorDetail, "");
         } catch (MloException e) {
             fail();
@@ -96,9 +96,9 @@ public class SdtncServiceImplTest {
             paramMap.put("TEST_KEY", "TEST_VALUE");
             paramMap.put("TEST_KEY2", "TEST_VALUE2");
             paramMap.put("TEST_KEY3", "TEST_VALUE3");
-            dummyInvoker.setXmlName("MultVLink.res.xml");// 受信レスポンスファイル指定
-            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// ダミークラス設定
-            SdtncResponseDto responseDto = sdtncServiceImpl.getLspResource(paramMap); // 実行
+            dummyInvoker.setXmlName("MultVLink.res.xml");// Specifies received response file
+            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// Specifies dummy class
+            SdtncResponseDto responseDto = sdtncServiceImpl.getLspResource(paramMap); // Execute
             assertEquals(responseDto.vlink.get(0).resourceIndex, "1");
         } catch (MloException e) {
             fail();
@@ -110,10 +110,10 @@ public class SdtncServiceImplTest {
     @Test
     public void createPwTest() {
         try {
-            dummyInvoker.setXmlName("createVpath.res.xml");// 受信レスポンスファイル指定
-            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// ダミークラス設定
-            SdtncRequestDto requestDto = createTempDto("createVpath.req.xml", SdtncReqPostCreatePwDto.class);//　リクエストXML DTO変換
-            SdtncResponseDto responseDto = sdtncServiceImpl.createPw(requestDto); // 実行
+            dummyInvoker.setXmlName("createVpath.res.xml");// Specifies received response file
+            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// Specifies dummy class
+            SdtncRequestDto requestDto = createTempDto("createVpath.req.xml", SdtncReqPostCreatePwDto.class); // Converts request XML DTO
+            SdtncResponseDto responseDto = sdtncServiceImpl.createPw(requestDto); // Execute
             assertEquals(responseDto.vpath.get(0).vObjectIndex, "vObjectIndex");
         } catch (MloException e) {
             fail();
@@ -125,13 +125,13 @@ public class SdtncServiceImplTest {
     @Test
     public void deletePwTest() {
         try {
-            dummyInvoker.setXmlName("delVpath.res.xml");// 受信レスポンスファイル指定
-            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// ダミークラス設定
+            dummyInvoker.setXmlName("delVpath.res.xml");// Specifies received response file
+            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// Specifies dummy class
             HashMap<String, String> paramMap = new HashMap<String, String>();
             paramMap.put("TEST_KEY", "TEST_VALUE");
             paramMap.put("TEST_KEY2", "TEST_VALUE2");
             paramMap.put("TEST_KEY3", "TEST_VALUE3");
-            SdtncResponseDto responseDto = sdtncServiceImpl.deletePw(paramMap); // 実行
+            SdtncResponseDto responseDto = sdtncServiceImpl.deletePw(paramMap); // Execute
             assertEquals(responseDto.vpath.get(0).vObjectIndex, "vObjectIndex");
         } catch (MloException e) {
             fail();
@@ -147,9 +147,9 @@ public class SdtncServiceImplTest {
             paramMap.put("TEST_KEY", "TEST_VALUE");
             paramMap.put("TEST_KEY2", "TEST_VALUE2");
             paramMap.put("TEST_KEY3", "TEST_VALUE3");
-            dummyInvoker.setXmlName("Vpath.res.xml");// 受信レスポンスファイル指定
-            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// ダミークラス設定
-            SdtncResponseDto responseDto = sdtncServiceImpl.getPw(paramMap); // 実行
+            dummyInvoker.setXmlName("Vpath.res.xml");// Specifies received response file
+            sdtncServiceImpl.setSdtncInvoker(dummyInvoker);// Specifies dummy class
+            SdtncResponseDto responseDto = sdtncServiceImpl.getPw(paramMap); // Execute
             assertEquals(responseDto.vpath.get(0).vObjectIndex, "vObjectIndex");
         } catch (MloException e) {
             fail();
@@ -159,9 +159,9 @@ public class SdtncServiceImplTest {
     }
     
     /**
-	 * テンプレートファイル(xml）を読み込み、リクエストDtoを作成する
+     * Loads template xml file, and then creates request DTO.
 	 * @param xmlFile
-	 * @return リクエストDto
+	 * @return the request Dto
 	 * @throws MloException 
 	 */
 	private static <T> T createTempDto(String xmlFileName, Class<T> type) throws MloException{
@@ -172,7 +172,7 @@ public class SdtncServiceImplTest {
 			istream = new FileInputStream(xmlFile);
 			reqDto = JAXB.unmarshal(istream, type);
 		} catch (FileNotFoundException e) {
-			// 基本、このルートには入らない
+			// Never pass here.
 			throw new InternalException("templete file is not found [file = " + xmlFile.getName() +"]");
 		} finally {
 			if (istream != null) {

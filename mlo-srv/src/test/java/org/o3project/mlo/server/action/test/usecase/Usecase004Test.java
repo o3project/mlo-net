@@ -32,29 +32,28 @@ public class Usecase004Test extends UsecaseTestBase {
 	}
 
 	/**
-	 * スライス変更時、1個目のフローの変更は成功し、2個目のフロー変更で失敗するケース
-	 * 
+	 * In the case that first flow is successfully modified but second flow fails to be modified in updating a slice.
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase01() throws Exception {
 		
-		// sliceA を demoApl で作成できる。
+		// Can create sliceA by demoApl.
 		_assertMloAction(
 				"CREATE", "usecase004/01.01.demoApl.create.req.xml", 
 				"usecase004/01.01.demoApl.create.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecase004/demoApl.read.00000001.req.xml", 
 				"usecase004/01.02.demoApl.read.00000001.res.xml");
 		
-		// demoApl で SliceA@DemoAplの変更に失敗する
+		// Cannot modify SliceA@DemoApl by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecase004/01.03.demoApl.update.mod.req.xml", 
 				"usecase004/01.03.demoApl.update.error.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。(1フロー目だけ更新されている)
+		// Can read sliceA@demoApl by demoApl (and can confirm that only first flow is updated).
 		_assertMloAction(
 				"READ", "usecase004/demoApl.read.00000001.req.xml", 
 				"usecase004/01.04.demoApl.read.00000001.res.xml");
@@ -62,58 +61,56 @@ public class Usecase004Test extends UsecaseTestBase {
 	
 	
 	/**
-	 * スライス変更時、1個目のフローの追加は成功し、2個目のフロー変更で失敗するケース
-	 * 
+	 * In the case that first flow is successfully added but second flow fails to be modified in updating a slice.
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase02() throws Exception {
 		
-		// sliceA を demoApl で作成できる。
+		// Can create demoApl by sliceA.
 		_assertMloAction(
 				"CREATE", "usecase004/02.01.demoApl.create.req.xml", 
 				"usecase004/02.01.demoApl.create.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecase004/demoApl.read.00000001.req.xml", 
 				"usecase004/02.02.demoApl.read.00000001.res.xml");
 		
-		// demoApl で SliceA@DemoAplの変更に失敗する
+		// Cannot modify SliceA@DemoApl by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecase004/02.03.demoApl.update.mod.req.xml", 
 				"usecase004/02.03.demoApl.update.error.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。(フローが追加され、既存フローは変更されていない)
+		// can read sliceA@demoApl by demoApl (a flow has been added, but existing flow is not modified.)
 		_assertMloAction(
 				"READ", "usecase004/demoApl.read.00000001.req.xml", 
 				"usecase004/02.04.demoApl.read.00000001.res.xml");
 	}
 	
 	/**
-	 * スライス変更時、1個目のフローの削除は成功し、2個目のフロー追加で失敗するケース
-	 * 
+	 * In the case that first flow is successfully deleted but second flow fails to be modified in updating a slice.
 	 * @throws Exception
 	 */
 	@Test
 	public void testUsecase03() throws Exception {
 		
-		// sliceA を demoApl で作成できる。
+		// Can create sliceA by demoApl.
 		_assertMloAction(
 				"CREATE", "usecase004/03.01.demoApl.create.req.xml", 
 				"usecase004/03.01.demoApl.create.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。
+		// Can read sliceA@demoApl by demoApl.
 		_assertMloAction(
 				"READ", "usecase004/demoApl.read.00000001.req.xml", 
 				"usecase004/03.02.demoApl.read.00000001.res.xml");
 		
-		// demoApl で SliceA@DemoAplの変更に失敗する
+		// Cannot modify SliceA@DemoApl by demoApl.
 		_assertMloAction(
 				"UPDATE", "usecase004/03.03.demoApl.update.mod.req.xml", 
 				"usecase004/03.03.demoApl.update.error.res.xml");
 		
-		// demoApl で sliceA@demoApl を読み込める。(フローが削除され、１つもフローが存在しなくなる)
+		// Can read sliceA@demoApl by demoApl (first flow has been deleted. There exists no flow in this slice).
 		_assertMloAction(
 				"READ", "usecase004/demoApl.read.00000001.req.xml", 
 				"usecase004/03.04.demoApl.read.00000001.res.xml");
