@@ -36,6 +36,9 @@ And then, re-login as this user.
 Next, on the "developer" user, executes commands as follows:
 
 ```
+$ sudo apt-get update -y
+...
+
 $ sudo apt-get install git-core -y
 ...
 
