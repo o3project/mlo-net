@@ -460,16 +460,16 @@ doit() {
             ;;
         2) # mpls metro switch
             if [ "${EDGE_TYPE}" = "simple" ]; then
-                echo "  push_mpls ${dpid_n} ${prt} ${dp} ${up} ${ul}"
-                echo "  pop_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp}"
+                echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${ul}"
+                echo "    pop_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp}"
             else
-                echo "  push_mpls_pop_vlan ${dpid_n} ${prt} ${dp} ${LABEL} ${up} ${ul}"
-                echo "  pop_mpls_push_vlan ${dpid_n} ${prt} ${up} ${ul} ${dp} ${LABEL}"
+                echo "    push_mpls_pop_vlan ${dpid_n} ${prt} ${dp} ${LABEL} ${up} ${ul}"
+                echo "    pop_mpls_push_vlan ${dpid_n} ${prt} ${up} ${ul} ${dp} ${LABEL}"
             fi
             ;;
         3) # mpls core switch
-            echo "  swap_mpls ${dpid_n} ${prt} ${dp} ${dl} ${up} ${ul}"
-            echo "  swap_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp} ${dl}"
+            echo "    swap_mpls ${dpid_n} ${prt} ${dp} ${dl} ${up} ${ul}"
+            echo "    swap_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp} ${dl}"
             ;;
         *)
             ;;
