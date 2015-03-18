@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # common
+sudo apt-get update -y
+sudo apt-get install openssh-server -y
 sudo apt-get install openjdk-7-jdk -y
 sudo apt-get install maven -y
 
