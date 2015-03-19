@@ -377,7 +377,7 @@
 				"eth3",
 				"eth4"
 			],
-			"type": "metro"
+			"type": "mpls"
 		},
 		{
 			"brNames": [
@@ -396,7 +396,7 @@
 				"eth3",
 				"eth4"
 			],
-			"type": "metro"
+			"type": "mpls"
 		},
 		{
 			"brNames": [
@@ -417,7 +417,7 @@
 				"eth4",
 				"eth5"
 			],
-			"type": "metro"
+			"type": "mpls"
 		},
 		{
 			"brNames": [
@@ -436,7 +436,7 @@
 				"eth3",
 				"eth4"
 			],
-			"type": "metro"
+			"type": "mpls"
 		},
 		{
 			"brNames": [
@@ -457,7 +457,7 @@
 				"eth4",
 				"eth5"
 			],
-			"type": "core"
+			"type": "mpls"
 		},
 		{
 			"brNames": [
@@ -476,7 +476,7 @@
 				"eth3",
 				"eth4"
 			],
-			"type": "core"
+			"type": "mpls"
 		}
 	]
 }

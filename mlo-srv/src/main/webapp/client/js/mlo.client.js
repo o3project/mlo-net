@@ -60,9 +60,9 @@ APP.cfg = {
     switchesPath: APP.getEtcPathWith('ryu/topology/switches'),
     linksPath:    APP.getEtcPathWith('ryu/topology/links'),
     topoConfPath: APP.getEtcPathWith('ld/topo'),
-    svgSize: {width: 708, height: 416},
+    svgSize: {width: 708, height: 580},
     portRectSize: {width: 8, height: 8},
-    nodeRectSize: {width: 36, height: 36},
+    nodeRectSize: {width: 40, height: 40},
     linkLabelRectSize: {width: 32, height: 16},
     nodeCircleSize: {r: 20}
 };
@@ -147,6 +147,20 @@ APP.model.update = function (switches, links, topoConf) {
         return ldBridge;
     };
 
+    var calcEdgePos = function (mainPos, subPos) {
+        var nodeExtent = APP.getSizeExtent(APP.cfg.nodeRectSize),
+            portExtent = APP.getSizeExtent(APP.cfg.portRectSize),
+            lenDx = (mainPos.x - subPos.x),
+            lenDy = (mainPos.y - subPos.y),
+            linkLen = Math.sqrt(lenDx * lenDx + lenDy * lenDy),
+            weight = (1.0 - 0.5 * (nodeExtent + portExtent * 0.75) / linkLen),
+            x0 = mainPos.x * weight,
+            y0 = mainPos.y * weight,
+            dx = subPos.x * (1.0 - weight),
+            dy = subPos.y * (1.0 - weight);
+        return {x: (x0 + dx), y: (y0 + dy)};
+    };
+
     this.topoSwitches = switches;
     this.topoLinks = links;
     this.ldTopoConf = topoConf;
@@ -215,7 +229,10 @@ APP.model.update = function (switches, links, topoConf) {
             //APP.log('nodeToNodeKey: ' + nodeToNodeKey);
             if (nodeToNodeCounts[nodeToNodeKey] !== undefined) {
                 nodeToNodeCounts[nodeToNodeKey] += 1;
-                APP.log('Multiple nodeToNode: (nodeToNodeKey, count) = (' + nodeToNodeKey + ', ' + nodeToNodeCounts[nodeToNodeKey] + ')');
+                APP.log('Multiple nodeToNode: (nodeToNodeKey, count)' 
+                        + ' = (' 
+                        + nodeToNodeKey + ', ' 
+                        + nodeToNodeCounts[nodeToNodeKey] + ')');
             } else {
                 nodeToNodeCounts[nodeToNodeKey] = 0;
             }
@@ -226,6 +243,16 @@ APP.model.update = function (switches, links, topoConf) {
                 topoLink: topoLink,
                 ldBridge: ldBridge,
                 nodeToNodeIndex: nodeToNodeCounts[nodeToNodeKey],
+                getSourcePos: function () {
+                    var edgePos = calcEdgePos(this.source, this.target),
+                        dvec = this.dVec();
+                    return {x: (edgePos.x + dvec.dx), y: (edgePos.y + dvec.dy)};
+                },
+                getTargetPos: function () {
+                    var edgePos = calcEdgePos(this.target, this.source),
+                        dvec = this.dVec();
+                    return {x: (edgePos.x + dvec.dx), y: (edgePos.y + dvec.dy)};
+                },
                 dVec: function () {
                     var r,
                         enorm, factor,
@@ -250,22 +277,14 @@ APP.model.update = function (switches, links, topoConf) {
     this.ports = (function (model) {
         var objs = [],
             idxLink = 0,
-            link,
-            nodeExtent = APP.getSizeExtent(APP.cfg.nodeRectSize),
-            portExtent = APP.getSizeExtent(APP.cfg.portRectSize);
+            link;
         var createPort = function (base, link, main, sub) {
             var obj = base;
             obj.link = link;
             obj.getPos = function () {
-                var lenDx = (link[main].x - link[sub].x),
-                    lenDy = (link[main].y - link[sub].y),
-                    linkLen = Math.sqrt(lenDx * lenDx + lenDy * lenDy),
-                    weight = (1.0 - 0.5 * (nodeExtent + portExtent * 0.75) / linkLen),
-                    x0 = link[main].x * weight,
-                    y0 = link[main].y * weight,
-                    dx = link[sub].x * (1.0 - weight) + link.dVec().dx,
-                    dy = link[sub].y * (1.0 - weight) + link.dVec().dy;
-                return {x: (x0 + dx), y: (y0 + dy)};
+                var edgePos = calcEdgePos(link[main], link[sub]),
+                    dvec = link.dVec();
+                return {x: (edgePos.x + dvec.dx), y: (edgePos.y + dvec.dy)};
             };
             return obj;
         };
@@ -363,6 +382,14 @@ APP.view.init = function () {
 
     }(this));
 
+    this.$sliceListPanel = $('.slice-list-panel');
+    this.$sliceList = $('.slice-list');
+    (function (view) {
+        view.$sliceList.menu({
+            items: "> :not(.ui-widget-header)"
+        });
+    } (this));
+
     //this.setSampleFlowListItems();
     //window.APP.view.setFlowListItems('slice-1', [{flowName: 'flow-1', flowTypeName: 'osaka11slow'},{flowName: 'flow-2', flowTypeName: 'akashi23cutthrough'}]);
     window.APP.view.setFlowListItems(null, null);
@@ -386,10 +413,10 @@ APP.view.update = function (model) {
     var tick = function () {
         var nodeRectSize = APP.cfg.nodeRectSize;
         that.viewLinks
-            .attr('x1', function (d) { return (d.source.x + d.dVec().dx); })
-            .attr('y1', function (d) { return (d.source.y + d.dVec().dy); })
-            .attr('x2', function (d) { return (d.target.x + d.dVec().dx); })
-            .attr('y2', function (d) { return (d.target.y + d.dVec().dy); });
+            .attr('x1', function (d) { return d.getSourcePos().x; })
+            .attr('y1', function (d) { return d.getSourcePos().y; })
+            .attr('x2', function (d) { return d.getTargetPos().x; })
+            .attr('y2', function (d) { return d.getTargetPos().y; });
 
         that.viewNodes
             .attr('transform', function (d) {
@@ -477,19 +504,34 @@ APP.view.update = function (model) {
         g.on('mouseout', function () {
             return that.tooltip.style('visibility', 'hidden');
         });
-
-//        g.append('circle')
-//        .attr('r', function (d) {return r;});
-
-        g.append('rect')
-            .attr('rx', size.width * 0.2)
-            .attr('ry', size.height * 0.2)
+//        g.append('rect')
+//            .attr('rx', size.width * 0.2)
+//            .attr('ry', size.height * 0.2)
+//            .attr('width', size.width)
+//            .attr('height', size.height);
+        g.append('image')
+            .attr('xlink:href', function (d) {
+                var imgRef;
+                if ('host' === d.type) {
+                    imgRef = './images/host.svg';
+                } else if ('edge' === d.type) {
+                    imgRef = './images/node-edge-2.svg';
+                } else if ('mpls' === d.type) {
+                    imgRef = './images/node-mpls.svg';
+                } else {
+                    imgRef = './images/node.svg';
+                }
+                return imgRef;
+            })
+            .attr('x', 0)
+            .attr('y', 0)
             .attr('width', size.width)
-            .attr('height', size.height);
-
+            .attr('height', size.height - 8);
         g.append('text')
             .attr('dx', size.width / 2)
-            .attr('dy', size.height / 2)
+            .attr('dy', size.height)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'ideographic')
             .text(function (d) { return d.name; });
     };
 
