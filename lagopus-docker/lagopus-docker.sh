@@ -116,6 +116,7 @@ case "$1" in
 	sudo apt-get install -y --force-yes iputils-arping
 	sudo apt-get install -y --force-yes bridge-utils
 	sudo apt-get install -y --force-yes curl
+    sudo service docker restart
 	sudo docker pull osrg/ryu
 	sudo docker run --name ryu-p1 -it osrg/ryu sed -i -e "s/^LLDP_MAC_NEAREST_BRIDGE/###LLDP_MAC_NEAREST_BRIDGE/" /root/ryu-master/ryu/lib/packet/lldp.py
 	sudo docker commit ryu-p1 ryu:lldp
