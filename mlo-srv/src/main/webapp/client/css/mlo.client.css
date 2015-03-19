@@ -1,4 +1,8 @@
 
+body {
+  background-color: #191d22;
+}
+
 #topo-canvas {
   margin: 0px;
   border: 0px;
@@ -12,7 +16,6 @@
 
 #topo-canvas > svg {
   border: 1px solid whitesmoke;
-  background-image: url('../images/lattice.png');
 }
 
 #topo-canvas rect {
@@ -42,6 +45,10 @@
   fill: lightblue;
   stroke: darkblue;
   stroke-width: 2;
+}
+
+#topo-canvas .view-node-mpls image {
+  fill: lightblue;
 }
 
 #topo-canvas .view-node-edge circle {
@@ -74,11 +81,10 @@
 #topo-canvas .view-node-metro text, 
 #topo-canvas .view-node-core text, 
 #topo-canvas .view-node-host text {
-  fill: black;
+  fill: white;
   font-family: sans-serif;
   stroke-width: 0;
-  text-anchor: middle;
-  dominant-baseline: middle;
+  background-color: #191d22;
 }
 
 #topo-canvas .view-link {
