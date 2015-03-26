@@ -6,7 +6,10 @@ package org.o3project.mlo.server.action;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -67,9 +70,10 @@ public class SlicesAction implements NbiConstants {
     	logAccess(request);
     	String jsp = null;
     	if (ActionUtil.isSupportingHttpMethod(request.getMethod(), "GET")) {
+    		Map<String, String> headerMap = createHeaderMap(request);
     		Map<String, String> paramMap = createParamMap(slicesForm);
     		jsp = doGetAction(orchestrator, serdes, sliceOpTask, 
-    				paramMap, response.getOutputStream());
+    				headerMap, paramMap, response.getOutputStream());
     	} else {
     		throw new RuntimeException("Unsupported HTTP method.");
     	}
@@ -85,6 +89,7 @@ public class SlicesAction implements NbiConstants {
 		Map<String, String> paramMap = new HashMap<String, String>();
 		if (form.owner != null) {
 			paramMap.put(REQPARAM_KEY_OWNER, form.owner);
+			paramMap.put(REQPARAM_WITH_FLOW_LIST, form.withFlowList);
 		}
 		return paramMap;
 	}
@@ -93,16 +98,17 @@ public class SlicesAction implements NbiConstants {
 	/**
      * Processes requests.
      * @param orchestrator Orchestrator instance. 
-     * @param serdes Serializer-deserializer instance.
-     * @param sliceOpTask Slice operation task.
+	 * @param serdes Serializer-deserializer instance.
+	 * @param sliceOpTask Slice operation task.
+	 * @param headerMap TODO
 	 * @param paramMap requested parameter map.
-     * @param ostream Output stream.
+	 * @param ostream Output stream.
      * @return Always returns null.
 	 */
 	private static String doGetAction(Orchestrator orchestrator,
 			Serdes serdes,
 			SliceOperationTask sliceOpTask, 
-			Map<String, String> paramMap, OutputStream ostream) {
+			Map<String, String> headerMap, Map<String, String> paramMap, OutputStream ostream) {
     	RestifResponseDto resDto = null;
     	try {
     		if (LOG.isDebugEnabled()) {
@@ -123,7 +129,7 @@ public class SlicesAction implements NbiConstants {
     		resDto.error.detail = e.getMessage();
     	} finally {
     		if (resDto != null) {
-    			serdes.marshal(resDto, ostream);
+    			serdes.serialize(resDto, ostream, headerMap.get("accept"));
     		}
     		if (LOG.isDebugEnabled()) {
     			LOG.debug("########## GET ACTION END  : owner=" + paramMap.get("owner"));
@@ -143,6 +149,16 @@ public class SlicesAction implements NbiConstants {
 		if (paramMap.get(REQPARAM_KEY_OWNER) == null) {
 			throw new ApiCallException("Parameter (owner) is not specified.");
 		}
+	}
+	
+	private static Map<String, String> createHeaderMap(HttpServletRequest req) {
+		Map<String, String> headerMap = new LinkedHashMap<>();
+		Enumeration<?> headerNameEnum = req.getHeaderNames();
+		for (Object oHeaderName : Collections.list(headerNameEnum)) {
+			String headerName = (String) oHeaderName;
+			headerMap.put(headerName, req.getHeader(headerName));
+		}
+		return headerMap;
 	}
     
     /**

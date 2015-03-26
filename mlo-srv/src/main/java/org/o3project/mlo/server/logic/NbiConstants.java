@@ -15,7 +15,12 @@ public interface NbiConstants {
 	String DEFAULT_COMPONENT_NAME = "mlo";
 	
 	/**
-	 * The query parameter key which specifies the owner of the slice.
+	 * Key of query parameter which specifies the owner of the slice.
 	 */
 	String REQPARAM_KEY_OWNER = "owner";
+	
+	/**
+	 * Key of query parameter which designates whether slice includes flow list or not.
+	 */
+	String REQPARAM_WITH_FLOW_LIST = "withFlowList";
 }

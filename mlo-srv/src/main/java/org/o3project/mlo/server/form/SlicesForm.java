@@ -14,4 +14,9 @@ public class SlicesForm {
 	 * The value of the "owner" query parameter.
 	 */
 	public String owner;
+	
+	/**
+	 * The value of the "withFlowList" query parameter.
+	 */
+	public String withFlowList;
 }
