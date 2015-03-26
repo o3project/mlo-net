@@ -10,6 +10,9 @@ APP.log = function (msg) {
     if ((typeof console !== 'undefined') && console.log) {
         console.log(msg);
     }
+    if (APP.mloApi !== undefined && APP.mloApi.debug) {
+        APP.mloApi.debug(msg);
+    }
 };
 
 APP.getQueryParams = function () {
@@ -62,7 +65,7 @@ APP.cfg = {
     topoConfPath: APP.getEtcPathWith('ld/topo'),
     svgSize: {width: 708, height: 580},
     portRectSize: {width: 8, height: 8},
-    nodeRectSize: {width: 40, height: 40},
+    nodeRectSize: {width: 32, height: 44},
     linkLabelRectSize: {width: 32, height: 16},
     nodeCircleSize: {r: 20}
 };
@@ -74,31 +77,20 @@ APP.model = {
     ldTopoConf: {},
     nodes: [],
     links: [],
-    ports: []
+    ports: [],
+    collapsedTypes: []
 };
 
-APP.model.update = function (switches, links, topoConf) {
-    var searchSwitchIndexByDpid = function (dpid, model) {
-        var idxSwitch = 0,
-            idxPort = 0,
-            idx,
-            oSwitch,
-            oPort;
-        for (idxSwitch = 0; idxSwitch < model.topoSwitches.length; idxSwitch += 1) {
-            oSwitch = model.topoSwitches[idxSwitch];
-            for (idxPort = 0; idxPort < oSwitch.ports.length; idxPort += 1) {
-                oPort = oSwitch.ports[idxPort];
-                if (oPort.dpid === dpid) {
-                    idx = idxSwitch;
-                    break;
-                }
-            }
-            if (idx) {
-                break;
-            }
-        }
-        return idx;
-    };
+APP.model.init = function (switches, links, topoConf) {
+    this.topoSwitches = switches;
+    this.topoLinks = links;
+    this.ldTopoConf = topoConf;
+
+    this.update();
+};
+
+APP.model.update = function () {
+    var collapsedTypes = this.collapsedTypes;
     var normalizeTopoConfDpid = function (dpid) {
         var splited = dpid.split('.', 2),
             prefix = ('0000' + splited[0]).slice(-4),
@@ -134,9 +126,8 @@ APP.model.update = function (switches, links, topoConf) {
         return node;
     };
 
-    var searchLdBridgeByName = function (brName, topoConf) {
-        var ldBridges = topoConf.bridges,
-            ldBridge,
+    var searchLdBridgeByName = function (brName, ldBridges) {
+        var ldBridge,
             idx = 0;
         for (idx = 0; idx < ldBridges.length; idx += 1) {
             if (brName && ldBridges[idx].name === brName) {
@@ -153,7 +144,7 @@ APP.model.update = function (switches, links, topoConf) {
             lenDx = (mainPos.x - subPos.x),
             lenDy = (mainPos.y - subPos.y),
             linkLen = Math.sqrt(lenDx * lenDx + lenDy * lenDy),
-            weight = (1.0 - 0.5 * (nodeExtent + portExtent * 0.75) / linkLen),
+            weight = (1.0 - 0.5 * (nodeExtent + portExtent) / linkLen),
             x0 = mainPos.x * weight,
             y0 = mainPos.y * weight,
             dx = subPos.x * (1.0 - weight),
@@ -161,63 +152,146 @@ APP.model.update = function (switches, links, topoConf) {
         return {x: (x0 + dx), y: (y0 + dy)};
     };
 
-    this.topoSwitches = switches;
-    this.topoLinks = links;
-    this.ldTopoConf = topoConf;
-
-    this.nodes = (function (model) {
+    this.nodes = (function (model, collapsedTypes) {
         var objs = [],
             sw,
-            topoConfNode,
-            idx = 0;
+            node, collapsedNode,
+            idx = 0, collapsedIdx = 0;
+        var searchFirstNodeByType = function (type, nodes) {
+            var idx = 0, node;
+            for (idx = 0; idx < nodes.length; idx += 1) {
+                if (type === nodes[idx].type) {
+                    node = nodes[idx];
+                    break;
+                }
+            }
+            return node;
+        };
+        var searchCollapsedNodeByType = function (type, nodes) {
+            var idx = 0, node;
+            for (idx = 0; idx < nodes.length; idx += 1) {
+                if (nodes[idx].childrenType && type === nodes[idx].childrenType) {
+                    node = nodes[idx];
+                    break;
+                }
+            }
+            return node;
+        };
         for (idx = 0; idx < model.topoSwitches.length; idx += 1) {
             sw = model.topoSwitches[idx];
-            topoConfNode = searchNodeFromTopoConf(sw.dpid, model.ldTopoConf);
-            if (!topoConfNode) {
-                topoConfNode = {};
+            node = searchNodeFromTopoConf(sw.dpid, model.ldTopoConf);
+            if (!node) {
+                node = {};
             }
-            topoConfNode.topoSwitch = sw;
-            objs.push(topoConfNode);
+            if (collapsedTypes.indexOf(node.type) > -1) {
+                //collapsedNode = searchFirstNodeByType(node.type, objs);
+                collapsedNode = searchCollapsedNodeByType(node.type, objs);
+                if (!collapsedNode) {
+                    collapsedNode = {
+                        type: 'collapsed-layer', 
+                        name: node.type,
+                        childrenType: node.type,
+                        children: []
+                    };
+                    objs.push(collapsedNode);
+                }
+                node.topoSwitch = sw;
+                node.ryDpid = sw.dpid;
+                collapsedNode.children.push(node);
+            } else {
+                node.topoSwitch = sw;
+                node.ryDpid = sw.dpid;
+                objs.push(node);
+            }
         }
         return objs;
-    }(this));
+    }(this, collapsedTypes));
 
-    this.links = (function (model) {
+    this.links = (function (ryLinks, nodes, ldBridges) {
         var objs = [],
             idxLink = 0,
             link,
             srcRySwIdx = 0, dstRySwIdx = 0, srcPortIdx, dstPortIdx,
-            srcRySw, dstRySw, srcLdNode, dstLdNode,
-            ldBridge, 
+            srcNode, dstNode,
+            ldBridge,
             nodeToNodeKey, nodeToNodeCounts = {}, 
             linkKey, linkKeys = [],
             topoLink;
-        for (idxLink = 0; idxLink < model.topoLinks.length; idxLink += 1) {
-            topoLink = model.topoLinks[idxLink];
-            srcRySwIdx = searchSwitchIndexByDpid(topoLink.src.dpid, model);
-            dstRySwIdx = searchSwitchIndexByDpid(topoLink.dst.dpid, model);
+        var searchNodeIndexByRyDpid = function (ryDpid, nodes) {
+            var idxNode = 0, idxChild = 0,
+                idx = -1,
+                node;
+            for (idxNode= 0; idxNode < nodes.length; idxNode += 1) {
+                node = nodes[idxNode];
+                if (ryDpid === node.ryDpid) {
+                    idx = idxNode;
+                } else if (node.children !== undefined) {
+                    //APP.log('node.children : ' + node.type + ', ' + node.children.length);
+                    for (idxChild = 0; idxChild < node.children.length; idxChild += 1) {
+                        //APP.log('node.children[idxChild].ryDpid : ' 
+                        //        + idxChild + ', ' + node.children[idxChild].ryDpid);
+                        if (ryDpid === node.children[idxChild].ryDpid) {
+                            idx = idxNode;
+                            break;
+                        }
+                    }
+                }
+                if (idx > -1) {
+                    break;
+                }
+            }
+            return idx;
+        };
+        var searchLdBridge = function (ryDpid, ryPortNo, nodes, ldBridges) {
+            var ldBridge, ldBridgeName,
+                idx = 0, idxChild = 0, node,
+                portIdx = parseInt(ryPortNo) - 2;
+            for (idx = 0; idx < nodes.length; idx += 1) {
+                if (ryDpid === nodes[idx].ryDpid) {
+                    ldBridgeName = nodes[idx].brNames[portIdx];
+                } else if (nodes[idx].children !== undefined) {
+                    for (idxChild = 0; idxChild < nodes[idx].children.length; idxChild += 1) {
+                        if (ryDpid === nodes[idx].children[idxChild].ryDpid) {
+                            ldBridgeName = nodes[idx].children[idxChild].brNames[portIdx];
+                            break;
+                        }
+                    }
+                }
+                if (ldBridgeName) {
+                    break;
+                }
+            }
+            for (idx = 0; idx < ldBridges.length; idx += 1) {
+                if (ldBridgeName && ldBridges[idx].name === ldBridgeName) {
+                    ldBridge = ldBridges[idx];
+                    break;
+                }
+            }
+            return ldBridge;
+        };
+        for (idxLink = 0; idxLink < ryLinks.length; idxLink += 1) {
+            topoLink = ryLinks[idxLink];
+            srcRySwIdx = searchNodeIndexByRyDpid(topoLink.src.dpid, nodes);
+            dstRySwIdx = searchNodeIndexByRyDpid(topoLink.dst.dpid, nodes);
+            if (!srcRySwIdx || srcRySwIdx === dstRySwIdx) {
+                continue;
+            }
+
+            srcNode = nodes[srcRySwIdx];
+            dstNode = nodes[dstRySwIdx];
             srcPortIdx = parseInt(topoLink.src.port_no) - 2;
             dstPortIdx = parseInt(topoLink.dst.port_no) - 2;
-            srcRySw = model.topoSwitches[srcRySwIdx];
-            dstRySw = model.topoSwitches[dstRySwIdx];
-            srcLdNode = searchNodeFromTopoConf(srcRySw.dpid, model.ldTopoConf);
-            dstLdNode = searchNodeFromTopoConf(dstRySw.dpid, model.ldTopoConf);
-            ldBridge = searchLdBridgeByName(srcLdNode.brNames[srcPortIdx], model.ldTopoConf);
-
-            //APP.log('src: ' + srcLdNode.name + ', ' + srcLdNode.brNames[srcPortIdx]);
-            //APP.log('dst: ' + dstLdNode.name + ', ' + dstLdNode.brNames[dstPortIdx]);
-            if (srcLdNode.brNames[srcPortIdx] !== dstLdNode.brNames[dstPortIdx]) {
-                APP.log('[ERROR] Unexpected situation. Bridge names should be same, but not.');
-            }
-
+            //ldBridge = searchLdBridgeByName(srcNode.brNames[srcPortIdx], ldBridges);
+            ldBridge = searchLdBridge(topoLink.src.dpid, topoLink.src.port_no, nodes, ldBridges);
+            //APP.log('ldBridge.name : ' + ldBridge.name);
+            
             if (srcRySwIdx < dstRySwIdx) {
-                //nodeToNodeKey = '' + srcRySwIdx + '-' + dstRySwIdx;
-                nodeToNodeKey = '' + srcLdNode.name + '-' + dstLdNode.name;
+                nodeToNodeKey = '' + srcNode.name + '-' + dstNode.name;
             } else {
-                //nodeToNodeKey = '' + dstRySwIdx + '-' + srcRySwIdx;
-                nodeToNodeKey = '' + dstLdNode.name + '-' + srcLdNode.name;
+                nodeToNodeKey = '' + dstNode.name + '-' + srcNode.name;
             }
             linkKey = ldBridge.name + '-' + nodeToNodeKey;
+            
 
             if (linkKeys.indexOf(linkKey) > -1) {
                 //APP.log('linkKey already contains: ' + linkKey);
@@ -256,23 +330,23 @@ APP.model.update = function (switches, links, topoConf) {
                 dVec: function () {
                     var r,
                         enorm, factor,
-                        dfactor = 6,
+                        dfactor = 6.0,
                         dvecx = 0.0, dvecy = 0.0,
                         idx = this.nodeToNodeIndex;
                     if (idx > 0) {
                         r = -1.0 * (this.target.x - this.source.x) / (this.target.y - this.source.y);
-                        factor = -1.0 * ((idx + 1) * 0.5) * (idx * 0.5 + 1.0 * (idx % 2)) * dfactor;
+                        factor = Math.pow(-1, idx % 2) * (Math.floor(idx / 2) + idx % 2) * dfactor;
                         enorm = Math.sqrt(1.0 + r * r);
                         dvecx = factor * 1.0 / enorm;
                         dvecy = factor * r / enorm;
                     }
-                    return {dx: dvecx, dy: dvecy};
+                    return {dx: dvecx, dy: dvecy, idx: idx};
                 }
             };
             objs.push(link);
         }
         return objs;
-    }(this));
+    }(this.topoLinks, this.nodes, this.ldTopoConf.bridges));
 
     this.ports = (function (model) {
         var objs = [],
@@ -318,6 +392,21 @@ APP.model.setSelectedFlowTypeName = function (flowTypeName) {
     APP.log('END setSelectedFlowTypeName');
 };
 
+APP.model.addCollapsedType = function (type) {
+    var types = this.collapsedTypes;
+    if (types.indexOf(type) < 0) {
+        types.push(type);
+    }
+};
+
+APP.model.removeCollapsedType = function (type) {
+    var types = this.collapsedTypes,
+        idx = types.indexOf(type);
+    if (idx > -1) {
+        types.splice(idx, 1);
+    }
+};
+
 APP.view = {
     viewNodes: {},
     viewLinks: {},
@@ -328,15 +417,13 @@ APP.view = {
     force: {},
     tooltip: {},
 
+    $sliceListPanel: {},
     $flowListPanel: {},
     $flowListTemplate: {}
 };
 
 APP.view.init = function () {
     var svgSize = APP.cfg.svgSize;
-
-    this.$flowListPanel = $('.flow-list-panel');
-    this.$flowListTemplate = $('.flow-list-template');
 
     this.canvas = d3.select('#topo-canvas');
     this.svg = this.canvas.append('svg');
@@ -366,6 +453,37 @@ APP.view.init = function () {
 
     this.tooltip = this.canvas.append('div').attr('class', 'tooltip').text('');
 
+    this.xScale = d3.scale.linear()
+        .domain([0, svgSize.width])
+        .range([0, svgSize.width]);
+    this.yScale = d3.scale.linear()
+        .domain([0, svgSize.height])
+        .range([svgSize.height, 0]);
+
+    this.xAxis = d3.svg.axis()
+        .scale(this.xScale)
+        .orient('bottom')
+        .innerTickSize(-svgSize.height);
+    this.yAxis = d3.svg.axis()
+        .scale(this.yScale)
+        .orient('left')
+        .innerTickSize(-svgSize.width);
+    
+    this.svg.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', 'translate(0,' + svgSize.height + ')')
+        .call(this.xAxis);
+    this.svg.append('g')
+        .attr('class', 'y axis')
+        .call(this.yAxis);
+
+    this.$flowListPanel = $('.flow-list-panel');
+    this.$flowListTemplate = $('.flow-list-template');
+    this.$sliceListPanel = $('.slice-list-panel');
+    this.$sliceList = $('.slice-list');
+    //this.$sliceListTemplate = this.$sliceListPanel.find('>.slice-list-template:first');
+    this.$sliceListTemplate = $('.slice-list-template:first', this.$sliceListPanel);
+
     (function (view) {
         view.$flowListPanel.accordion({
             collapsible: true,
@@ -380,15 +498,25 @@ APP.view.init = function () {
         });
         view.setUpFlowListAsSelectable(view.$flowListPanel.find('ul'));
 
-    }(this));
-
-    this.$sliceListPanel = $('.slice-list-panel');
-    this.$sliceList = $('.slice-list');
-    (function (view) {
-        view.$sliceList.menu({
-            items: "> :not(.ui-widget-header)"
+        view.$sliceListPanel.position({
+            of: $('#topo-canvas'),
+            my: 'left top',
+            at: 'left+4 top+4',
+            collision: 'none none'
         });
-    } (this));
+        view.$sliceList.menu({
+            items: '> :not(.ui-widget-header)'
+        });
+        view.$sliceListPanel.find('h3 a').button({
+            icons: {primary: 'ui-icon-plus'},
+            text: false
+        }).position({
+            of: view.$sliceListPanel.find('h3:first'),
+            my: 'right center',
+            at: 'right center'
+        });
+        view.$sliceList.find('a').button();
+    }(this));
 
     //this.setSampleFlowListItems();
     //window.APP.view.setFlowListItems('slice-1', [{flowName: 'flow-1', flowTypeName: 'osaka11slow'},{flowName: 'flow-2', flowTypeName: 'akashi23cutthrough'}]);
@@ -462,31 +590,39 @@ APP.view.update = function (model) {
 
     var updateViewNodes = function () {
         var g,
-            //r = APP.cfg.nodeCircleSize.r,
             size = APP.cfg.nodeRectSize;
 
-        that.viewNodes = that.viewNodes.data(nodes);
-        that.viewNodes.exit().remove();
-        g = that.viewNodes.enter().append('g');
-        g.attr('class', function (d) { return 'view-node-' + d.type; });
+        APP.log('nodes.length = ' + nodes.length);
+        that.viewNodes = that.svg.selectAll('.view-node').data(nodes, function (d) { return d.name;});
+
+        g = that.viewNodes.enter().append('g').attr('class', 'view-node');
 
         g.call(that.force.drag().on('dragstart', function (d) {
             d.fixed = true;
             d3.select(this).classed('fixed', d.fixed);
         }));
-        g.on('dblclick', function (d) {
+        g.on('dblclick', function (d, i) {
             d.fixed = false;
             d3.select(this).classed('fixed', d.fixed);
+
+            if (d.type === 'collapsed-layer') {
+                APP.model.removeCollapsedType(d.childrenType);
+                APP.model.update();
+            } else if (d.type !== 'host') {
+                APP.model.addCollapsedType(d.type);
+                APP.model.update();
+            }
+            that.tooltip.style('visibility', 'hidden');
         });
         g.on('mouseover', function () {
             return that.tooltip.style('visibility', 'visible');
         });
         g.on('mousemove', function (d) {
             var ipdisp = '', macdisp = '';
-            if (d.ip !== null) {
+            if (d.ip) {
                 ipdisp = '<dt>IP:</dt><dd>' + d.ip + '</dd>';
             }
-            if (d.mac !== null) {
+            if (d.mac) {
                 macdisp = '<dt>MAC:</dt><dd>' + d.mac + '</dd>';
             }
             return that.tooltip
@@ -496,7 +632,7 @@ APP.view.update = function (model) {
                     + '<dl>'
                     + '<dt>Name:</dt><dd>' + d.name + '</dd>'
                     + '<dt>Type:</dt><dd>' + d.type + '</dd>'
-                    + '<dt>DP ID:</dt><dd>' + d.dpid + '</dd>'
+                    + '<dt>DP ID:</dt><dd>' + d.ryDpid + '</dd>'
                     + ipdisp
                     + macdisp
                     + '</dl>');
@@ -504,11 +640,6 @@ APP.view.update = function (model) {
         g.on('mouseout', function () {
             return that.tooltip.style('visibility', 'hidden');
         });
-//        g.append('rect')
-//            .attr('rx', size.width * 0.2)
-//            .attr('ry', size.height * 0.2)
-//            .attr('width', size.width)
-//            .attr('height', size.height);
         g.append('image')
             .attr('xlink:href', function (d) {
                 var imgRef;
@@ -518,8 +649,10 @@ APP.view.update = function (model) {
                     imgRef = './images/node-edge-2.svg';
                 } else if ('mpls' === d.type) {
                     imgRef = './images/node-mpls.svg';
+                } else if ('collapsed-layer' === d.type) {
+                    imgRef = './images/layer.svg';
                 } else {
-                    imgRef = './images/node.svg';
+                    imgRef = './images/node-any.svg';
                 }
                 return imgRef;
             })
@@ -531,8 +664,10 @@ APP.view.update = function (model) {
             .attr('dx', size.width / 2)
             .attr('dy', size.height)
             .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'ideographic')
+            .attr('dominant-baseline', 'alphabetic')
             .text(function (d) { return d.name; });
+
+        that.viewNodes.exit().remove();
     };
 
     var updateViewPorts = function () {
@@ -552,6 +687,7 @@ APP.view.update = function (model) {
                 .html('<h1>Port</h1>'
                     + '<dl>'
                     + '<dt>Name:</dt><dd>' + d.name + '</dd>'
+                    + '<dt>Dpid:</dt><dd>' + d.dpid + '</dd>'
                     + '</dl>');
         });
         g.on('mouseout', function () {
@@ -631,6 +767,39 @@ APP.view.setFlowListItems = function (sliceName, flowListItems) {
     this.$flowListPanel.accordion('refresh');
 };
 
+APP.view.setDataToSliceListPanel = function (slices) {
+    var $sliceTitleTpl = this.$sliceListTemplate.find('>.slice-title:first'),
+        $flowItemTpl = this.$sliceListTemplate.find('>.flow-item:first'),
+        $sliceList = this.$sliceList;
+
+    $sliceList.find('>*').remove();
+
+    jQuery.each(slices, function (index, slice) {
+        var $sliceTitle = $sliceTitleTpl.clone();
+        $('.slice-name', $sliceTitle).text(slice.name);
+        $('.slice-id', $sliceTitle).text(slice.id);
+        $sliceTitle.appendTo($sliceList);
+        jQuery.each(slice.flows, function (idxFlow, flow) {
+            var $flowItem = $flowItemTpl.clone();
+            $flowItem.find('.flow-name').text(flow.name);
+            $flowItem.find('.flow-type-name').text(flow.flowTypeName);
+            $flowItem.appendTo($sliceList);
+        });
+    });
+
+    $sliceList.menu('refresh');
+
+    $sliceList.find('>.flow-item').selectable({
+        stop: function () {
+            $('.flow-type-name', this).each(function () {
+                var flowTypeName = $(this).text();
+                APP.log('Flow type name selected : ' + $(this).text());
+                APP.model.setSelectedFlowTypeName(flowTypeName);
+            });
+        }
+    });
+};
+
 APP.api = {};
 
 APP.api.setFlowListItems = function (sliceName, flowListItems) {
@@ -638,12 +807,41 @@ APP.api.setFlowListItems = function (sliceName, flowListItems) {
     APP.view.setFlowListItems(sliceName, flowListItems);
 };
 
+APP.api.requestGetSlices = function () {
+    var userid = 'developer',
+        settings;
+    
+    settings = {
+        type: 'GET',
+        url: '../slices/?owner=' + userid + '&withFlowList=true',
+        cache: false,
+        dataType: 'json',
+        success: function (data, textStatus, xhr) {
+            APP.log(data);
+            if (!data.common.error) {
+                APP.log('Got slices. : count = ' + data.slices.length);
+                APP.view.setDataToSliceListPanel(data.slices);
+            } else {
+                APP.log('[ERROR] Error occurs.: ' + data.common.error);
+            }
+        },
+        error: function (xhr, textStatus, error) {
+            APP.log('Failed to get slices. (textStatus, error) = (' 
+                    + textStatus + ', '
+                    + error + ')');
+        }
+    };
+    APP.log('Getting slices...');
+    $.ajax(settings);
+}
+
 APP.load = function () {
     var obj = {};
     var topoConfLoaded = function (err, data) {
         if (!err) {
             obj.topoConf = data;
-            APP.model.update(obj.switches, obj.links, obj.topoConf);
+            APP.model.init(obj.switches, obj.links, obj.topoConf);
+            APP.api.requestGetSlices();
         } else {
             APP.log('[ERROR] Failed to load topoConf.');
         }
@@ -679,7 +877,9 @@ APP.load = function () {
 };
 
 APP.init = function () {
+    var ua = window.navigator.userAgent;
     this.cfg.queryParams = this.getQueryParams();
     this.view.init();
     this.load();
+    APP.log('user-agent: ' + ua);
 };

@@ -1,59 +1,79 @@
 
+/*
+ * Elements
+ */
 body {
   background-color: #191d22;
 }
 
+/*
+ * d3.js
+ */
+.axis .tick line {
+  fill: none;
+  stroke: white;
+  opacity: 0.4;
+  shape-rendering: crispedges;
+  stroke-dasharray: 2, 2;
+}
+
+/*
+ * jquery ui
+ */
+.ui-accordion .ui-accordion-content {
+    padding: 0px;
+    border-width: 0px;
+}
+
+.ui-accordion .ui-accordion-header-active {
+  background-color: lightgray;
+  border-color: lightgray;
+}
+
+.ui-menu {
+  width: 200px;
+}
+
+.ui-button-text,
+.ui-button-text-only {
+  font-weight: normal;
+  font-size: 12px;
+}
+
+/*
+ * App
+ */
 #topo-canvas {
-  margin: 0px;
-  border: 0px;
+  margin: 0;
+  border: 0;
   width: 100%;
   height: 100%;
-  text-align: center;
+  /*
+  text-align: right;
+  */
 }
 
 #topo-canvas .with-lattice {
 }
 
 #topo-canvas > svg {
-  border: 1px solid whitesmoke;
+  margin-left: 240px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  /*
+  left: 240px;
+  position: absolute;
+  margin: 0 4px;
+  background-image: url('../images/lattice.c.png');
+  */
 }
 
-#topo-canvas rect {
-}
-
-#topo-canvas circle {
-  fill: lightblue;
-  stroke: darkblue;
-  stroke-width: 2;
-}
-
-#topo-canvas rect {
-  rx: 4;
-  fill: lightblue;
-  stroke: darkblue;
-  stroke-width: 2;
-}
-
-#topo-canvas .view-node-mpls circle {
-  fill: lightblue;
-  stroke: darkblue;
-  stroke-width: 2;
+#topo-canvas .view-node rect {
 }
 
 #topo-canvas .view-node-mpls rect {
   rx: 4;
   fill: lightblue;
   stroke: darkblue;
-  stroke-width: 2;
-}
-
-#topo-canvas .view-node-mpls image {
-  fill: lightblue;
-}
-
-#topo-canvas .view-node-edge circle {
-  fill: lightgreen;
-  stroke: darkgreen;
   stroke-width: 2;
 }
 
@@ -64,27 +84,20 @@ body {
   stroke-width: 2;
 }
 
-#topo-canvas .view-node-host circle {
-  fill: yellow;
-  stroke: orange;
-  stroke-width: 2;
-}
-
 #topo-canvas .view-node-host rect {
   fill: yellow;
   stroke: orange;
   stroke-width: 2;
 }
 
+#topo-canvas .view-node text, 
 #topo-canvas .view-node-edge text, 
 #topo-canvas .view-node-mpls text, 
 #topo-canvas .view-node-metro text, 
 #topo-canvas .view-node-core text, 
 #topo-canvas .view-node-host text {
   fill: white;
-  font-family: sans-serif;
   stroke-width: 0;
-  background-color: #191d22;
 }
 
 #topo-canvas .view-link {
@@ -138,20 +151,9 @@ body {
   margin-left: 16px;
 }
 
-.ui-accordion .ui-accordion-content {
-    padding: 0px;
-    border-width: 0px;
-}
-
-.ui-accordion .ui-accordion-header-active {
-  background-color: lightgray;
-  border-color: lightgray;
-}
-
 .flow-list-panel {
   position: absolute;
   display: block;
-  padding: 4px;
   width: 240px;
 }
 
@@ -181,7 +183,7 @@ body {
 }
 
 .flow-list-panel .ui-selected {
-  background-color: #d3d3d3;;
+  background-color: #d3d3d3;
   color: white;
 }
 
@@ -190,6 +192,46 @@ body {
 }
 
 .flow-type-name {
-  visibility: hidden;
+  display: none;
+}
+
+.slice-list-panel {
+  /*
+  background-color: rgba(200, 200, 255, 1.0);
+  background-color: white;
+  */
+  background-color: #d1dee3;
+  position: absolute;
+  display: block;
+  border-radius: 6px 0 0 0;
+  height: 95%;
+}
+
+.wrapper {
+  background-color: #d1dee3;
+  /*
+  background-color: rgba(200, 200, 255, 0.2);
+  */
+  width: 100%;
+  height: 100%;
+}
+
+.slice-list {
+  background: rgba(255, 255, 255, 0.5);
+  /*
+  background-color: rgba(0, 0, 0, 0.5);
+  */
+}
+
+.slice-list-template {
+  position: absolute;
+  display: none;
+}
+
+.slice-list-panel h3 {
+  padding: 8px 4px;
+}
+
+.flow-item {
 }
 

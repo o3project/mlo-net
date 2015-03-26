@@ -188,6 +188,22 @@ class SerdesStub implements Serdes {
 	public void marshal(RestifResponseDto dto, OutputStream ostream) {
 		resDto = dto;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.o3project.mlo.server.logic.Serdes#deserialize(java.io.InputStream, java.lang.String)
+	 */
+	@Override
+	public RestifRequestDto deserialize(InputStream istream, String contentType) throws ApiCallException {
+		throw new UnsupportedOperationException("Not implemented.");
+	}
+
+	/* (non-Javadoc)
+	 * @see org.o3project.mlo.server.logic.Serdes#serialize(org.o3project.mlo.server.dto.RestifResponseDto, java.io.OutputStream, java.lang.String)
+	 */
+	@Override
+	public void serialize(RestifResponseDto dto, OutputStream ostream, String contentType) {
+		throw new UnsupportedOperationException("Not implemented.");
+	}
 }
 
 class ValidatorStub implements Validator {
