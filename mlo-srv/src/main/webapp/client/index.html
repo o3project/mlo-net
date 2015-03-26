@@ -2,14 +2,14 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="externals/jquery-ui-1.11.3/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="externals/jquery-ui/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="css/base.css">
     <link rel="stylesheet" type="text/css" href="css/mlo.client.css">
 </head>
 <body>
     <div >
         <div id="topo-canvas"></div>
-        <div class="ui-widget-content flow-list-panel">
+        <div class="ui-widget-content flow-list-panel hidden">
         </div>
         <div class="flow-list-template">
             <h3>slice-sample</h3>
@@ -20,21 +20,27 @@
                 </li>
             </ul>
         </div>
-        <div class="ui-widget-content slice-list-panel hidden">
-            <h2>Service slice list</h2>
+        <div class="slice-list-panel">
+            <h3>
+                Service slice list<a href="#">Create new slice</a>
+            </h3>
             <ul class="slice-list">
-                <li class="ui-widget-header">slice-a</li>
-                <li>flow-a-1</li>
-                <li>flow-a-2</li>
-                <li class="ui-widget-header">slice-a</li>
-                <li>flow-a-1</li>
-                <li>flow-a-2</li>
+            </ul>
+            <ul class="slice-list-template">
+                <li class="ui-widget-header slice-title">
+                    <span class="slice-name">slice-sample-1</span>
+                    (id:<span class="slice-id">1</span>)
+                </li>
+                <li class="flow-item">
+                    <span class="flow-name">flow-sample-1-1</span>
+                    <span class="flow-type-name">of1</span>
+                </li>
             </ul>
         </div>
     </div>
     <script src="externals/d3.v3.min.js"></script>
     <script src="externals/jquery-1.11.0.min.js"></script>
-    <script src="externals/jquery-ui-1.11.3/jquery-ui.min.js"></script>
+    <script src="externals/jquery-ui/jquery-ui.min.js"></script>
     <script src="js/mlo.client.js"></script>
 </body>
 </html>
