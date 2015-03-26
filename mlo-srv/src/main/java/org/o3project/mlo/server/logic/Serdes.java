@@ -34,4 +34,24 @@ public interface Serdes {
 	 */
 	void marshal(RestifResponseDto dto, OutputStream ostream);
 
+	/**
+	 * Deserializes the input stream including request XML of MLO web API as the request DTO.
+	 * @param istream the stream including request XML.
+	 * @param contentType the content type.
+	 * @return the request DTO.
+	 * @throws ApiCallException Failed in deserializing.
+	 */
+	RestifRequestDto deserialize(InputStream istream, String contentType) throws ApiCallException;
+
+	/**
+	 * Serializes the response DTO to the output stream of MLO web API.
+	 * This method may throw the RuntimeException.
+	 * @param dto the response DTO.
+	 * @param ostream the output stream response XML is written to.
+	 * @param contentType the content type.
+	 */
+	void serialize(RestifResponseDto dto, OutputStream ostream, String contentType);
+	
+	
+
 }
