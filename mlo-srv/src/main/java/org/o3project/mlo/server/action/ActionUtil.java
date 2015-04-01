@@ -6,6 +6,8 @@ package org.o3project.mlo.server.action;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,13 +72,32 @@ public class ActionUtil {
      * @param ostream Output stream instance which is MLO API response.
      * @return Always returns null.l
      */
-	public static String doAction(Orchestrator orchestrator, Serdes serdes, Validator validator, SliceOperationTask sliceOpTask, 
+	public static String doAction(Orchestrator orchestrator, Serdes serdes, Validator validator, 
+			SliceOperationTask sliceOpTask, 
+			InputStream istream, OutputStream ostream) {
+		return doAction(orchestrator, serdes, validator, 
+				sliceOpTask, new LinkedHashMap<String, String>(), istream, ostream);
+    }
+    
+    /**
+     * Executes requests.
+     * @param orchestrator Orchestrator instance.O
+     * @param serdes Serializer-deserializer instance. 
+     * @param validator Validator instance for MLO REST I/F.
+     * @param sliceOpTask Slice operation task.
+     * @param reqHeaderMap Request header map.
+     * @param istream Input stream instance including requested MLO API.
+     * @param ostream Output stream instance which is MLO API response.
+     * @return Always returns null.l
+     */
+	public static String doAction(Orchestrator orchestrator, Serdes serdes, Validator validator, 
+			SliceOperationTask sliceOpTask, Map<String, String> reqHeaderMap, 
 			InputStream istream, OutputStream ostream) {
     	RestifRequestDto reqDto = null;
     	RestifResponseDto resDto = null;
     	try {
     		// Deserialize XML-body request.
-    		reqDto = serdes.unmarshal(istream);
+    		reqDto = serdes.deserialize(istream, reqHeaderMap.get("content-type"));
     		
     		if (LOG.isDebugEnabled()) {
     			if (null == reqDto) {
@@ -102,7 +123,7 @@ public class ActionUtil {
     		resDto.error.detail = e.getMessage();
     	} finally {
     		if (resDto != null) {
-    			serdes.marshal(resDto, ostream);
+    			serdes.serialize(resDto, ostream, reqHeaderMap.get("accept"));
     		}
     		if (LOG.isDebugEnabled()) {
     			if (null == reqDto) {
