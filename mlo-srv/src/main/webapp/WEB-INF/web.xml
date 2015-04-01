@@ -99,7 +99,7 @@ version="2.4">
     
     <servlet>
         <servlet-name>action</servlet-name>
-        <servlet-class>org.apache.struts.action.ActionServlet</servlet-class>
+        <servlet-class>org.o3project.mlo.server.servlet.RestfulActionServlet</servlet-class>
         <init-param>
             <param-name>config</param-name>
             <param-value>/WEB-INF/struts-config.xml</param-value>
