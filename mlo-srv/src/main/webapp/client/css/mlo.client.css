@@ -57,7 +57,7 @@ body {
 }
 
 #topo-canvas > svg {
-  margin-left: 240px;
+  margin-left: 216px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   /*
   left: 240px;
@@ -199,12 +199,14 @@ body {
   /*
   background-color: rgba(200, 200, 255, 1.0);
   background-color: white;
+  background-color: #d1dee3;
   */
   background-color: #d1dee3;
+  box-shadow: 4px -4px 8px 4px rgba(128,128,128,0.2) inset;
   position: absolute;
   display: block;
-  border-radius: 6px 0 0 0;
-  height: 95%;
+  border-radius: 4px;
+  height: 97%;
 }
 
 .wrapper {
@@ -229,9 +231,78 @@ body {
 }
 
 .slice-list-panel h3 {
-  padding: 8px 4px;
+  padding: 8px 16px;
 }
 
 .flow-item {
+}
+
+#dialogbox-post-slice fieldset {
+  padding: 0;
+  border: 0;
+  margin-top: 25px;
+}
+
+#dialogbox-post-slice fieldset.add-flow-fieldset-template {
+  display: none;
+}
+
+#dialogbox-post-slice .block {
+  display: block;
+}
+
+#dialogbox-post-slice label,
+#dialogbox-post-slice input {/*
+  display: block;*/
+}
+
+#dialogbox-post-slice label {
+  display: block;
+  float: left;
+  width: 120px;
+}
+
+#dialogbox-post-slice input,
+#dialogbox-post-slice text {
+  margin-bottom: 10px;/*
+  width: 95%;*/
+  padding: .4em;
+}
+
+#dialogbox-post-slice input[type=text] {
+    width: 320px;
+}
+
+#dialogbox-post-slice input.middle {
+    width: 240px;
+}
+
+#dialogbox-post-slice input.short {
+    width: 80px;
+}
+
+
+#dialogbox-post-slice .keyboard-submission {
+  position: absolute;
+  top: -1000px;
+}
+
+#dialogbox-post-slice fieldset.add-flow-fieldset {
+  margin: 4px;
+  padding: 4px;
+  border: 1px lightgray solid;
+}
+
+#dialogbox-post-slice fieldset.add-flow-fieldset legend {
+  margin: 4px;
+  padding: 4px 16px;
+}
+
+.busy {
+  width: 200px;
+  height: 200px;
+  background-color: rgba(255,255,255,0.5);
+  position: absolute;
+  display: block;
 }
 

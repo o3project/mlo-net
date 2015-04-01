@@ -10,8 +10,8 @@ APP.log = function (msg) {
     if ((typeof console !== 'undefined') && console.log) {
         console.log(msg);
     }
-    if (APP.mloApi !== undefined && APP.mloApi.debug) {
-        APP.mloApi.debug(msg);
+    if ((typeof mloApi !== 'undefined') && mloApi.debug) {
+        mloApi.debug(msg);
     }
 };
 
@@ -483,6 +483,7 @@ APP.view.init = function () {
     this.$sliceList = $('.slice-list');
     //this.$sliceListTemplate = this.$sliceListPanel.find('>.slice-list-template:first');
     this.$sliceListTemplate = $('.slice-list-template:first', this.$sliceListPanel);
+    this.$postSliceDialogbox = $('#dialogbox-post-slice');
 
     (function (view) {
         view.$flowListPanel.accordion({
@@ -510,12 +511,80 @@ APP.view.init = function () {
         view.$sliceListPanel.find('h3 a').button({
             icons: {primary: 'ui-icon-plus'},
             text: false
+        }).click(function () {
+            view.$postSliceDialogbox.dialog('open');
         }).position({
             of: view.$sliceListPanel.find('h3:first'),
             my: 'right center',
-            at: 'right center'
+            at: 'right-2 center',
+            collision: 'none none'
         });
         view.$sliceList.find('a').button();
+        view.$postSliceDialogbox.dialog({
+            autoOpen: false,
+            width: 600,
+            height: 520,
+            modal: true,
+            buttons: [ 
+                {
+                    text: 'Create a slice',
+                    click: function () {
+                        var sliceObj, 
+                            getSliceObj = function () {
+                            var slice = {}, 
+                                $form = $('form.create-slice');
+                            slice.name = $('input[name=slice-name]', $form).val();
+                            slice.flows = [];
+                            $('fieldset.add-flow-fieldset', $form).each(function (idx, fset) {
+                                var $fset, flow = {type:'add'}, sBandwidth, sDelay;
+                                $fset = $(fset, $form);
+                                flow.name = $('input[name=flow-name]', $fset).val();
+                                flow.srcCENodeName = $('input[name=src-ce-node-name]', $fset).val();
+                                flow.srcCEPortNo   = $('input[name=src-ce-port-no]', $fset).val();
+                                flow.dstCENodeName = $('input[name=dst-ce-node-name]', $fset).val();
+                                flow.dstCEPortNo   = $('input[name=dst-ce-port-no]', $fset).val();
+                                sBandwidth =  $('input[name=req-bandwidth]', $fset).val();
+                                sDelay     =  $('input[name=req-delay]', $fset).val();
+                                flow.reqBandWidth = parseInt(sBandwidth);
+                                flow.reqDelay = parseInt(sDelay);
+                                flow.protectionLevel = '0';
+                                slice.flows.push(flow);
+                            });
+                            return slice;
+                        };
+                        sliceObj = getSliceObj();
+                        APP.log(sliceObj);
+                        APP.api.requestToPostSlice({
+                            success: function (resJson) {
+                                APP.log(resJson);
+                                APP.api.requestToGetSlices({
+                                    success: function (resJson) {
+                                        view.setDataToSliceListPanel(resJson.slices);
+                                        view.$postSliceDialogbox.dialog('close');
+                                    }
+                                });
+                            }
+                        }, sliceObj);
+                    }
+                }
+            ],
+            //show: {effect: 'slice'},
+            open: function (event, ui) {
+                var $copyEle;
+                APP.log('Dialogbox opened. ' + ui);
+                $('form>fieldset>fieldset.add-flow-fieldset', $(this)).remove();
+                $copyEle = $('.add-flow-fieldset-template .add-flow-fieldset:first').clone();
+                $('a.add-flow-button', $(this)).before($copyEle);
+            }
+        });
+        $('a.add-flow-button').button({
+            icons: {primary: 'ui-icon-plus'},
+            text: 'Add flow'
+        }).click(function () {
+            var $copyEle = $('.add-flow-fieldset-template .add-flow-fieldset:first').clone();
+            $(this).before($copyEle);
+            $('input:first', $copyEle).focus();
+        });
     }(this));
 
     //this.setSampleFlowListItems();
@@ -770,7 +839,8 @@ APP.view.setFlowListItems = function (sliceName, flowListItems) {
 APP.view.setDataToSliceListPanel = function (slices) {
     var $sliceTitleTpl = this.$sliceListTemplate.find('>.slice-title:first'),
         $flowItemTpl = this.$sliceListTemplate.find('>.flow-item:first'),
-        $sliceList = this.$sliceList;
+        $sliceList = this.$sliceList,
+        $sliceTitle;
 
     $sliceList.find('>*').remove();
 
@@ -788,6 +858,33 @@ APP.view.setDataToSliceListPanel = function (slices) {
     });
 
     $sliceList.menu('refresh');
+
+    $('.slice-title', $sliceList).each(function () {
+        var $that = $(this),
+            $delSliceBtn = $('a', $that);
+        $delSliceBtn.button({
+            icons: {primary: 'ui-icon-minus'},
+            text: false
+        }).click(function () {
+            // Delete this slice here.
+            var sliceid = $('.slice-id', $that).text();
+            APP.api.requestToDeleteSlice({
+                success: function (resJson) {
+                    APP.log(resJson);
+                    APP.api.requestToGetSlices({
+                        success: function (resJson) {
+                            APP.view.setDataToSliceListPanel(resJson.slices);
+                        }
+                    });
+                }
+            }, sliceid);
+        }).position({
+            of: $that,
+            my: 'right center',
+            at: 'right-2 center',
+            collision: 'none none'
+        });
+    });
 
     $sliceList.find('>.flow-item').selectable({
         stop: function () {
@@ -807,33 +904,103 @@ APP.api.setFlowListItems = function (sliceName, flowListItems) {
     APP.view.setFlowListItems(sliceName, flowListItems);
 };
 
-APP.api.requestGetSlices = function () {
+APP.api.requestToGetSlices = function (callbacks) {
     var userid = 'developer',
-        settings;
+        settings,
+        resCallbacks = APP.api.createResponseCallbacks(callbacks);
     
     settings = {
         type: 'GET',
         url: '../slices/?owner=' + userid + '&withFlowList=true',
         cache: false,
         dataType: 'json',
-        success: function (data, textStatus, xhr) {
-            APP.log(data);
-            if (!data.common.error) {
-                APP.log('Got slices. : count = ' + data.slices.length);
-                APP.view.setDataToSliceListPanel(data.slices);
-            } else {
-                APP.log('[ERROR] Error occurs.: ' + data.common.error);
-            }
-        },
-        error: function (xhr, textStatus, error) {
-            APP.log('Failed to get slices. (textStatus, error) = (' 
-                    + textStatus + ', '
-                    + error + ')');
-        }
+        success: resCallbacks.success,
+        error: resCallbacks.error,
+        complete: resCallbacks.complete
     };
     APP.log('Getting slices...');
     $.ajax(settings);
-}
+};
+
+APP.api.requestToPostSlice = function (callbacks, sliceObj) {
+    var userid = 'developer',
+        settings,
+        reqData,
+        resCallbacks = APP.api.createResponseCallbacks(callbacks);
+
+    reqData = {
+        common: {
+            version: 1,
+            srcComponent: {name: userid},
+            dstComponent: {name: 'mlo'},
+            operation: 'Request'
+        },
+        slice: sliceObj
+    };
+    
+    settings = {
+        type: 'POST',
+        url: '../slices/',
+        cache: false,
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify(reqData),
+        success: resCallbacks.success,
+        error: resCallbacks.error,
+        complete: resCallbacks.complete
+    };
+    APP.log('Posting slice...');
+    $.ajax(settings);
+};
+
+APP.api.requestToDeleteSlice = function (callbacks, sliceid) {
+    var userid = 'developer',
+        settings,
+        resCallbacks = APP.api.createResponseCallbacks(callbacks);
+    
+    settings = {
+        type: 'DELETE',
+        url: '../slices/' + sliceid + '?owner=' + userid,
+        cache: false,
+        dataType: 'json',
+        success: resCallbacks.success,
+        error: resCallbacks.error,
+        complete: resCallbacks.complete
+    };
+    APP.log('Deleting slice...');
+    $.ajax(settings);
+};
+
+APP.api.createResponseCallbacks = function (callbacks) {
+    return {
+        success: function (resJson, textStatus, xhr) {
+            APP.log(resJson);
+            if (!resJson.common.error) {
+                if (!!callbacks && !!(callbacks.success)) {
+                    callbacks.success(resJson);
+                }
+            } else {
+                APP.log('[ERROR] Error occurs.: ' + resJson.common.error);
+                if (!!callbacks && !!(callbacks.apiCallError)) {
+                    callbacks.apiCallError(resJson);
+                }
+            }
+        },
+        error: function (xhr, textStatus, error) {
+            APP.log('[ERROR] Failed to get slices. (textStatus, error) = (' 
+                    + textStatus + ', '
+                    + error + ')');
+            if (!!callbacks && !!(callbacks.error)) {
+                callbacks.error(textStatus, error);
+            }
+        },
+        complete: function (xhr, textStatus) {
+            if (!!callbacks && !!(callbacks.complete)) {
+                callbacks.complete(textStatus);
+            }
+        }
+    };
+};
 
 APP.load = function () {
     var obj = {};
@@ -841,7 +1008,11 @@ APP.load = function () {
         if (!err) {
             obj.topoConf = data;
             APP.model.init(obj.switches, obj.links, obj.topoConf);
-            APP.api.requestGetSlices();
+            APP.api.requestToGetSlices({
+                success: function (resJson) {
+                    APP.view.setDataToSliceListPanel(resJson.slices);
+                }
+            });
         } else {
             APP.log('[ERROR] Failed to load topoConf.');
         }
@@ -873,6 +1044,7 @@ APP.load = function () {
         APP.log('[INFO] Loading ... ' + url);
         d3.json(url, switchesLoaded);
     };
+    $('.busy').activity();
     startLoading();
 };
 
@@ -883,3 +1055,4 @@ APP.init = function () {
     this.load();
     APP.log('user-agent: ' + ua);
 };
+
