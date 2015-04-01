@@ -79,6 +79,6 @@ public class SerdesImpl implements Serdes {
 	}
 	
 	private static boolean isJson(String contentType) {
-		return (contentType != null && contentType.startsWith(CONTENT_TYPE_APPLICATION_JSON));
+		return (contentType != null && contentType.contains(CONTENT_TYPE_APPLICATION_JSON));
 	}
 }

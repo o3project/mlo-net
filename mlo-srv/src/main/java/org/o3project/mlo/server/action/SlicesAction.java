@@ -21,13 +21,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.o3project.mlo.server.dto.RestifCommonDto;
 import org.o3project.mlo.server.dto.RestifErrorDto;
+import org.o3project.mlo.server.dto.RestifRequestDto;
 import org.o3project.mlo.server.dto.RestifResponseDto;
+import org.o3project.mlo.server.dto.SliceDto;
 import org.o3project.mlo.server.form.SlicesForm;
 import org.o3project.mlo.server.logic.ApiCallException;
 import org.o3project.mlo.server.logic.NbiConstants;
 import org.o3project.mlo.server.logic.Orchestrator;
 import org.o3project.mlo.server.logic.Serdes;
 import org.o3project.mlo.server.logic.SliceOperationTask;
+import org.o3project.mlo.server.logic.Validator;
 import org.seasar.framework.container.annotation.tiger.Binding;
 import org.seasar.struts.annotation.ActionForm;
 import org.seasar.struts.annotation.Execute;
@@ -58,6 +61,15 @@ public class SlicesAction implements NbiConstants {
 	
 	@Binding(value = "slicesGetTask")
 	private SliceOperationTask sliceOpTask;
+	
+	@Binding
+	private SliceOperationTask createSliceTask;
+
+	@Binding
+	private SliceOperationTask deleteSliceTask;
+
+	@Binding
+	private Validator createSliceValidator;
 
 	/**
 	 * Handles requests to "slices/" path.
@@ -70,14 +82,33 @@ public class SlicesAction implements NbiConstants {
     	logAccess(request);
     	String jsp = null;
     	if (ActionUtil.isSupportingHttpMethod(request.getMethod(), "GET")) {
-    		Map<String, String> headerMap = createHeaderMap(request);
+    		Map<String, String> reqHeaderMap = createHeaderMap(request);
     		Map<String, String> paramMap = createParamMap(slicesForm);
     		jsp = doGetAction(orchestrator, serdes, sliceOpTask, 
-    				headerMap, paramMap, response.getOutputStream());
+    				reqHeaderMap, paramMap, response.getOutputStream());
+    	} else if (ActionUtil.isSupportingHttpMethod(request.getMethod(), "POST")) {
+    		Map<String, String> reqHeaderMap = createHeaderMap(request);
+    		jsp = ActionUtil.doAction(orchestrator, serdes, createSliceValidator, 
+    				createSliceTask, reqHeaderMap, 
+    				request.getInputStream(), response.getOutputStream());
     	} else {
     		throw new RuntimeException("Unsupported HTTP method.");
     	}
     	return jsp;
+	}
+	
+	@Execute(validator = false, urlPattern = "{sliceId}")
+	public String slice() throws IOException {
+    	logAccess(request);
+		String jsp = null;
+    	if (ActionUtil.isSupportingHttpMethod(request.getMethod(), "DELETE")) {
+    		Map<String, String> reqHeaderMap = createHeaderMap(request);
+    		jsp = doDeleteAction(orchestrator, serdes, deleteSliceTask, 
+    				reqHeaderMap, slicesForm, response.getOutputStream());
+    	} else {
+    		throw new RuntimeException("Unsupported HTTP method.");
+    	}
+		return jsp;
 	}
 	
 	/**
@@ -138,6 +169,42 @@ public class SlicesAction implements NbiConstants {
     	return null;
     }
 	
+	private static String doDeleteAction(Orchestrator orchestrator, 
+			Serdes serdes, 
+			SliceOperationTask deleteSliceTask, Map<String, String> reqHeaderMap, SlicesForm slicesForm, 
+			OutputStream ostream) {
+    	RestifResponseDto resDto = null;
+    	RestifRequestDto reqDto = new RestifRequestDto();
+    	reqDto.common = RestifCommonDto.createInstance(1, slicesForm.owner, DEFAULT_COMPONENT_NAME, "Request");
+    	reqDto.slice = new SliceDto();
+    	try {
+    		if (LOG.isDebugEnabled()) {
+    			LOG.debug("########## DELETE ACTION START : owner=" + slicesForm.owner);
+    		}
+    		// Parses and validates slice ID.
+    		reqDto.slice.id = parseSliceId(slicesForm.sliceId);
+    		
+    		// Handles requests.
+    		resDto = orchestrator.handle(deleteSliceTask, reqDto);
+    	} catch (ApiCallException e) {
+    		// Creates error response if failed.
+    		resDto = new RestifResponseDto();
+    		resDto.common = RestifCommonDto.createInstance(1, 
+    				DEFAULT_COMPONENT_NAME, null, "Response");
+    		resDto.error = new RestifErrorDto();
+    		resDto.error.cause = e.getErrorName();
+    		resDto.error.detail = e.getMessage();
+    	} finally {
+    		if (resDto != null) {
+    			serdes.serialize(resDto, ostream, reqHeaderMap.get("accept"));
+    		}
+    		if (LOG.isDebugEnabled()) {
+    			LOG.debug("########## DELETE ACTION END  : owner=" + slicesForm.owner);
+    		}
+    	}
+		return null;
+	}
+	
 	/**
 	 * Validates requested parameters.
 	 * If invalid, throws exception.
@@ -149,6 +216,16 @@ public class SlicesAction implements NbiConstants {
 		if (paramMap.get(REQPARAM_KEY_OWNER) == null) {
 			throw new ApiCallException("Parameter (owner) is not specified.");
 		}
+	}
+	
+	private static Integer parseSliceId(String sValue) throws ApiCallException {
+		Integer nValue = null;
+		try {
+			nValue = Integer.parseInt(sValue);
+		} catch (NumberFormatException e) {
+			throw new ApiCallException("Slice ID is invalid. : " + sValue, e);
+		}
+		return nValue;
 	}
 	
 	private static Map<String, String> createHeaderMap(HttpServletRequest req) {
