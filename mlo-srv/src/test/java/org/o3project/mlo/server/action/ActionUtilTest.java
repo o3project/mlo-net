@@ -194,7 +194,7 @@ class SerdesStub implements Serdes {
 	 */
 	@Override
 	public RestifRequestDto deserialize(InputStream istream, String contentType) throws ApiCallException {
-		throw new UnsupportedOperationException("Not implemented.");
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -202,7 +202,7 @@ class SerdesStub implements Serdes {
 	 */
 	@Override
 	public void serialize(RestifResponseDto dto, OutputStream ostream, String contentType) {
-		throw new UnsupportedOperationException("Not implemented.");
+		resDto = dto;
 	}
 }
 
