@@ -484,6 +484,7 @@ APP.view.init = function () {
     //this.$sliceListTemplate = this.$sliceListPanel.find('>.slice-list-template:first');
     this.$sliceListTemplate = $('.slice-list-template:first', this.$sliceListPanel);
     this.$postSliceDialogbox = $('#dialogbox-post-slice');
+    this.$flowOpMenu = $('#page-main .flow-operation-menu');
 
     (function (view) {
         view.$flowListPanel.accordion({
@@ -585,6 +586,7 @@ APP.view.init = function () {
             $(this).before($copyEle);
             $('input:first', $copyEle).focus();
         });
+        view.$flowOpMenu.hide().menu();
     }(this));
 
     //this.setSampleFlowListItems();
@@ -837,7 +839,8 @@ APP.view.setFlowListItems = function (sliceName, flowListItems) {
 };
 
 APP.view.setDataToSliceListPanel = function (slices) {
-    var $sliceTitleTpl = this.$sliceListTemplate.find('>.slice-title:first'),
+    var that = this,
+        $sliceTitleTpl = this.$sliceListTemplate.find('>.slice-title:first'),
         $flowItemTpl = this.$sliceListTemplate.find('>.flow-item:first'),
         $sliceList = this.$sliceList,
         $sliceTitle;
@@ -851,8 +854,9 @@ APP.view.setDataToSliceListPanel = function (slices) {
         $sliceTitle.appendTo($sliceList);
         jQuery.each(slice.flows, function (idxFlow, flow) {
             var $flowItem = $flowItemTpl.clone();
-            $flowItem.find('.flow-name').text(flow.name);
-            $flowItem.find('.flow-type-name').text(flow.flowTypeName);
+            $('.flow-id', $flowItem).text(flow.id);
+            $('.flow-name', $flowItem).text(flow.name);
+            $('.flow-type-name', $flowItem).text(flow.flowTypeName);
             $flowItem.appendTo($sliceList);
         });
     });
@@ -894,6 +898,54 @@ APP.view.setDataToSliceListPanel = function (slices) {
                 APP.model.setSelectedFlowTypeName(flowTypeName);
             });
         }
+    });
+
+    $sliceList.find('>.flow-item').each(function () {
+        var $that = $(this),
+            //$editBtn = $('button', $that);
+            $editBtn = $that.find('button');
+        $editBtn.button({
+            icons: { 
+                //primary: 'ui-icon-gear',
+                //secondary: 'ui-icon-carat-1-s'
+                primary: 'ui-icon-carat-1-s'
+            },
+            text: false
+        }).click(function () {
+            var $flowItem = $(this).parent(),
+                flowId = $('.flow-id', $flowItem).text(),
+                flowName = $('.flow-name', $flowItem).text();
+            that.$flowOpMenu.show().position({
+                of: this,
+                my: 'left top',
+                at: 'left bottom'
+            }).one('menuselect', function (event, ui) {
+                var actionKey;
+                //APP.log(this);
+                //APP.log(event);
+                //APP.log(ui);
+                actionKey = $('.action-key', ui.item[0]).text();
+                APP.log('(actionKey, flowId, flowName) = (' 
+                        + actionKey + ', ' + flowId + ', ' + flowName + ')');
+            });
+            $(document).one('click', function () {
+                that.$flowOpMenu.hide();
+            });
+            APP.log('Flow edit button clicked. ' + this);
+            return false;
+        }).position({
+            of: $that,
+            my: 'right center',
+            at: 'right-2 center',
+            collision: 'none none'
+        });
+    });
+    $('#page-main > button').button({
+        icons: {
+            primary: 'ui-icon-gear',
+            secondary: 'ui-icon-carat-1-s'
+        },
+        text: false
     });
 };
 
