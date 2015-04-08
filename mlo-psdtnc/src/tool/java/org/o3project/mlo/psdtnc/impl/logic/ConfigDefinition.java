@@ -52,13 +52,13 @@ class ConfigDefinition implements ConfigConstants {
 		props.put(PROP_KEY_LD_PASSWORD, "developer");
 		props.put(PROP_KEY_LD_OPERATION_TIMEOUT_SEC, "300"); // 5 min. 
 		
-		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_START,  "(cd mlo-net/lagopus-docker;./lagopus-docker.sh start)");
-		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_STOP,   "(cd mlo-net/lagopus-docker;./lagopus-docker.sh stop)");
-		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_STATUS, "(cd mlo-net/lagopus-docker;./lagopus-docker.sh status)");
-		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_DELETE_ALL_FLOWS, "(cd mlo-net/lagopus-docker/workspace;./clear_flow.sh)");
-		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_FMT_PUT_FLOW, "(cd mlo-net/lagopus-docker/workspace;./%s.conf.sh -s)");
-		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_FMT_DELETE_FLOW, "(cd mlo-net/lagopus-docker/workspace;./%s.conf.sh -d -e)");
-		props.put(PROP_KEY_LD_OPERATION_PATH_TOPO_CONF, "mlo-net/lagopus-docker/workspace/topo.conf");
+		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_START,  "(cd mlo-net.css/lagopus-docker;./lagopus-docker.sh start)");
+		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_STOP,   "(cd mlo-net.css/lagopus-docker;./lagopus-docker.sh stop)");
+		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_STATUS, "(cd mlo-net.css/lagopus-docker;./lagopus-docker.sh status)");
+		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_DELETE_ALL_FLOWS, "(cd mlo-net.css/lagopus-docker/workspace;./clear_flow.sh)");
+		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_FMT_PUT_FLOW, "(cd mlo-net.css/lagopus-docker/workspace;./%s.conf.sh -s)");
+		props.put(PROP_KEY_LD_OPERATION_SHELL_COMMAND_FMT_DELETE_FLOW, "(cd mlo-net.css/lagopus-docker/workspace;./%s.conf.sh -d -e)");
+		props.put(PROP_KEY_LD_OPERATION_PATH_TOPO_CONF, "mlo-net.css/lagopus-docker/workspace/topo.conf");
 		
 		props.put(PROP_KEY_VRM_LOGIN_IDS, "admin");
 		props.put(PROP_KEY_VRM_LOGIN_ID_PREFIX + "admin." + PROP_SUBKEY_VRM_LOGIN_ID_PASSWORD, "Admin");
