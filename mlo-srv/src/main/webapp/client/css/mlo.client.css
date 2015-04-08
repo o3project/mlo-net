@@ -31,7 +31,10 @@ body {
 }
 
 .ui-menu {
+  /*
+  position: absolute;
   width: 200px;
+   */
 }
 
 .ui-button-text,
@@ -191,6 +194,7 @@ body {
   visibility: hidden;
 }
 
+.flow-id,
 .flow-type-name {
   display: none;
 }
@@ -206,6 +210,7 @@ body {
   position: absolute;
   display: block;
   border-radius: 4px;
+  width: 200px;
   height: 97%;
 }
 
@@ -219,7 +224,10 @@ body {
 }
 
 .slice-list {
+  position: absolute;
   background: rgba(255, 255, 255, 0.5);
+  width: 100%;
+  box-sizing: border-box;
   /*
   background-color: rgba(0, 0, 0, 0.5);
   */
@@ -234,7 +242,20 @@ body {
   padding: 8px 16px;
 }
 
+.slice-list li span.slice-name {
+  padding: 0 8px 0 0;
+}
+
 .flow-item {
+}
+
+.flow-operation-menu {
+  position: absolute;
+  width: 120px;
+}
+
+.action-key {
+  display: none;
 }
 
 #dialogbox-post-slice fieldset {
@@ -304,5 +325,9 @@ body {
   background-color: rgba(255,255,255,0.5);
   position: absolute;
   display: block;
+}
+
+#page-main > button {
+  margin-left: 1000px;
 }
 

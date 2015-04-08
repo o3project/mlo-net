@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <title>MLO web console</title>
     <link rel="stylesheet" type="text/css" href="externals/jquery-ui/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="css/base.css">
     <link rel="stylesheet" type="text/css" href="css/mlo.client.css">
@@ -14,7 +15,7 @@
         <div class="flow-list-template">
             <h3>slice-sample</h3>
             <ul>
-                <li class="ui-widget-content">
+                <li >
                     <span class="flow-name">flow-sample-1</span>
                     <span class="flow-type-name">of1</span>
                 </li>
@@ -33,11 +34,17 @@
                     <a href="#">Delete this slice</a>
                 </li>
                 <li class="flow-item">
+                    <span class="flow-id">1</span>
                     <span class="flow-name">flow-sample-1-1</span>
                     <span class="flow-type-name">of1</span>
+                    <button class="hidden">Edit this flow</button>
                 </li>
             </ul>
         </div>
+        <ul class="flow-operation-menu">
+            <li><span>Modify</span><span class="action-key">put-flow</span></li>
+            <li><span>Delete</span><span class="action-key">delete-flow</span></li>
+        </ul>
     </div>
     <div id="dialogbox-post-slice" title="Create a slice" >
         <form class="create-slice" >
