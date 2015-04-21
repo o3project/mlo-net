@@ -6,6 +6,11 @@ body {
   background-color: #191d22;
 }
 
+input[type=text]:disabled {
+  background: gainsboro;
+  cursor:not-allowed;
+}
+
 /*
  * d3.js
  */
@@ -252,6 +257,15 @@ body {
 .flow-operation-menu {
   position: absolute;
   width: 120px;
+}
+
+.slice-operation-menu {
+  position: absolute;
+  width: 160px;
+}
+
+.slice-operation-menu .operation-flow-list {
+  width: 240px;
 }
 
 .action-key {

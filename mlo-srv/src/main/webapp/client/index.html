@@ -31,19 +31,36 @@
                 <li class="ui-widget-header slice-title">
                     <span class="slice-name">slice-sample-1</span>
                     (id:<span class="slice-id">1</span>)
-                    <a href="#">Delete this slice</a>
+                    <a class="edit-slice-op" href="#">Edit this slice</a>
                 </li>
                 <li class="flow-item">
                     <span class="flow-id">1</span>
                     <span class="flow-name">flow-sample-1-1</span>
                     <span class="flow-type-name">of1</span>
-                    <button class="hidden">Edit this flow</button>
                 </li>
             </ul>
         </div>
         <ul class="flow-operation-menu">
-            <li><span>Modify</span><span class="action-key">put-flow</span></li>
-            <li><span>Delete</span><span class="action-key">delete-flow</span></li>
+            <li><span>Modify</span><span class="action-key">modifyFlow</span></li>
+            <li><span>Delete</span><span class="action-key">deleteFlow</span></li>
+        </ul>
+        <ul class="slice-operation-menu">
+            <li class="delete-slice-menu-item">
+                <span>Delete slice</span><span class="action-key">deleteSlice</span>
+            </li>
+            <li class="post-flow-menu-item">
+                <span>Add flow ...</span><span class="action-key">addFlow</span>
+            </li>
+            <li class="put-flow-menu-item">
+                <span>Modify flow ...</span><span class="action-key">modifyFlow</span>
+                <ul class="operation-flow-list">
+                </ul>
+            </li>
+            <li class="delete-flow-menu-item">
+                <span>Delete flow</span><span class="action-key">deleteFlow</span>
+                <ul class="operation-flow-list">
+                </ul>
+            </li>
         </ul>
     </div>
     <div id="dialogbox-post-slice" title="Create a slice" >
