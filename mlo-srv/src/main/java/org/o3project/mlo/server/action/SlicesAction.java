@@ -66,10 +66,16 @@ public class SlicesAction implements NbiConstants {
 	private SliceOperationTask createSliceTask;
 
 	@Binding
+	private SliceOperationTask updateSliceTask;
+
+	@Binding
 	private SliceOperationTask deleteSliceTask;
 
 	@Binding
 	private Validator createSliceValidator;
+
+	@Binding
+	private Validator updateSliceValidator;
 
 	/**
 	 * Handles requests to "slices/" path.
@@ -101,7 +107,12 @@ public class SlicesAction implements NbiConstants {
 	public String slice() throws IOException {
     	logAccess(request);
 		String jsp = null;
-    	if (ActionUtil.isSupportingHttpMethod(request.getMethod(), "DELETE")) {
+    	if (ActionUtil.isSupportingHttpMethod(request.getMethod(), "PUT")) {
+    		Map<String, String> reqHeaderMap = createHeaderMap(request);
+    		jsp = ActionUtil.doAction(orchestrator, serdes, updateSliceValidator, 
+    				updateSliceTask, reqHeaderMap, 
+    				request.getInputStream(), response.getOutputStream());
+    	} else if (ActionUtil.isSupportingHttpMethod(request.getMethod(), "DELETE")) {
     		Map<String, String> reqHeaderMap = createHeaderMap(request);
     		jsp = doDeleteAction(orchestrator, serdes, deleteSliceTask, 
     				reqHeaderMap, slicesForm, response.getOutputStream());
