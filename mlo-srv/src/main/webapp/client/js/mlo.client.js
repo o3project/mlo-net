@@ -485,6 +485,9 @@ APP.view.init = function () {
     this.$sliceListTemplate = $('.slice-list-template:first', this.$sliceListPanel);
     this.$postSliceDialogbox = $('#dialogbox-post-slice');
     this.$flowOpMenu = $('#page-main .flow-operation-menu');
+    this.$sliceOpMenu = $('#page-main .slice-operation-menu');
+
+    this._initSliceListPanel();
 
     (function (view) {
         view.$flowListPanel.accordion({
@@ -500,84 +503,31 @@ APP.view.init = function () {
         });
         view.setUpFlowListAsSelectable(view.$flowListPanel.find('ul'));
 
-        view.$sliceListPanel.position({
-            of: $('#topo-canvas'),
-            my: 'left top',
-            at: 'left+4 top+4',
-            collision: 'none none'
-        });
-        view.$sliceList.menu({
-            items: '> :not(.ui-widget-header)'
-        });
-        view.$sliceListPanel.find('h3 a').button({
-            icons: {primary: 'ui-icon-plus'},
-            text: false
-        }).click(function () {
-            view.$postSliceDialogbox.dialog('open');
-        }).position({
-            of: view.$sliceListPanel.find('h3:first'),
-            my: 'right center',
-            at: 'right-2 center',
-            collision: 'none none'
-        });
-        view.$sliceList.find('a').button();
         view.$postSliceDialogbox.dialog({
             autoOpen: false,
             width: 600,
             height: 520,
             modal: true,
-            buttons: [ 
-                {
-                    text: 'Create a slice',
-                    click: function () {
-                        var sliceObj, 
-                            getSliceObj = function () {
-                            var slice = {}, 
-                                $form = $('form.create-slice');
-                            slice.name = $('input[name=slice-name]', $form).val();
-                            slice.flows = [];
-                            $('fieldset.add-flow-fieldset', $form).each(function (idx, fset) {
-                                var $fset, flow = {type:'add'}, sBandwidth, sDelay;
-                                $fset = $(fset, $form);
-                                flow.name = $('input[name=flow-name]', $fset).val();
-                                flow.srcCENodeName = $('input[name=src-ce-node-name]', $fset).val();
-                                flow.srcCEPortNo   = $('input[name=src-ce-port-no]', $fset).val();
-                                flow.dstCENodeName = $('input[name=dst-ce-node-name]', $fset).val();
-                                flow.dstCEPortNo   = $('input[name=dst-ce-port-no]', $fset).val();
-                                sBandwidth =  $('input[name=req-bandwidth]', $fset).val();
-                                sDelay     =  $('input[name=req-delay]', $fset).val();
-                                flow.reqBandWidth = parseInt(sBandwidth);
-                                flow.reqDelay = parseInt(sDelay);
-                                flow.protectionLevel = '0';
-                                slice.flows.push(flow);
-                            });
-                            return slice;
-                        };
-                        sliceObj = getSliceObj();
-                        APP.log(sliceObj);
-                        APP.api.requestToPostSlice({
-                            success: function (resJson) {
-                                APP.log(resJson);
-                                APP.api.requestToGetSlices({
-                                    success: function (resJson) {
-                                        view.setDataToSliceListPanel(resJson.slices);
-                                        view.$postSliceDialogbox.dialog('close');
-                                    }
-                                });
-                            }
-                        }, sliceObj);
-                    }
-                }
-            ],
-            //show: {effect: 'slice'},
-            open: function (event, ui) {
-                var $copyEle;
-                APP.log('Dialogbox opened. ' + ui);
-                $('form>fieldset>fieldset.add-flow-fieldset', $(this)).remove();
-                $copyEle = $('.add-flow-fieldset-template .add-flow-fieldset:first').clone();
-                $('a.add-flow-button', $(this)).before($copyEle);
-            }
+            //show: {effect: 'slide', direction: 'up', duration: 250},
+            buttons: []
         });
+        view.$postSliceDialogbox.on('dialogopen', function (event, ui) {
+            // default dialogopen event.
+            var $copyEle
+                $sliceNameTxtf = $('form>fieldset>input[name=slice-name]', $(this)),
+                $addFlowBtn = $('form>fieldset>.add-flow-button', $(this));
+            APP.log('default dialogopen called.');
+
+            $sliceNameTxtf.val('');
+            $sliceNameTxtf.removeAttr('disabled');
+
+            $addFlowBtn.removeClass('hidden');
+
+            $('form>fieldset>fieldset.add-flow-fieldset', $(this)).remove();
+            $copyEle = $('.add-flow-fieldset-template .add-flow-fieldset:first').clone();
+            $('a.add-flow-button', $(this)).before($copyEle);
+        });
+
         $('a.add-flow-button').button({
             icons: {primary: 'ui-icon-plus'},
             text: 'Add flow'
@@ -587,6 +537,7 @@ APP.view.init = function () {
             $('input:first', $copyEle).focus();
         });
         view.$flowOpMenu.hide().menu();
+        view.$sliceOpMenu.hide().menu();
     }(this));
 
     //this.setSampleFlowListItems();
@@ -838,12 +789,260 @@ APP.view.setFlowListItems = function (sliceName, flowListItems) {
     this.$flowListPanel.accordion('refresh');
 };
 
+APP.view.findSliceById = function (sliceid, slices) {
+    var slice = null,
+        idx = 0;
+    for (idx = 0; idx < slices.length; idx += 1) {
+        if (('' + slices[idx].id) === ('' + sliceid)) {
+            slice = slices[idx];
+            break;
+        }
+    }
+    return slice;
+};
+
+APP.view.findFlowIndexById = function (flowid, slice) {
+    var flowIdx = -1,
+        idx = 0;
+    for (idx = 0; idx < slice.flows.length; idx += 1) {
+        if (('' + slice.flows[idx].id) === ('' + flowid)) {
+            flowIdx = idx;
+            break;
+        }
+    }
+    return flowIdx;
+};
+
+APP.view.reloadSlices = function () {
+    APP.api.requestToGetSlices({
+        success: function (resJson) {
+            APP.view.setDataToSliceListPanel(resJson.slices);
+        }
+    });
+};
+
+APP.view.getSliceObjFromSliceDlg = function (flowType) {
+    var view = this,
+        slice = {},
+        $sliceDlg = view.$postSliceDialogbox,
+        $form = $('form.create-slice', $sliceDlg);
+    
+    slice.name = $('input[name=slice-name]', $form).val();
+    slice.flows = [];
+    $('fieldset.add-flow-fieldset', $form).each(function (idx, fset) {
+        var $fset, flow = {type:flowType}, sBandwidth, sDelay;
+        $fset = $(fset, $form);
+        flow.name = $('input[name=flow-name]', $fset).val();
+        flow.srcCENodeName = $('input[name=src-ce-node-name]', $fset).val();
+        flow.srcCEPortNo   = $('input[name=src-ce-port-no]', $fset).val();
+        flow.dstCENodeName = $('input[name=dst-ce-node-name]', $fset).val();
+        flow.dstCEPortNo   = $('input[name=dst-ce-port-no]', $fset).val();
+        sBandwidth =  $('input[name=req-bandwidth]', $fset).val();
+        sDelay     =  $('input[name=req-delay]', $fset).val();
+        flow.reqBandWidth = parseInt(sBandwidth);
+        flow.reqDelay = parseInt(sDelay);
+        flow.protectionLevel = '0';
+        slice.flows.push(flow);
+    });
+    return slice;
+};
+
+APP.view.createAction = function (actionKey, slices) {
+    var view = this,
+        actions,
+        action = null;
+
+    actions = {
+        // createSlice-action
+        createSlice: function (sliceid, flowid) {
+            var $sliceDlg = view.$postSliceDialogbox,
+                sliceObj,
+                buttonClicked;
+            buttonClicked = function () {
+                sliceObj = view.getSliceObjFromSliceDlg('add');
+                APP.api.requestToPostSlice({
+                    success: function (resJson) {
+                        APP.log(resJson);
+                        view.reloadSlices();
+                        $sliceDlg.dialog('close');
+                    }
+                }, sliceObj);
+                return false;
+            };
+            $sliceDlg.dialog('option', 'title', 'Creating a slice');
+            $sliceDlg.dialog('option', 'buttons', [
+                {
+                    text: 'Create a slice',
+                    click: buttonClicked
+                }
+            ]);
+            $sliceDlg.dialog('open');
+        },
+        // deleteSlice-action
+        deleteSlice: function (sliceid, flowid) {
+            APP.api.requestToDeleteSlice({
+                success: function (resJson) {
+                    APP.log(resJson);
+                    view.reloadSlices();
+                }
+            }, sliceid);
+        },
+        // addFlow-action
+        addFlow: function (sliceid, flowid) {
+            var $sliceDlg = view.$postSliceDialogbox,
+                originalSlice = view.findSliceById(sliceid, slices),
+                sliceObj,
+                buttonClicked;
+            buttonClicked = function () {
+                sliceObj = view.getSliceObjFromSliceDlg('add');
+                sliceObj.id = sliceid;
+                APP.api.requestToPutSlice({
+                    success: function (resJson) {
+                        APP.log(resJson);
+                        view.reloadSlices();
+                        $sliceDlg.dialog('close');
+                    }
+                }, sliceObj);
+                return false;
+            };
+            $sliceDlg.dialog('option', 'title', 'Adding flow(s) to sliceid = ' + sliceid);
+            $sliceDlg.dialog('option', 'buttons', [
+                {
+                    text: 'Update the slice',
+                    click: buttonClicked
+                }
+            ]);
+            $sliceDlg.one('dialogopen', function (event, ui) {
+                var $sliceNameTxtf =  $('form.create-slice input[name=slice-name]', $sliceDlg);
+                APP.log('dialogopen called in adding flow.');
+                $sliceNameTxtf.val(originalSlice.name);
+                $sliceNameTxtf.attr('disabled', 'disabled');
+            });
+            $sliceDlg.dialog('open');
+        },
+        // modifyFlow-action
+        modifyFlow: function (sliceid, flowid) {
+            var $sliceDlg = view.$postSliceDialogbox,
+                originalSlice = view.findSliceById(sliceid, slices),
+                flowIndex = view.findFlowIndexById(flowid, originalSlice),
+                sliceObj,
+                buttonClicked;
+            buttonClicked = function () {
+                sliceObj = view.getSliceObjFromSliceDlg('mod');
+                sliceObj.id = sliceid;
+                delete sliceObj.name;
+                if (sliceObj.flows.length === 1) {
+                    sliceObj.flows[0].id = flowid;
+                    APP.api.requestToPutSlice({
+                        success: function (resJson) {
+                            APP.log(resJson);
+                            view.reloadSlices();
+                            $sliceDlg.dialog('close');
+                        }
+                    }, sliceObj);
+                } else {
+                    APP.log('[ERROR] Failed to modify flow. '
+                            + 'Invalid length of flows: ' 
+                            + '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
+                }
+                return false;
+            };
+            $sliceDlg.dialog('option', 'title', 'Modifying a flow ' 
+                + originalSlice.flows[flowIndex].name);
+            $sliceDlg.dialog('option', 'buttons', [
+                {
+                    text: 'Update the slice',
+                    click: buttonClicked
+                }
+            ]);
+            $sliceDlg.one('dialogopen', function (event, ui) {
+                var $sliceNameTxtf =  $('form.create-slice input[name=slice-name]', $sliceDlg),
+                    $flowNameTxtf = $('form.create-slice fieldset.add-flow-fieldset input[name=flow-name]', $sliceDlg),
+                    $addFlowButton = $('form.create-slice .add-flow-button', $sliceDlg);
+                APP.log('dialogopen called in modifying flow.');
+                $sliceNameTxtf.val(originalSlice.name);
+                $sliceNameTxtf.attr('disabled', 'disabled');
+                $flowNameTxtf.val(originalSlice.flows[flowIndex].name);
+                $addFlowButton.addClass('hidden');
+            });
+            $sliceDlg.dialog('open');
+        },
+        // deleteFlow-action
+        deleteFlow: function (sliceid, flowid) {
+            var $sliceDlg = view.$postSliceDialogbox,
+                originalSlice = view.findSliceById(sliceid, slices),
+                flowIndex = view.findFlowIndexById(flowid, originalSlice),
+                flow,
+                sliceObj;
+            if (flowIndex > -1) {
+                flow = originalSlice.flows[flowIndex];
+                sliceObj = {
+                    id: sliceid,
+                    flows: [{ type: 'del', id: flowid }]
+                };
+                APP.api.requestToPutSlice({
+                    success: function (resJson) {
+                        APP.log(resJson);
+                        view.reloadSlices();
+                    }
+                }, sliceObj);
+            } else {
+                APP.log('[ERROR] Failed to delete flow. Invalid flow id: '
+                        + '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
+            }
+        }
+    };
+    return actions[actionKey];
+};
+
+APP.view._initSliceListPanel = function () {
+    var view = this,
+        $addSliceButton = $('h3 a', view.$sliceListPanel);
+        $sliceDlg = view.$postSliceDialogbox;
+
+    // Initializes sliceListPanel
+    view.$sliceListPanel.position({
+        of: $('#topo-canvas'),
+        my: 'left top',
+        at: 'left+4 top+4',
+        collision: 'none none'
+    });
+
+    // Initializes sliceList as menu
+    view.$sliceList.menu({
+        items: '> :not(.ui-widget-header)'
+    });
+
+    // Initializes addSlice button.
+    $addSliceButton.button({
+        icons: {primary: 'ui-icon-plus'},
+        text: false
+    }).click(function () {
+        var actionKey = 'createSlice',
+            doAction = view.createAction(actionKey);
+        doAction();
+    }).position({
+        of: view.$sliceListPanel.find('h3:first'),
+        my: 'right center',
+        at: 'right-2 center',
+        collision: 'none none'
+    });
+};
+
 APP.view.setDataToSliceListPanel = function (slices) {
-    var that = this,
+    var that = view = this,
         $sliceTitleTpl = this.$sliceListTemplate.find('>.slice-title:first'),
         $flowItemTpl = this.$sliceListTemplate.find('>.flow-item:first'),
         $sliceList = this.$sliceList,
         $sliceTitle;
+
+    var createFlowItem = function (flow) {
+        var $flowItem = $flowItemTpl.clone();
+        $('.flow-id', $flowItem).text(flow.id);
+        $('.flow-name', $flowItem).text(flow.name);
+        $('.flow-type-name', $flowItem).text(flow.flowTypeName);
+        return $flowItem;
+    };
 
     $sliceList.find('>*').remove();
 
@@ -853,10 +1052,7 @@ APP.view.setDataToSliceListPanel = function (slices) {
         $('.slice-id', $sliceTitle).text(slice.id);
         $sliceTitle.appendTo($sliceList);
         jQuery.each(slice.flows, function (idxFlow, flow) {
-            var $flowItem = $flowItemTpl.clone();
-            $('.flow-id', $flowItem).text(flow.id);
-            $('.flow-name', $flowItem).text(flow.name);
-            $('.flow-type-name', $flowItem).text(flow.flowTypeName);
+            var $flowItem = createFlowItem(flow);
             $flowItem.appendTo($sliceList);
         });
     });
@@ -865,7 +1061,8 @@ APP.view.setDataToSliceListPanel = function (slices) {
 
     $('.slice-title', $sliceList).each(function () {
         var $that = $(this),
-            $delSliceBtn = $('a', $that);
+            $delSliceBtn = $('a.delete-slice-op', $that),
+            $editSliceBtn = $('a.edit-slice-op', $that);
         $delSliceBtn.button({
             icons: {primary: 'ui-icon-minus'},
             text: false
@@ -885,6 +1082,64 @@ APP.view.setDataToSliceListPanel = function (slices) {
         }).position({
             of: $that,
             my: 'right center',
+            at: 'right-34 center',
+            collision: 'none none'
+        });
+
+        $editSliceBtn.button({
+            icons: {primary: 'ui-icon-carat-1-s'},
+            text: false
+        }).click(function () {
+            // Shows slice-editing menu here.
+            var sliceid = $('.slice-id', $that).text();
+            var updateSliceOpMenu = function ($menu, $flowItems) {
+                var $putFlowList    = $('li.put-flow-menu-item    ul.operation-flow-list', $menu),
+                    $deleteFlowList = $('li.delete-flow-menu-item ul.operation-flow-list', $menu),
+                    slice = view.findSliceById(sliceid, slices);
+
+                $putFlowList.empty();
+                $deleteFlowList.empty();
+                jQuery.each(slice.flows, function (idx, flow) {
+                    var $flowItem = createFlowItem(flow),
+                        $newFlowItem,
+                        $actionTag;
+                    $newFlowItem = $flowItem.clone();
+                    $('>.action-key', $putFlowList.parent()).clone().appendTo($newFlowItem);
+                    $newFlowItem.appendTo($putFlowList);
+                    $newFlowItem = $flowItem.clone();
+                    $('>.action-key', $deleteFlowList.parent()).clone().appendTo($newFlowItem);
+                    $newFlowItem.clone().appendTo($deleteFlowList);
+                });
+
+                $menu.menu('refresh');
+            };
+            updateSliceOpMenu(that.$sliceOpMenu, $that.next());
+            that.$sliceOpMenu.show().position({
+                of: this,
+                my: 'left top',
+                at: 'left bottom',
+                collision: 'none none'
+            }).one('menuselect', function (event, ui) {
+                var $item = $(ui.item[0]),
+                    actionKey = $('>.action-key', $item).text(),
+                    flowid = 'N/A',
+                    doAction;
+                if ($item.hasClass('flow-item')) {
+                    flowid = $('>.flow-id', $item).text();
+                }
+                APP.log('(actionKey, sliceid, flowid) = (' 
+                        + actionKey + ', ' + sliceid + ', ' + flowid + ')');
+                doAction = view.createAction(actionKey, slices);
+                doAction(sliceid, flowid);
+            });
+            $(document).one('click', function () {
+                that.$sliceOpMenu.hide();
+            });
+            APP.log('Flow edit button clicked. ' + this);
+            return false;
+        }).position({
+            of: $that,
+            my: 'right center',
             at: 'right-2 center',
             collision: 'none none'
         });
@@ -900,46 +1155,6 @@ APP.view.setDataToSliceListPanel = function (slices) {
         }
     });
 
-    $sliceList.find('>.flow-item').each(function () {
-        var $that = $(this),
-            //$editBtn = $('button', $that);
-            $editBtn = $that.find('button');
-        $editBtn.button({
-            icons: { 
-                //primary: 'ui-icon-gear',
-                //secondary: 'ui-icon-carat-1-s'
-                primary: 'ui-icon-carat-1-s'
-            },
-            text: false
-        }).click(function () {
-            var $flowItem = $(this).parent(),
-                flowId = $('.flow-id', $flowItem).text(),
-                flowName = $('.flow-name', $flowItem).text();
-            that.$flowOpMenu.show().position({
-                of: this,
-                my: 'left top',
-                at: 'left bottom'
-            }).one('menuselect', function (event, ui) {
-                var actionKey;
-                //APP.log(this);
-                //APP.log(event);
-                //APP.log(ui);
-                actionKey = $('.action-key', ui.item[0]).text();
-                APP.log('(actionKey, flowId, flowName) = (' 
-                        + actionKey + ', ' + flowId + ', ' + flowName + ')');
-            });
-            $(document).one('click', function () {
-                that.$flowOpMenu.hide();
-            });
-            APP.log('Flow edit button clicked. ' + this);
-            return false;
-        }).position({
-            of: $that,
-            my: 'right center',
-            at: 'right-2 center',
-            collision: 'none none'
-        });
-    });
     $('#page-main > button').button({
         icons: {
             primary: 'ui-icon-gear',
@@ -974,7 +1189,7 @@ APP.api.requestToGetSlices = function (callbacks) {
     $.ajax(settings);
 };
 
-APP.api.requestToPostSlice = function (callbacks, sliceObj) {
+APP.api._requestWithSliceBody = function (callbacks, url, httpMethod, sliceObj) {
     var userid = 'developer',
         settings,
         reqData,
@@ -991,8 +1206,8 @@ APP.api.requestToPostSlice = function (callbacks, sliceObj) {
     };
     
     settings = {
-        type: 'POST',
-        url: '../slices/',
+        type: httpMethod,
+        url: url,
         cache: false,
         dataType: 'json',
         contentType: 'application/json',
@@ -1001,8 +1216,18 @@ APP.api.requestToPostSlice = function (callbacks, sliceObj) {
         error: resCallbacks.error,
         complete: resCallbacks.complete
     };
-    APP.log('Posting slice...');
+    APP.log('Requesting to ' + httpMethod + ' slice...');
     $.ajax(settings);
+};
+
+APP.api.requestToPostSlice = function (callbacks, sliceObj) {
+    var url = '../slices/';
+    return this._requestWithSliceBody(callbacks, url, 'POST', sliceObj);
+};
+
+APP.api.requestToPutSlice = function (callbacks, sliceObj) {
+    var url = '../slices/' + sliceObj.id;
+    return this._requestWithSliceBody(callbacks, url, 'PUT', sliceObj);
 };
 
 APP.api.requestToDeleteSlice = function (callbacks, sliceid) {
