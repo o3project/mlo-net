@@ -245,7 +245,7 @@ APP.model.update = function () {
         var searchLdBridge = function (ryDpid, ryPortNo, nodes, ldBridges) {
             var ldBridge, ldBridgeName,
                 idx = 0, idxChild = 0, node,
-                portIdx = parseInt(ryPortNo) - 2;
+                portIdx = parseInt(ryPortNo, 10) - 2;
             for (idx = 0; idx < nodes.length; idx += 1) {
                 if (ryDpid === nodes[idx].ryDpid) {
                     ldBridgeName = nodes[idx].brNames[portIdx];
@@ -279,8 +279,8 @@ APP.model.update = function () {
 
             srcNode = nodes[srcRySwIdx];
             dstNode = nodes[dstRySwIdx];
-            srcPortIdx = parseInt(topoLink.src.port_no) - 2;
-            dstPortIdx = parseInt(topoLink.dst.port_no) - 2;
+            srcPortIdx = parseInt(topoLink.src.port_no, 10) - 2;
+            dstPortIdx = parseInt(topoLink.dst.port_no, 10) - 2;
             //ldBridge = searchLdBridgeByName(srcNode.brNames[srcPortIdx], ldBridges);
             ldBridge = searchLdBridge(topoLink.src.dpid, topoLink.src.port_no, nodes, ldBridges);
             //APP.log('ldBridge.name : ' + ldBridge.name);
@@ -303,10 +303,9 @@ APP.model.update = function () {
             //APP.log('nodeToNodeKey: ' + nodeToNodeKey);
             if (nodeToNodeCounts[nodeToNodeKey] !== undefined) {
                 nodeToNodeCounts[nodeToNodeKey] += 1;
-                APP.log('Multiple nodeToNode: (nodeToNodeKey, count)' 
-                        + ' = (' 
-                        + nodeToNodeKey + ', ' 
-                        + nodeToNodeCounts[nodeToNodeKey] + ')');
+                APP.log('Multiple nodeToNode: (nodeToNodeKey, count)' + 
+                        ' = (' + 
+                        nodeToNodeKey + ', ' + nodeToNodeCounts[nodeToNodeKey] + ')');
             } else {
                 nodeToNodeCounts[nodeToNodeKey] = 0;
             }
@@ -513,7 +512,7 @@ APP.view.init = function () {
         });
         view.$postSliceDialogbox.on('dialogopen', function (event, ui) {
             // default dialogopen event.
-            var $copyEle
+            var $copyEle,
                 $sliceNameTxtf = $('form>fieldset>input[name=slice-name]', $(this)),
                 $addFlowBtn = $('form>fieldset>.add-flow-button', $(this));
             APP.log('default dialogopen called.');
@@ -570,18 +569,18 @@ APP.view.update = function (model) {
 
         that.viewNodes
             .attr('transform', function (d) {
-                return ('translate('
-                    + (d.x - nodeRectSize.width / 2) + ','
-                    + (d.y - nodeRectSize.height / 2) + ')');
+                return ('translate(' + 
+                        (d.x - nodeRectSize.width / 2) + ',' + 
+                        (d.y - nodeRectSize.height / 2) + ')');
             });
 
         that.viewPorts
             .attr('transform', function (d) {
                 var pos = d.getPos(),
                     size = APP.cfg.portRectSize;
-                return 'translate('
-                    + (pos.x - size.width / 2) + ','
-                    + (pos.y - size.height / 2) + ')';
+                return ('translate(' + 
+                    (pos.x - size.width / 2) + ',' + 
+                    (pos.y - size.height / 2) + ')');
             });
     };
 
@@ -600,10 +599,8 @@ APP.view.update = function (model) {
             return that.tooltip
                 .style('top', (d3.event.pageY - 10) + 'px')
                 .style('left', (d3.event.pageX + 10) + 'px')
-                .html('<h1>Channel</h1>'
-                    + '<dl>'
-                    + '<dt>Name:</dt><dd>' + d.ldBridge.name + '</dd>'
-                    + '</dl>');
+                .html('<h1>Channel</h1>' + 
+                    '<dl>' + '<dt>Name:</dt><dd>' + d.ldBridge.name + '</dd>' + '</dl>');
         });
         g.on('mouseout', function () {
             return that.tooltip.style('visibility', 'hidden');
@@ -650,14 +647,14 @@ APP.view.update = function (model) {
             return that.tooltip
                 .style('top', (d3.event.pageY - 10) + 'px')
                 .style('left', (d3.event.pageX + 10) + 'px')
-                .html('<h1>Node</h1>'
-                    + '<dl>'
-                    + '<dt>Name:</dt><dd>' + d.name + '</dd>'
-                    + '<dt>Type:</dt><dd>' + d.type + '</dd>'
-                    + '<dt>DP ID:</dt><dd>' + d.ryDpid + '</dd>'
-                    + ipdisp
-                    + macdisp
-                    + '</dl>');
+                .html('<h1>Node</h1>' + 
+                    '<dl>' + 
+                    '<dt>Name:</dt><dd>' + d.name + '</dd>' + 
+                    '<dt>Type:</dt><dd>' + d.type + '</dd>' + 
+                    '<dt>DP ID:</dt><dd>' + d.ryDpid + '</dd>' + 
+                    ipdisp + 
+                    macdisp + 
+                    '</dl>');
         });
         g.on('mouseout', function () {
             return that.tooltip.style('visibility', 'hidden');
@@ -706,11 +703,11 @@ APP.view.update = function (model) {
             return that.tooltip
                 .style('top', (d3.event.pageY - 10) + 'px')
                 .style('left', (d3.event.pageX + 10) + 'px')
-                .html('<h1>Port</h1>'
-                    + '<dl>'
-                    + '<dt>Name:</dt><dd>' + d.name + '</dd>'
-                    + '<dt>Dpid:</dt><dd>' + d.dpid + '</dd>'
-                    + '</dl>');
+                .html('<h1>Port</h1>' + 
+                    '<dl>' + 
+                    '<dt>Name:</dt><dd>' + d.name + '</dd>' + 
+                    '<dt>Dpid:</dt><dd>' + d.dpid + '</dd>' + 
+                    '</dl>');
         });
         g.on('mouseout', function () {
             return that.tooltip.style('visibility', 'hidden');
@@ -839,8 +836,8 @@ APP.view.getSliceObjFromSliceDlg = function (flowType) {
         flow.dstCEPortNo   = $('input[name=dst-ce-port-no]', $fset).val();
         sBandwidth =  $('input[name=req-bandwidth]', $fset).val();
         sDelay     =  $('input[name=req-delay]', $fset).val();
-        flow.reqBandWidth = parseInt(sBandwidth);
-        flow.reqDelay = parseInt(sDelay);
+        flow.reqBandWidth = parseInt(sBandwidth, 10);
+        flow.reqDelay = parseInt(sDelay, 10);
         flow.protectionLevel = '0';
         slice.flows.push(flow);
     });
@@ -941,14 +938,14 @@ APP.view.createAction = function (actionKey, slices) {
                         }
                     }, sliceObj);
                 } else {
-                    APP.log('[ERROR] Failed to modify flow. '
-                            + 'Invalid length of flows: ' 
-                            + '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
+                    APP.log('[ERROR] Failed to modify flow. ' + 
+                            'Invalid length of flows: ' + 
+                            '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
                 }
                 return false;
             };
-            $sliceDlg.dialog('option', 'title', 'Modifying a flow ' 
-                + originalSlice.flows[flowIndex].name);
+            $sliceDlg.dialog('option', 'title', 
+                'Modifying a flow ' + originalSlice.flows[flowIndex].name);
             $sliceDlg.dialog('option', 'buttons', [
                 {
                     text: 'Update the slice',
@@ -987,8 +984,8 @@ APP.view.createAction = function (actionKey, slices) {
                     }
                 }, sliceObj);
             } else {
-                APP.log('[ERROR] Failed to delete flow. Invalid flow id: '
-                        + '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
+                APP.log('[ERROR] Failed to delete flow. Invalid flow id: ' + 
+                        '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
             }
         }
     };
@@ -1030,7 +1027,8 @@ APP.view._initSliceListPanel = function () {
 };
 
 APP.view.setDataToSliceListPanel = function (slices) {
-    var that = view = this,
+    var that = this,
+        view = this,
         $sliceTitleTpl = this.$sliceListTemplate.find('>.slice-title:first'),
         $flowItemTpl = this.$sliceListTemplate.find('>.flow-item:first'),
         $sliceList = this.$sliceList,
@@ -1113,8 +1111,8 @@ APP.view.setDataToSliceListPanel = function (slices) {
 
                 $menu.menu('refresh');
             };
-            updateSliceOpMenu(that.$sliceOpMenu, $that.next());
-            that.$sliceOpMenu.show().position({
+            updateSliceOpMenu(view.$sliceOpMenu, $that.next());
+            view.$sliceOpMenu.show().position({
                 of: this,
                 my: 'left top',
                 at: 'left bottom',
@@ -1127,13 +1125,13 @@ APP.view.setDataToSliceListPanel = function (slices) {
                 if ($item.hasClass('flow-item')) {
                     flowid = $('>.flow-id', $item).text();
                 }
-                APP.log('(actionKey, sliceid, flowid) = (' 
-                        + actionKey + ', ' + sliceid + ', ' + flowid + ')');
+                APP.log('(actionKey, sliceid, flowid) = (' + 
+                        actionKey + ', ' + sliceid + ', ' + flowid + ')');
                 doAction = view.createAction(actionKey, slices);
                 doAction(sliceid, flowid);
             });
             $(document).one('click', function () {
-                that.$sliceOpMenu.hide();
+                view.$sliceOpMenu.hide();
             });
             APP.log('Flow edit button clicked. ' + this);
             return false;
@@ -1264,9 +1262,8 @@ APP.api.createResponseCallbacks = function (callbacks) {
             }
         },
         error: function (xhr, textStatus, error) {
-            APP.log('[ERROR] Failed to get slices. (textStatus, error) = (' 
-                    + textStatus + ', '
-                    + error + ')');
+            APP.log('[ERROR] Failed to get slices. (textStatus, error) = ' + 
+                    '(' + textStatus + ', ' + error + ')');
             if (!!callbacks && !!(callbacks.error)) {
                 callbacks.error(textStatus, error);
             }
