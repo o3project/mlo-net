@@ -1,6 +1,5 @@
 
-var APP = {
-};
+var APP = APP || {};
 
 $(document).ready(function() {
     APP.init();
@@ -63,7 +62,7 @@ APP.cfg = {
     switchesPath: APP.getEtcPathWith('ryu/topology/switches'),
     linksPath:    APP.getEtcPathWith('ryu/topology/links'),
     topoConfPath: APP.getEtcPathWith('ld/topo'),
-    svgSize: {width: 708, height: 580},
+    svgSize: {width: 708, height: 590},
     portRectSize: {width: 8, height: 8},
     nodeRectSize: {width: 32, height: 44},
     linkLabelRectSize: {width: 32, height: 16},
@@ -485,6 +484,7 @@ APP.view.init = function () {
     this.$postSliceDialogbox = $('#dialogbox-post-slice');
     this.$flowOpMenu = $('#page-main .flow-operation-menu');
     this.$sliceOpMenu = $('#page-main .slice-operation-menu');
+    this.$nodeContextMenu = $('#page-main .node-context-menu');
 
     this._initSliceListPanel();
 
@@ -537,7 +537,10 @@ APP.view.init = function () {
         });
         view.$flowOpMenu.hide().menu();
         view.$sliceOpMenu.hide().menu();
+        view.$nodeContextMenu.hide().menu();
     }(this));
+
+    this.initNodeTerminalDialog();
 
     //this.setSampleFlowListItems();
     //window.APP.view.setFlowListItems('slice-1', [{flowName: 'flow-1', flowTypeName: 'osaka11slow'},{flowName: 'flow-2', flowTypeName: 'akashi23cutthrough'}]);
@@ -587,24 +590,25 @@ APP.view.update = function (model) {
     var updateViewLinks = function () {
         var lines, g;
         that.viewLinks = that.viewLinks.data(links);
-        that.viewLinks.exit().remove();
         lines = that.viewLinks.enter().append('line')
             .attr('class', function () { return 'view-link'; });
 
         g = lines;
         g.on('mouseover', function () {
+            APP.log('mouseover called.');
             return that.tooltip.style('visibility', 'visible');
         });
         g.on('mousemove', function (d) {
-            return that.tooltip
+            return (that.tooltip
                 .style('top', (d3.event.pageY - 10) + 'px')
                 .style('left', (d3.event.pageX + 10) + 'px')
                 .html('<h1>Channel</h1>' + 
-                    '<dl>' + '<dt>Name:</dt><dd>' + d.ldBridge.name + '</dd>' + '</dl>');
+                    '<dl>' + '<dt>Name:</dt><dd>' + d.ldBridge.name + '</dd>' + '</dl>'));
         });
         g.on('mouseout', function () {
             return that.tooltip.style('visibility', 'hidden');
         });
+        that.viewLinks.exit().remove();
     };
 
     var updateViewNodes = function () {
@@ -634,6 +638,7 @@ APP.view.update = function (model) {
             that.tooltip.style('visibility', 'hidden');
         });
         g.on('mouseover', function () {
+            APP.log('mouseover called.');
             return that.tooltip.style('visibility', 'visible');
         });
         g.on('mousemove', function (d) {
@@ -658,6 +663,12 @@ APP.view.update = function (model) {
         });
         g.on('mouseout', function () {
             return that.tooltip.style('visibility', 'hidden');
+        });
+        g.on('contextmenu', function (d, i) {
+            APP.log('contextmenu called.: ' + d.name);
+            d3.event.preventDefault();
+            that.tooltip.style('visibility', 'hidden');
+            that.openNodeContextMenu(d, d3.event);
         });
         g.append('image')
             .attr('xlink:href', function (d) {
@@ -715,10 +726,6 @@ APP.view.update = function (model) {
 
         g.append('rect')
             .attr('width', size.width).attr('height', size.height);
-
-        //g.append('text')
-        //.text(function (d) {return d.name;})
-        //.attr('dx', 2).attr('dy', size.height  - 6);
     };
 
     this.force
@@ -1026,6 +1033,98 @@ APP.view._initSliceListPanel = function () {
     });
 };
 
+APP.view.initNodeTerminalDialog = function () {
+    var view = this,
+        $termDlg = $('#dialog-node-terminal'),
+        $execCmdBtn = $('.exec-cmd-button', $termDlg),
+        $termInTxtf = $('.term-in', $termDlg),
+        $termOutTxta = $('.term-out', $termDlg),
+        webSocket,
+        connectWs,
+        webSocketOnMessageReceived,
+        sendMessage;
+
+    connectWs = function (wsUri, onMessageCallback) {
+        var ws;
+        APP.log('Creating web socket ...');
+        try {
+            ws = new WebSocket(wsUri);
+            ws.onopen = function (event) {
+                APP.log('web socket opened.');
+            };
+            ws.onmessage = function (event) {
+                onMessageCallback(event.data);
+            };
+            ws.onerror = function (event) {
+                APP.log('web socket error occurred.');
+            };
+            ws.onclose = function (event) {
+                APP.log('web socket closed.');
+            };
+            APP.log('web socket created.');
+        } catch (e) {
+            APP.log('Failed to create web socket. e = ' + e);
+            throw e;
+        }
+        return ws;
+    };
+
+    sendMessage = function (ws, msg) {
+        APP.log('execCmdBtn clicked.');
+        ws.send(msg);
+    };
+
+    webSocketOnMessageReceived = function (msg) {
+        var origValue = $termOutTxta.val(),
+            newValue = origValue + msg;
+        $termOutTxta.val(newValue);
+        if (newValue.length) {
+            $termOutTxta.scrollTop($termOutTxta[0].scrollHeight - $termOutTxta.height());
+        }
+
+        $termInTxtf.val('');
+        $termInTxtf.focus();
+    };
+
+    $termDlg.dialog({
+        modal: true,
+        autoOpen: false,
+        width: 600,
+        height: 400,
+        title: 'Node terminal',
+        buttons: []
+    });
+    $termDlg.on('dialogbeforeclose', function (event, ui) {
+        APP.log('termDlg dialogbeforeclose called.');
+        webSocket.close();
+    });
+
+    $execCmdBtn.button({
+        icons: { primary: 'ui-icon-arrowthick-1-w' },
+        text: null
+    }).click(function () {
+        var msg;
+        msg = JSON.stringify($termInTxtf.val() + '\n');
+        sendMessage(webSocket, msg);
+        return false;
+    });
+
+    $termInTxtf.keypress(function (event) {
+        var msg;
+        if (event.which === 13) {
+            msg = JSON.stringify($termInTxtf.val() + '\n');
+            sendMessage(webSocket, msg);
+            return false;
+        }
+    });
+
+    view.openNodeTerminal = function (nodeData) {
+        var webSocketUri = 'ws://133.108.84.185:9280/ws';
+        webSocket = connectWs(webSocketUri, webSocketOnMessageReceived);
+        $termDlg.dialog('open');
+    };
+};
+
 APP.view.setDataToSliceListPanel = function (slices) {
     var that = this,
         view = this,
@@ -1162,7 +1261,33 @@ APP.view.setDataToSliceListPanel = function (slices) {
     });
 };
 
-APP.api = {};
+APP.view.openNodeContextMenu = function (nodeData, evt) {
+    var view = this
+        $nodeCntxtMenu = view.$nodeContextMenu;
+
+    APP.log('Opening node context menu on ' + nodeData.name);
+    $nodeCntxtMenu.menu('refresh');
+    $nodeCntxtMenu.show().position({
+        of: evt,
+        my: 'left top',
+        at: 'center center',
+        collision: 'none none'
+    }).one('menuselect', function (event, ui) {
+        var $item = $(ui.item[0]),
+            actionKey = $('>.action-key', $item).text(),
+            doAction;
+        APP.log('node context menu selected. actionKey = ' + actionKey);
+        if (actionKey === 'connectToNode') {
+            //view.openNodeTerminal(nodeData);
+            APP.api.openNodeAccessDialog(nodeData.name);
+        }
+    });
+    $(document).one('click', function () {
+        $nodeCntxtMenu.hide();
+    });
+};
+
+APP.api = APP.api || {};
 
 APP.api.setFlowListItems = function (sliceName, flowListItems) {
     APP.view.setAllLinksToUnselected();
@@ -1274,6 +1399,14 @@ APP.api.createResponseCallbacks = function (callbacks) {
             }
         }
     };
+};
+
+APP.api.openNodeAccessDialog = function (nodeName) {
+    if ((typeof mloApi !== 'undefined') && mloApi.openNodeAccessDialogbox) {
+        mloApi.openNodeAccessDialogbox(nodeName);
+    } else {
+        APP.log('Failed to open node access view.');
+    }
 };
 
 APP.load = function () {
