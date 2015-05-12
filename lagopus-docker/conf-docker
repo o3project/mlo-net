@@ -227,7 +227,7 @@ register_docker_kill() {
     local name=$1
     echo "docker_kill_${name}() {"
     echo "    if [ -e ${CONTDIR}/${name} ]; then"
-    echo "        docker rm -f \`cat ${CONTDIR}/${name}\` >/dev/null 2>&1"
+    echo "        docker kill -f \`cat ${CONTDIR}/${name}\` >/dev/null 2>&1"
     echo "        rm -f ${CONTDIR}/${name}"
     echo "    fi"
     echo "}"
@@ -554,7 +554,7 @@ main() {
     echo "}" 								>>"${_START}"
     echo 								>>"${_START}"
     cat "${_START}"
-    echo "    docker rm -f \$(docker ps -qa) >/dev/null 2>&1"		>>"${_STOP}"
+    echo "    docker ps -q | xargs docker kill -f >/dev/null 2>&1"	>>"${_STOP}"
     for br in ${LINKS}; do
         if [[ "${br}" =~ ^br.* ]]; then 
             echo "    [ -e /sys/class/net/${br} ] && {"			>>"${_STOP}"
