@@ -15,4 +15,9 @@ RUN make install
 
 RUN apt-get install -y tcpdump curl iperf
 
+RUN apt-get install -y zabbix-agent
+ADD tools/zabbix_agentd.conf /etc/zabbix/zabbix_agentd.conf
+
 WORKDIR /src/workspace
+
+

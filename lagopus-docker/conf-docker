@@ -191,6 +191,8 @@ register_docker_run_lagopus_vswitch() {
     echo "    local name=\$1"
     echo "    for ((;;)); do"
     echo "        docker run --name \${name} --link ${RYU}:OF --cap-add=NET_ADMIN -v ${WORKDIR}:${SRCWRKDIR}\\"
+    echo " --hostname=\${name}-ldn\\"
+    echo " --add-host host-docker0:`tools/ipaddr.sh docker0`\\"
     echo " -itd lagopus-vswitch:${TAG} bash >>${CONTDIR}/\${name}"
     echo "        [ "\"\$?\"" -eq 0 ] && break"
     echo "        sleep 1"
@@ -272,6 +274,7 @@ conf_switch() {
         echo "install -m 644 ${SRCWRKDIR}/`basename ${conf_file}`\\"	>>"${outfile}"
         echo " /usr/local/etc/lagopus/lagopus.conf" 			>>"${outfile}"
         echo "lagopus -d -l /tmp/lagopus.log -- -- -p3 &"		>>"${outfile}"
+        echo "/usr/sbin/service zabbix-agent start" | tr ! ' '				>>"${outfile}"
         for app in ${applist}; do
              echo "nohup ${app} &" | tr ! ' '				>>"${outfile}"
         done
@@ -353,6 +356,7 @@ conf_host() {
         eval local applist=\${${host}_APP:-}
         local outfile=${WORKDIR}/${host}.sh
         cat "${_HOSTS}"							>>"${outfile}"
+        echo "/usr/sbin/service zabbix-agent start" | tr ! ' '				>>"${outfile}"
         for app in ${applist}; do
             echo "nohup ${app} &" | tr ! ' '				>>"${outfile}"
         done
