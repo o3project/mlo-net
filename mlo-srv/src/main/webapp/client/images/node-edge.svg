@@ -7,6 +7,7 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="64"
@@ -15,9 +16,18 @@
    version="1.1"
    inkscape:version="0.91 r13725"
    viewBox="0 0 64 64"
-   sodipodi:docname="edge-node.svg">
+   sodipodi:docname="node-edge-3.svg">
   <defs
-     id="defs4743" />
+     id="defs4743">
+    <symbol
+       id="symbol7266">
+      <path
+         style="fill:#999999;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
+         d="M 31.999197,0.18181818 A 31.818191,31.818191 0 0 0 0.18217335,32.000979 31.818191,31.818191 0 0 0 31.999197,63.818005 31.818191,31.818191 0 0 0 63.818359,32.000979 31.818191,31.818191 0 0 0 31.999197,0.18181818 Z m -9.751894,7.47680912 11.163944,14.3661537 -6.581728,0.03204 0,32.214363 -9.346011,0 0,-32.171639 -6.163027,0.02991 10.926822,-14.4708276 z m 13.42194,0.040588 9.346011,0 0,32.214363 6.581727,0.03204 -11.163942,14.366154 -10.926822,-14.470828 6.163026,0.02991 0,-32.1716389 z"
+         id="path4749"
+         inkscape:connector-curvature="0" />
+    </symbol>
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -26,7 +36,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.5"
-     inkscape:cx="-0.18181818"
+     inkscape:cx="-32.181818"
      inkscape:cy="32"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -45,7 +55,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -53,9 +63,8 @@
      id="layer1"
      inkscape:label="Layer 1"
      inkscape:groupmode="layer">
-    <path
-       style="fill:#999999"
-       d="M 32 -0.18164062 A 32 32.090908 0 0 0 0 31.908203 A 32 32.090908 0 0 0 32 64 A 32 32.090908 0 0 0 64 31.908203 A 32 32.090908 0 0 0 32 -0.18164062 z M 50.84375 8.5839844 L 54.078125 11.730469 L 40.742188 25.484375 L 42.691406 27.380859 L 38.433594 28.308594 L 34.177734 29.236328 L 34.923828 24.898438 L 35.669922 20.558594 L 37.505859 22.339844 L 50.84375 8.5839844 z M 10.521484 10.832031 L 14.804688 11.632812 L 19.087891 12.435547 L 17.195312 14.388672 L 30.931641 27.740234 L 27.789062 30.980469 L 14.052734 17.628906 L 12.269531 19.460938 L 11.394531 15.144531 L 10.521484 10.832031 z M 35.958984 32.742188 L 49.697266 46.095703 L 51.589844 44.142578 L 52.517578 48.404297 L 53.445312 52.667969 L 49.111328 51.919922 L 44.775391 51.171875 L 46.554688 49.335938 L 32.816406 35.982422 L 35.958984 32.742188 z M 29.136719 34.435547 L 28.335938 38.722656 L 27.535156 43.011719 L 25.585938 41.115234 L 12.248047 54.871094 L 9.0117188 51.724609 L 22.349609 37.970703 L 20.515625 36.185547 L 24.828125 35.310547 L 29.136719 34.435547 z "
-       id="path3343" />
+    <use
+       xlink:href="#symbol7266"
+       id="use7269" />
   </g>
 </svg>

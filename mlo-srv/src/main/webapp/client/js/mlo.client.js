@@ -268,6 +268,40 @@ APP.model.update = function () {
             }
             return ldBridge;
         };
+        var constructLink = function (srcRySwIdx, dstRySwIdx, topoLink, ldBridge, nodeToNodeIndex) {
+            return ({
+                source: srcRySwIdx,
+                target: dstRySwIdx,
+                topoLink: topoLink,
+                ldBridge: ldBridge,
+                nodeToNodeIndex: nodeToNodeIndex,
+                getSourcePos: function () {
+                    var edgePos = calcEdgePos(this.source, this.target),
+                        dvec = this.dVec();
+                    return {x: (edgePos.x + dvec.dx), y: (edgePos.y + dvec.dy)};
+                },
+                getTargetPos: function () {
+                    var edgePos = calcEdgePos(this.target, this.source),
+                        dvec = this.dVec();
+                    return {x: (edgePos.x + dvec.dx), y: (edgePos.y + dvec.dy)};
+                },
+                dVec: function () {
+                    var r,
+                        enorm, factor,
+                        dfactor = 6.0,
+                        dvecx = 0.0, dvecy = 0.0,
+                        idx = this.nodeToNodeIndex;
+                    if (idx > 0) {
+                        r = -1.0 * (this.target.x - this.source.x) / (this.target.y - this.source.y);
+                        factor = Math.pow(-1, idx % 2) * (Math.floor(idx / 2) + idx % 2) * dfactor;
+                        enorm = Math.sqrt(1.0 + r * r);
+                        dvecx = factor * 1.0 / enorm;
+                        dvecy = factor * r / enorm;
+                    }
+                    return {dx: dvecx, dy: dvecy, idx: idx};
+                }
+            });
+        };
         for (idxLink = 0; idxLink < ryLinks.length; idxLink += 1) {
             topoLink = ryLinks[idxLink];
             srcRySwIdx = searchNodeIndexByRyDpid(topoLink.src.dpid, nodes);
@@ -309,38 +343,7 @@ APP.model.update = function () {
                 nodeToNodeCounts[nodeToNodeKey] = 0;
             }
 
-            link = {
-                source: srcRySwIdx,
-                target: dstRySwIdx,
-                topoLink: topoLink,
-                ldBridge: ldBridge,
-                nodeToNodeIndex: nodeToNodeCounts[nodeToNodeKey],
-                getSourcePos: function () {
-                    var edgePos = calcEdgePos(this.source, this.target),
-                        dvec = this.dVec();
-                    return {x: (edgePos.x + dvec.dx), y: (edgePos.y + dvec.dy)};
-                },
-                getTargetPos: function () {
-                    var edgePos = calcEdgePos(this.target, this.source),
-                        dvec = this.dVec();
-                    return {x: (edgePos.x + dvec.dx), y: (edgePos.y + dvec.dy)};
-                },
-                dVec: function () {
-                    var r,
-                        enorm, factor,
-                        dfactor = 6.0,
-                        dvecx = 0.0, dvecy = 0.0,
-                        idx = this.nodeToNodeIndex;
-                    if (idx > 0) {
-                        r = -1.0 * (this.target.x - this.source.x) / (this.target.y - this.source.y);
-                        factor = Math.pow(-1, idx % 2) * (Math.floor(idx / 2) + idx % 2) * dfactor;
-                        enorm = Math.sqrt(1.0 + r * r);
-                        dvecx = factor * 1.0 / enorm;
-                        dvecy = factor * r / enorm;
-                    }
-                    return {dx: dvecx, dy: dvecy, idx: idx};
-                }
-            };
+            link = constructLink(srcRySwIdx, dstRySwIdx, topoLink, ldBridge, nodeToNodeCounts[nodeToNodeKey]);
             objs.push(link);
         }
         return objs;
@@ -350,7 +353,7 @@ APP.model.update = function () {
         var objs = [],
             idxLink = 0,
             link;
-        var createPort = function (base, link, main, sub) {
+        var constructPort = function (base, link, main, sub) {
             var obj = base;
             obj.link = link;
             obj.getPos = function () {
@@ -362,8 +365,8 @@ APP.model.update = function () {
         };
         for (idxLink = 0; idxLink < model.links.length; idxLink += 1) {
             link = model.links[idxLink];
-            objs.push(createPort(link.topoLink.src, link, 'source', 'target'));
-            objs.push(createPort(link.topoLink.dst, link, 'target', 'source'));
+            objs.push(constructPort(link.topoLink.src, link, 'source', 'target'));
+            objs.push(constructPort(link.topoLink.dst, link, 'target', 'source'));
         }
         return objs;
     }(this));
@@ -421,10 +424,28 @@ APP.view = {
 };
 
 APP.view.init = function () {
-    var svgSize = APP.cfg.svgSize;
+    var svgSize = APP.cfg.svgSize,
+        loadSymbolFromSvgImage;
 
     this.canvas = d3.select('#topo-canvas');
     this.svg = this.canvas.append('svg');
+    this.svgDefs = this.svg.append('defs');
+    
+    loadSymbolFromSvgImage = function (url, id, parentSelector) {
+        d3.xml(url, 'image/svg+xml', function (error, xml) {
+            var $xml, $symbol;
+            $xml = $(xml);
+            $symbol = $('svg symbol', $xml);
+            $symbol.attr('id', id).attr('viewBox', $('svg', $xml).attr('viewBox'));
+            $(parentSelector).append($symbol);
+        });
+    };
+    loadSymbolFromSvgImage('images/host.svg', 'svg-symbol-host', '#topo-canvas svg defs');
+    loadSymbolFromSvgImage('images/node-edge.svg', 'svg-symbol-node-edge', '#topo-canvas svg defs');
+    loadSymbolFromSvgImage('images/node-mpls.svg', 'svg-symbol-node-mpls', '#topo-canvas svg defs');
+    loadSymbolFromSvgImage('images/layer.svg', 'svg-symbol-layer', '#topo-canvas svg defs');
+    loadSymbolFromSvgImage('images/node-any.svg', 'svg-symbol-node-any', '#topo-canvas svg defs');
+    
     this.force = d3.layout.force();
 
     this.viewNodes = this.svg.selectAll('.view-node');
@@ -595,7 +616,6 @@ APP.view.update = function (model) {
 
         g = lines;
         g.on('mouseover', function () {
-            APP.log('mouseover called.');
             return that.tooltip.style('visibility', 'visible');
         });
         g.on('mousemove', function (d) {
@@ -620,11 +640,41 @@ APP.view.update = function (model) {
 
         g = that.viewNodes.enter().append('g').attr('class', 'view-node');
 
+        g.append('text')
+            .attr('dx', size.width / 2)
+            .attr('dy', size.height)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'alphabetic')
+            .text(function (d) { return d.name; });
+        g.append('use')
+            .attr('xlink:href', function (d) {
+                var xlinkHref;
+                if ('host' === d.type) {
+                    xlinkHref = '#svg-symbol-host';
+                } else if ('edge' === d.type) {
+                    xlinkHref = '#svg-symbol-node-edge';
+                } else if ('mpls' === d.type) {
+                    xlinkHref = '#svg-symbol-node-mpls';
+                } else if ('collapsed-layer' === d.type) {
+                    xlinkHref = '#svg-symbol-layer';
+                } else {
+                    xlinkHref = '#svg-symbol-node-any';
+                }
+                return xlinkHref;
+            })
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', size.width)
+            .attr('height', size.height - 8);
+
         g.call(that.force.drag().on('dragstart', function (d) {
             d.fixed = true;
             d3.select(this).classed('fixed', d.fixed);
         }));
         g.on('dblclick', function (d, i) {
+            APP.log('dblclick called.: ' + d.name);
+            that.tooltip.style('visibility', 'hidden');
+            
             d.fixed = false;
             d3.select(this).classed('fixed', d.fixed);
 
@@ -635,14 +685,14 @@ APP.view.update = function (model) {
                 APP.model.addCollapsedType(d.type);
                 APP.model.update();
             }
-            that.tooltip.style('visibility', 'hidden');
         });
-        g.on('mouseover', function () {
-            APP.log('mouseover called.');
+        g.on('mouseover', function (d) {
+            //APP.log('mouseover called.: ' + d.name);
             return that.tooltip.style('visibility', 'visible');
         });
         g.on('mousemove', function (d) {
             var ipdisp = '', macdisp = '';
+            //APP.log('mousemove called.: ' + d.name);
             if (d.ip) {
                 ipdisp = '<dt>IP:</dt><dd>' + d.ip + '</dd>';
             }
@@ -661,41 +711,18 @@ APP.view.update = function (model) {
                     macdisp + 
                     '</dl>');
         });
-        g.on('mouseout', function () {
+        g.on('mouseout', function (d) {
+            //APP.log('mouseout called.: ' + d.name);
             return that.tooltip.style('visibility', 'hidden');
         });
         g.on('contextmenu', function (d, i) {
             APP.log('contextmenu called.: ' + d.name);
             d3.event.preventDefault();
             that.tooltip.style('visibility', 'hidden');
-            that.openNodeContextMenu(d, d3.event);
+            if (d.type !== 'collapsed-layer') {
+                that.openNodeContextMenu(d, d3.event);
+            }
         });
-        g.append('image')
-            .attr('xlink:href', function (d) {
-                var imgRef;
-                if ('host' === d.type) {
-                    imgRef = './images/host.svg';
-                } else if ('edge' === d.type) {
-                    imgRef = './images/node-edge-2.svg';
-                } else if ('mpls' === d.type) {
-                    imgRef = './images/node-mpls.svg';
-                } else if ('collapsed-layer' === d.type) {
-                    imgRef = './images/layer.svg';
-                } else {
-                    imgRef = './images/node-any.svg';
-                }
-                return imgRef;
-            })
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', size.width)
-            .attr('height', size.height - 8);
-        g.append('text')
-            .attr('dx', size.width / 2)
-            .attr('dy', size.height)
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'alphabetic')
-            .text(function (d) { return d.name; });
 
         that.viewNodes.exit().remove();
     };
@@ -1262,7 +1289,7 @@ APP.view.setDataToSliceListPanel = function (slices) {
 };
 
 APP.view.openNodeContextMenu = function (nodeData, evt) {
-    var view = this
+    var view = this,
         $nodeCntxtMenu = view.$nodeContextMenu;
 
     APP.log('Opening node context menu on ' + nodeData.name);
