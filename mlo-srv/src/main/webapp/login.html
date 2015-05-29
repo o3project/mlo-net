@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MLO web console login</title>
+    <link rel="stylesheet" type="text/css" href="/DEMO/common/css/base.css">
+    <link rel="stylesheet" type="text/css" href="/DEMO/common/css/mlo.client.css">
+</head>
+<body>
+    <div id="page-login">
+        <form class="login-form dark dark-grad" 
+            method="POST" action="j_security_check" name="loginform">
+            <span class="title">Multi Layer Orchestrator</span>
+            <fieldset>
+                <ul>
+                    <li>
+                        <label>User ID:</label>
+                        <input type="text" name="j_username" size="24" autofocus />
+                    </li>
+                    <li>
+                        <label>Password:</label>
+                        <input type="password" name="j_password" size="24" />
+                    </li>
+                </ul>
+            </fieldset>
+            <div class="submit-panel">
+                <input class="dark-button dark-grad" type="submit" value="login" />
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+

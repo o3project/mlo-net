@@ -140,6 +140,9 @@ version="2.4">
         <session-timeout>1</session-timeout>
     </session-config>
 	-->
+    <session-config>
+        <session-timeout>5</session-timeout>
+    </session-config>
 
 	<!--
     <welcome-file-list>
@@ -155,4 +158,28 @@ version="2.4">
     		<include-prelude>/WEB-INF/view/common/common.jsp</include-prelude>
     	</jsp-property-group>
     </jsp-config>
+
+    <!-- Authentication settings -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>MLO User Authentication</web-resource-name>
+            <url-pattern>/console/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>mlo-user</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>MLO User FORM Authentication</realm-name>
+        <form-login-config>
+            <form-login-page>/login.html</form-login-page>
+            <form-error-page>/login-error.html</form-error-page>
+        </form-login-config>
+    </login-config>
+    <security-role>
+        <role-name>mlo-user</role-name>
+    </security-role>
+    <!--
+    -->
 </web-app>
