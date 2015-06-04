@@ -124,7 +124,9 @@ case "$1" in
 	sudo docker commit ryu-p2 ryu:lldp
 	sudo docker run --name ryu-p3 -it ryu:lldp bash -c "cd /root/ryu-master; python ./setup.py install"
 	sudo docker commit ryu-p3 ryu:lldp
-	sudo docker rm -f ryu-p1 ryu-p2 ryu-p3
+	sudo docker run --name ryu-p4 -it ryu:lldp bash -c "pip install oslo.config --upgrade"
+	sudo docker commit ryu-p4 ryu:lldp
+	sudo docker rm -f ryu-p1 ryu-p2 ryu-p3 ryu-p4
 	docker_build_lagopus_vswitch
 	mod_sudoers
 	;;
