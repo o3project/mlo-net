@@ -72,6 +72,25 @@ APP.cfg = {
 };
 
 
+APP.namespace = function (ns_string) {
+    var parts = ns_string.split('.'),
+        currObj = APP,
+        idx = 0;
+
+    APP.log('[INFO] Defining ... ' + ns_string);
+
+    if (parts[0] === 'APP') {
+        parts = parts.slice(1);
+    }
+    for (idx = 0; idx < parts.length; idx += 1) {
+        if (typeof currObj[parts[idx]] === 'undefined') {
+            currObj[parts[idx]] = {};
+        }
+        currObj = currObj[parts[idx]];
+    }
+    return currObj;
+};
+
 APP.model = {
     topoSwitches: [],
     topoLinks: [],
@@ -81,6 +100,186 @@ APP.model = {
     ports: [],
     collapsedTypes: []
 };
+
+APP.namespace('APP.rpc');
+APP.rpc = (function (opts) {
+    var pfs = {};
+    opts = opts || {};
+
+    pfs.userid = 'developer';
+
+    pfs.createResponseCallbacks = function (callbacks) {
+        return {
+            success: function (resJson, textStatus, xhr) {
+                APP.log(resJson);
+                if (!resJson.common.error) {
+                    if (!!callbacks && !!(callbacks.success)) {
+                        callbacks.success(resJson);
+                    }
+                } else {
+                    APP.log('[ERROR] Error occurs.: ' + resJson.common.error);
+                    if (!!callbacks && !!(callbacks.apiCallError)) {
+                        callbacks.apiCallError(resJson);
+                    }
+                }
+            },
+            error: function (xhr, textStatus, error) {
+                APP.log('[ERROR] Failed to get slices. (textStatus, error) = ' + 
+                        '(' + textStatus + ', ' + error + ')');
+                if (!!callbacks && !!(callbacks.error)) {
+                    callbacks.error(textStatus, error);
+                }
+            },
+            complete: function (xhr, textStatus) {
+                if (!!callbacks && !!(callbacks.complete)) {
+                    callbacks.complete(textStatus);
+                }
+            }
+        };
+    };
+
+    pfs.requestWithSliceBody = function (callbacks, url, httpMethod, sliceObj) {
+        var userid = pfs.userid,
+            settings,
+            reqData,
+            resCallbacks = pfs.createResponseCallbacks(callbacks);
+
+        reqData = {
+            common: {
+                version: 1,
+                srcComponent: {name: userid},
+                dstComponent: {name: 'mlo'},
+                operation: 'Request'
+            },
+            slice: sliceObj
+        };
+        
+        settings = {
+            type: httpMethod,
+            url: url,
+            cache: false,
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(reqData),
+            success: resCallbacks.success,
+            error: resCallbacks.error,
+            complete: resCallbacks.complete
+        };
+        APP.log('Requesting to ' + httpMethod + ' slice...');
+        $.ajax(settings);
+    };
+
+    pfs.requestToGetSlices = function (callbacks) {
+        var userid = pfs.userid,
+            settings,
+            resCallbacks = pfs.createResponseCallbacks(callbacks);
+        
+        settings = {
+            type: 'GET',
+            url: '../slices/?owner=' + userid + '&withFlowList=true',
+            cache: false,
+            dataType: 'json',
+            success: resCallbacks.success,
+            error: resCallbacks.error,
+            complete: resCallbacks.complete
+        };
+        APP.log('Getting slices...');
+        $.ajax(settings);
+    };
+
+    pfs.requestToPostSlice = function (callbacks, sliceObj) {
+        var url = '../slices/';
+        return pfs.requestWithSliceBody(callbacks, url, 'POST', sliceObj);
+    };
+
+    pfs.requestToPutSlice = function (callbacks, sliceObj) {
+        var url = '../slices/' + sliceObj.id;
+        return pfs.requestWithSliceBody(callbacks, url, 'PUT', sliceObj);
+    };
+
+    pfs.requestToDeleteSlice = function (callbacks, sliceid) {
+        var userid = pfs.userid,
+            settings,
+            resCallbacks = pfs.createResponseCallbacks(callbacks);
+    
+        settings = {
+            type: 'DELETE',
+            url: '../slices/' + sliceid + '?owner=' + userid,
+            cache: false,
+            dataType: 'json',
+            success: resCallbacks.success,
+            error: resCallbacks.error,
+            complete: resCallbacks.complete
+        };
+        APP.log('Deleting slice...');
+        $.ajax(settings);
+    };
+
+    return {
+        requestToGetSlices: pfs.requestToGetSlices,
+        requestToPostSlice: pfs.requestToPostSlice,
+        requestToPutSlice: pfs.requestToPutSlice,
+        requestToDeleteSlice: pfs.requestToDeleteSlice,
+        __END__:null
+    };
+}());
+
+APP.namespace('APP.model.topology');
+APP.model.topology = (function (opts) {
+    var pfs = {},
+        rpc = APP.rpc;
+    opts = opts || {};
+
+    pfs.load = function (cfg) {
+        var topoData = {},
+            rySwitchesUrl = cfg.switchesPath,
+            ryLinksUrl = cfg.linksPath,
+            topoConfUrl = cfg.topoConfPath,
+            rySwitches,
+            ryLinks,
+            topoConf,
+            loadJson;
+
+        loadJson = function (url, successCb, errorCb) {
+            APP.log('[INFO] Loading: ' + url);
+            d3.json(url, function (err, data) {
+                if (!err) {
+                    APP.log('[INFO] Successfully loaded: ' + url);
+                    if (successCb) {
+                        successCb(data);
+                    }
+                } else {
+                    APP.log('[ERROR] Failed to load: ' + url);
+                    APP.log('[ERROR] err: ' + err);
+                    if (errorCb) {
+                        errorCb(err, data);
+                    }
+                }
+            });
+        };
+
+        loadJson(rySwitchesUrl, function (data) {
+            rySwitches = data;
+            loadJson(ryLinksUrl, function (data) {
+                ryLinks = data;
+                loadJson(topoConfUrl, function (data) {
+                    topoConf = data;
+                    APP.model.init(rySwitches, ryLinks, topoConf);
+                    rpc.requestToGetSlices({
+                        success: function (resJson) {
+                            APP.view.setDataToSliceListPanel(resJson.slices);
+                        }
+                    });
+                });
+            });
+        });
+    };
+    APP.log('[INFO] APP.model.topology');
+    return {
+        load: pfs.load,
+        __END__: null
+    };
+}());
 
 APP.model.init = function (switches, links, topoConf) {
     this.topoSwitches = switches;
@@ -650,7 +849,12 @@ APP.view.update = function (model) {
         APP.log('nodes.length = ' + nodes.length);
         that.viewNodes = that.svg.selectAll('.view-node').data(nodes, function (d) { return d.name;});
 
-        g = that.viewNodes.enter().append('g').attr('class', 'view-node');
+        g = that.viewNodes.enter().append('g');
+
+        g.classed('view-node', true)
+            .classed('alarm', function (d) {
+                return (d.state === 'alarm');
+            });
 
         g.append('text')
             .attr('dx', size.width / 2)
@@ -857,7 +1061,7 @@ APP.view.findFlowIndexById = function (flowid, slice) {
 };
 
 APP.view.reloadSlices = function () {
-    APP.api.requestToGetSlices({
+    APP.rpc.requestToGetSlices({
         success: function (resJson) {
             APP.view.setDataToSliceListPanel(resJson.slices);
         }
@@ -903,7 +1107,7 @@ APP.view.createAction = function (actionKey, slices) {
                 buttonClicked;
             buttonClicked = function () {
                 sliceObj = view.getSliceObjFromSliceDlg('add');
-                APP.api.requestToPostSlice({
+                APP.rpc.requestToPostSlice({
                     success: function (resJson) {
                         APP.log(resJson);
                         view.reloadSlices();
@@ -923,7 +1127,7 @@ APP.view.createAction = function (actionKey, slices) {
         },
         // deleteSlice-action
         deleteSlice: function (sliceid, flowid) {
-            APP.api.requestToDeleteSlice({
+            APP.rpc.requestToDeleteSlice({
                 success: function (resJson) {
                     APP.log(resJson);
                     view.reloadSlices();
@@ -939,7 +1143,7 @@ APP.view.createAction = function (actionKey, slices) {
             buttonClicked = function () {
                 sliceObj = view.getSliceObjFromSliceDlg('add');
                 sliceObj.id = sliceid;
-                APP.api.requestToPutSlice({
+                APP.rpc.requestToPutSlice({
                     success: function (resJson) {
                         APP.log(resJson);
                         view.reloadSlices();
@@ -976,7 +1180,7 @@ APP.view.createAction = function (actionKey, slices) {
                 delete sliceObj.name;
                 if (sliceObj.flows.length === 1) {
                     sliceObj.flows[0].id = flowid;
-                    APP.api.requestToPutSlice({
+                    APP.rpc.requestToPutSlice({
                         success: function (resJson) {
                             APP.log(resJson);
                             view.reloadSlices();
@@ -1023,7 +1227,7 @@ APP.view.createAction = function (actionKey, slices) {
                     id: sliceid,
                     flows: [{ type: 'del', id: flowid }]
                 };
-                APP.api.requestToPutSlice({
+                APP.rpc.requestToPutSlice({
                     success: function (resJson) {
                         APP.log(resJson);
                         view.reloadSlices();
@@ -1205,10 +1409,10 @@ APP.view.setDataToSliceListPanel = function (slices) {
         }).click(function () {
             // Delete this slice here.
             var sliceid = $('.slice-id', $that).text();
-            APP.api.requestToDeleteSlice({
+            APP.rpc.requestToDeleteSlice({
                 success: function (resJson) {
                     APP.log(resJson);
-                    APP.api.requestToGetSlices({
+                    APP.rpc.requestToGetSlices({
                         success: function (resJson) {
                             APP.view.setDataToSliceListPanel(resJson.slices);
                         }
@@ -1333,113 +1537,6 @@ APP.api.setFlowListItems = function (sliceName, flowListItems) {
     APP.view.setFlowListItems(sliceName, flowListItems);
 };
 
-APP.api.requestToGetSlices = function (callbacks) {
-    var userid = 'developer',
-        settings,
-        resCallbacks = APP.api.createResponseCallbacks(callbacks);
-    
-    settings = {
-        type: 'GET',
-        url: '../slices/?owner=' + userid + '&withFlowList=true',
-        cache: false,
-        dataType: 'json',
-        success: resCallbacks.success,
-        error: resCallbacks.error,
-        complete: resCallbacks.complete
-    };
-    APP.log('Getting slices...');
-    $.ajax(settings);
-};
-
-APP.api._requestWithSliceBody = function (callbacks, url, httpMethod, sliceObj) {
-    var userid = 'developer',
-        settings,
-        reqData,
-        resCallbacks = APP.api.createResponseCallbacks(callbacks);
-
-    reqData = {
-        common: {
-            version: 1,
-            srcComponent: {name: userid},
-            dstComponent: {name: 'mlo'},
-            operation: 'Request'
-        },
-        slice: sliceObj
-    };
-    
-    settings = {
-        type: httpMethod,
-        url: url,
-        cache: false,
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify(reqData),
-        success: resCallbacks.success,
-        error: resCallbacks.error,
-        complete: resCallbacks.complete
-    };
-    APP.log('Requesting to ' + httpMethod + ' slice...');
-    $.ajax(settings);
-};
-
-APP.api.requestToPostSlice = function (callbacks, sliceObj) {
-    var url = '../slices/';
-    return this._requestWithSliceBody(callbacks, url, 'POST', sliceObj);
-};
-
-APP.api.requestToPutSlice = function (callbacks, sliceObj) {
-    var url = '../slices/' + sliceObj.id;
-    return this._requestWithSliceBody(callbacks, url, 'PUT', sliceObj);
-};
-
-APP.api.requestToDeleteSlice = function (callbacks, sliceid) {
-    var userid = 'developer',
-        settings,
-        resCallbacks = APP.api.createResponseCallbacks(callbacks);
-    
-    settings = {
-        type: 'DELETE',
-        url: '../slices/' + sliceid + '?owner=' + userid,
-        cache: false,
-        dataType: 'json',
-        success: resCallbacks.success,
-        error: resCallbacks.error,
-        complete: resCallbacks.complete
-    };
-    APP.log('Deleting slice...');
-    $.ajax(settings);
-};
-
-APP.api.createResponseCallbacks = function (callbacks) {
-    return {
-        success: function (resJson, textStatus, xhr) {
-            APP.log(resJson);
-            if (!resJson.common.error) {
-                if (!!callbacks && !!(callbacks.success)) {
-                    callbacks.success(resJson);
-                }
-            } else {
-                APP.log('[ERROR] Error occurs.: ' + resJson.common.error);
-                if (!!callbacks && !!(callbacks.apiCallError)) {
-                    callbacks.apiCallError(resJson);
-                }
-            }
-        },
-        error: function (xhr, textStatus, error) {
-            APP.log('[ERROR] Failed to get slices. (textStatus, error) = ' + 
-                    '(' + textStatus + ', ' + error + ')');
-            if (!!callbacks && !!(callbacks.error)) {
-                callbacks.error(textStatus, error);
-            }
-        },
-        complete: function (xhr, textStatus) {
-            if (!!callbacks && !!(callbacks.complete)) {
-                callbacks.complete(textStatus);
-            }
-        }
-    };
-};
-
 APP.api.openNodeAccessDialog = function (nodeName) {
     if ((typeof mloApi !== 'undefined') && mloApi.openNodeAccessDialogbox) {
         mloApi.openNodeAccessDialogbox(nodeName);
@@ -1449,49 +1546,8 @@ APP.api.openNodeAccessDialog = function (nodeName) {
 };
 
 APP.load = function () {
-    var obj = {};
-    var topoConfLoaded = function (err, data) {
-        if (!err) {
-            obj.topoConf = data;
-            APP.model.init(obj.switches, obj.links, obj.topoConf);
-            APP.api.requestToGetSlices({
-                success: function (resJson) {
-                    APP.view.setDataToSliceListPanel(resJson.slices);
-                }
-            });
-        } else {
-            APP.log('[ERROR] Failed to load topoConf.');
-        }
-    };
-    var linksLoaded = function (err, data) {
-        var nextUrl = APP.cfg.topoConfPath;
-        if (!err) {
-            obj.links = data;
-
-            APP.log('[INFO] Loading ... ' + nextUrl);
-            d3.json(nextUrl, topoConfLoaded);
-        } else {
-            APP.log('[ERROR] Failed to load links.');
-        }
-    };
-    var switchesLoaded = function (err, data) {
-        var nextUrl = APP.cfg.linksPath;
-        if (!err) {
-            obj.switches = data;
-
-            APP.log('[INFO] Loading ... ' + nextUrl);
-            d3.json(nextUrl, linksLoaded);
-        } else {
-            APP.log('[ERROR] Failed to load switches.');
-        }
-    };
-    var startLoading = function () {
-        var url = APP.cfg.switchesPath;
-        APP.log('[INFO] Loading ... ' + url);
-        d3.json(url, switchesLoaded);
-    };
-    $('.busy').activity();
-    startLoading();
+    APP.log('[INFO] Loading topology.');
+    APP.model.topology.load(APP.cfg);
 };
 
 APP.init = function () {

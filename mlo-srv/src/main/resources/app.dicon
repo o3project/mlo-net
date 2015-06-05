@@ -24,7 +24,13 @@
       <arg>"default.mlo-srv.properties"</arg>
       <arg>"/etc/mlo/mlo-srv.properties"</arg>
   </component>
-  
+  <component name="notificationCenter" 
+      class="org.o3project.mlo.server.impl.logic.NotificationCenterImpl" 
+      instance="singleton">
+      <aspect>traceInterceptor</aspect>
+      <initMethod name="init" />
+      <destroyMethod name="destroy" />
+  </component>
   <component name="componentFactory"
       class="org.o3project.mlo.server.component.ComponentFactory" 
       instance="singleton">
@@ -42,6 +48,11 @@
   </component>
   <component name="topologyProviderRemoteLdImpl" 
       class="org.o3project.mlo.server.impl.logic.TopologyProviderRemoteLdImpl" 
+      instance="singleton">
+      <aspect>traceInterceptor</aspect>
+  </component>
+  <component name="alarmProcessor" 
+      class="org.o3project.mlo.server.impl.logic.AlarmProcessorImpl" 
       instance="singleton">
       <aspect>traceInterceptor</aspect>
   </component>

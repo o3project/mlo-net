@@ -207,6 +207,13 @@ div.footer .copyright {
     stroke-width: 0;
 }
 
+#topo-canvas .alarm {
+    fill: red;
+    color: red;
+    stroke: red;
+    stroke-width: 4;
+}
+
 #topo-canvas .view-link {
     fill: none;
     stroke: darkgray;
