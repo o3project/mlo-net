@@ -7,6 +7,7 @@ package org.o3project.mlo.server.impl.logic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.o3project.mlo.server.component.NetDeviceObj;
 import org.o3project.mlo.server.component.NodeObj;
 import org.o3project.mlo.server.component.TopologyObj;
 import org.o3project.mlo.server.dto.AlarmDto;
+import org.o3project.mlo.server.dto.EventDto;
 import org.o3project.mlo.server.dto.FlowDto;
 import org.o3project.mlo.server.dto.LdTopoDto;
 import org.o3project.mlo.server.dto.LinkInfoDto;
@@ -33,6 +35,7 @@ import org.o3project.mlo.server.dto.RySwitchDto;
 import org.o3project.mlo.server.logic.ApiCallException;
 import org.o3project.mlo.server.logic.ConfigConstants;
 import org.o3project.mlo.server.logic.ConfigProvider;
+import org.o3project.mlo.server.logic.EventRepository;
 import org.o3project.mlo.server.logic.LdTopologyRepository;
 import org.o3project.mlo.server.logic.MloException;
 import org.o3project.mlo.server.logic.Notification;
@@ -62,6 +65,8 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 	private final CacheData cacheData = new CacheData();
 	
 	private NotificationCenter notificationCenter;
+	
+	private EventRepository eventRepository;
 
 	/**
 	 * Setter method (for DI setter injection).
@@ -69,6 +74,13 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 	 */
 	public void setConfigProvider(ConfigProvider configProvider) {
 		this.configProvider = configProvider;
+	}
+	
+	/**
+	 * @param eventRepository the eventRepository to set
+	 */
+	public void setEventRepository(EventRepository eventRepository) {
+		this.eventRepository = eventRepository;
 	}
 	
 	/**
@@ -123,6 +135,7 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 						NodeObj targetNodeObj = cacheData.topologyObj.nodeMap.get(alarmDto.targetId);
 						String stateKey = getStateKey(targetNodeObj.getClass(), targetNodeObj.meta.id);
 						cacheData.componentStateMap.put(stateKey, alarmDto.state);
+						eventRepository.addEventToAllUsers(createTopologyStateChangedEvent());
 						
 						// Changes state of flows.
 						for (Entry<String, FlowObj> entry : cacheData.flowObjMap.entrySet()) {
@@ -135,6 +148,14 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 						}
 					}
 				}
+			}
+			
+			private EventDto createTopologyStateChangedEvent() {
+				EventDto eventDto = new EventDto();
+				eventDto.timestamp = new Date();
+				eventDto.type = "modified";
+				eventDto.targetType = "topology-state";
+				return eventDto;
 			}
 		}, AlarmDto.class.getName());
 	}

@@ -51,6 +51,11 @@
       instance="singleton">
       <aspect>traceInterceptor</aspect>
   </component>
+  <component name="eventRepository" 
+      class="org.o3project.mlo.server.impl.logic.EventRepositoryImpl" 
+      instance="singleton">
+      <aspect>traceInterceptor</aspect>
+  </component>
   <component name="alarmProcessor" 
       class="org.o3project.mlo.server.impl.logic.AlarmProcessorImpl" 
       instance="singleton">
