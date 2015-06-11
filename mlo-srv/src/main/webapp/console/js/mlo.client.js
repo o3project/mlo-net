@@ -49,14 +49,14 @@ APP.getSizeExtent = function (size) {
 };
 
 APP.getEtcPathWith = function (path) {
-	var href = (window.location.href),
-		pathWithEtc;
-	if (href.indexOf('file:') !== 0) {
-		pathWithEtc = '../etc/' + path;
-	} else {
-		pathWithEtc = 'etc/' + path;
-	}
-	return pathWithEtc;
+    var href = (window.location.href),
+        pathWithEtc;
+    if (href.indexOf('file:') !== 0) {
+        pathWithEtc = '../etc/' + path;
+    } else {
+        pathWithEtc = 'etc/' + path;
+    }
+    return pathWithEtc;
 };
 
 APP.cfg = {
@@ -1528,28 +1528,28 @@ APP.load = function () {
     APP.model.topology.load(APP.cfg);
 };
 
-APP.initWebSocket = function () {
+APP.connectToEventsApi = function () {
     var ws = new WebSocket("ws://" + location.hostname + ":8080/DEMO/events");
     ws.onopen = function(){
-    	APP.log('Websocket connection is opened.');
+        APP.log('Websocket connection is opened.');
     };
     ws.onclose = function() {
-    	APP.log('Websocket connection is closed.');
-    }
+        APP.log('Websocket connection is closed.');
+    };
     ws.onmessage = function(message){
         APP.log(message.data + "\n");
         var obj = JSON.parse(message.data);
-    	APP.log(obj);
-    	APP.load();
+        APP.log(obj);
+        APP.load();
     };
-}
+};
 
 APP.init = function () {
     var ua = window.navigator.userAgent;
     this.cfg.queryParams = this.getQueryParams();
+    this.connectToEventsApi();
     this.view.init();
     this.load();
-    APP.log('user-agent: ' + ua);
-	this.initWebSocket();
+    APP.log('[INFO] user-agent: ' + ua);
 };
 
