@@ -134,8 +134,16 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 						// Changes state of the node.
 						NodeObj targetNodeObj = cacheData.topologyObj.nodeMap.get(alarmDto.targetId);
 						String stateKey = getStateKey(targetNodeObj.getClass(), targetNodeObj.meta.id);
-						cacheData.componentStateMap.put(stateKey, alarmDto.state);
-						eventRepository.addEventToAllUsers(createTopologyStateChangedEvent());
+						
+						if(cacheData.componentStateMap.containsKey(stateKey)){
+							if (!cacheData.componentStateMap.get(stateKey).equals(alarmDto.state)){
+								cacheData.componentStateMap.put(stateKey, alarmDto.state);
+								eventRepository.addEventToAllUsers(createTopologyStateChangedEvent());
+							}
+						}else{
+							cacheData.componentStateMap.put(stateKey, alarmDto.state);
+							eventRepository.addEventToAllUsers(createTopologyStateChangedEvent());
+						}
 						
 						// Changes state of flows.
 						for (Entry<String, FlowObj> entry : cacheData.flowObjMap.entrySet()) {

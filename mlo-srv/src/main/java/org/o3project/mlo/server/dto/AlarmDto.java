@@ -8,10 +8,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.seasar.framework.beans.util.Beans;
-
 import net.arnx.jsonic.JSON;
 import net.arnx.jsonic.JSONHint;
+
+import org.seasar.framework.beans.util.Beans;
 
 /**
  * AlarmDto
@@ -36,9 +36,9 @@ public class AlarmDto {
 	public String generateIdentifier() {
 		Map<String, Object> props = new HashMap<>();
 		Beans.copy(this, props).execute();
-		props.remove("id");
-		props.remove("timestamp");
-		props.remove("description");
+		//props.remove("id");
+		//props.remove("timestamp");
+		//props.remove("description");
 		return JSON.encode(props, true);
 	}
 	
