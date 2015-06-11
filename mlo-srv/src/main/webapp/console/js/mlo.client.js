@@ -371,6 +371,7 @@ APP.model.topology = (function (opts) {
                         children: []
                     };
                     objs.push(collapsedNode);
+                    objs[collapsedNode.name] = collapsedNode;
                 }
                 node.topoSwitch = sw;
                 node.ryDpid = sw.dpid;
@@ -553,16 +554,19 @@ APP.model.topology = (function (opts) {
         var topologyView = APP.view.topology,
             rySwitches = pfs.rySwitches,
             ryLinks = pfs.ryLinks,
-            ldTopoConf = pfs.ldTopoConf;
+            ldTopoConf = pfs.ldTopoConf,
+            newNodes,
+            newLinks,
+            newPorts;
 
-        pfs.nodes = pfs.constructNodes(ldTopoConf, rySwitches, pfs.collapsedTypes);
-        pfs.links = pfs.constructLinks(ryLinks, pfs.nodes, ldTopoConf.bridges);
-        pfs.ports = pfs.constructPorts(pfs.links);
+        newNodes = pfs.constructNodes(ldTopoConf, rySwitches, pfs.collapsedTypes);
+        newLinks = pfs.constructLinks(ryLinks, newNodes, ldTopoConf.bridges);
+        newPorts = pfs.constructPorts(newLinks);
 
         topologyView.update({
-            nodes: pfs.nodes,
-            links: pfs.links,
-            ports: pfs.ports,
+            nodes: newNodes,
+            links: newLinks,
+            ports: newPorts,
             __END__: null
         });
     };
@@ -731,6 +735,25 @@ APP.view.topology = (function (opts) {
         return pfs.tooltip.style('visibility', 'hidden');
     };
 
+    pfs.copyViewNodeProps = function (nodes) {
+        var oldObj,
+            newObj,
+            sel = pfs.svg.selectAll('.view-node'),
+            oldObjs= sel.data(),
+            newObjs = nodes,
+            idx = 0;
+        for (idx = 0; idx < oldObjs.length; idx += 1) {
+            oldObj = oldObjs[idx];
+            newObj = newObjs[oldObj.name];
+            if (newObj) {
+                newObj.x = oldObj.x;
+                newObj.y = oldObj.y;
+                newObj.fixed = oldObj.fixed;
+            }
+        }
+        return newObjs;
+    };
+
     pfs.updateViewNodes = function (nodes) {
         var g,
             size = cfg.nodeRectSize;
@@ -877,6 +900,8 @@ APP.view.topology = (function (opts) {
         var nodes = data.nodes,
             links = data.links,
             ports = data.ports;
+
+        nodes = pfs.copyViewNodeProps(nodes);
 
         pfs.force
             .on('tick', pfs.tickLayout)
