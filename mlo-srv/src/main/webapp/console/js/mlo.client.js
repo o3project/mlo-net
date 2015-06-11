@@ -49,14 +49,14 @@ APP.getSizeExtent = function (size) {
 };
 
 APP.getEtcPathWith = function (path) {
-	var href = (window.location.href),
-		pathWithEtc;
-	if (href.indexOf('file:') !== 0) {
-		pathWithEtc = '../etc/' + path;
-	} else {
-		pathWithEtc = 'etc/' + path;
-	}
-	return pathWithEtc;
+    var href = (window.location.href),
+        pathWithEtc;
+    if (href.indexOf('file:') !== 0) {
+        pathWithEtc = '../etc/' + path;
+    } else {
+        pathWithEtc = 'etc/' + path;
+    }
+    return pathWithEtc;
 };
 
 APP.cfg = {
@@ -205,6 +205,7 @@ APP.rpc = (function (opts) {
         $.ajax(settings);
     };
 
+    APP.log('[INFO] APP.rpc');
     return {
         requestToGetSlices: pfs.requestToGetSlices,
         requestToPostSlice: pfs.requestToPostSlice,
@@ -257,7 +258,7 @@ APP.model.topology = (function (opts) {
                     pfs.init(rySwitches, ryLinks, topoConf);
                     rpc.requestToGetSlices({
                         success: function (resJson) {
-                            APP.view.setDataToSliceListPanel(resJson.slices);
+                            APP.view.operation.slices.setDataToSliceListPanel(resJson.slices);
                         }
                     });
                 });
@@ -370,6 +371,7 @@ APP.model.topology = (function (opts) {
                         children: []
                     };
                     objs.push(collapsedNode);
+                    objs[collapsedNode.name] = collapsedNode;
                 }
                 node.topoSwitch = sw;
                 node.ryDpid = sw.dpid;
@@ -552,16 +554,19 @@ APP.model.topology = (function (opts) {
         var topologyView = APP.view.topology,
             rySwitches = pfs.rySwitches,
             ryLinks = pfs.ryLinks,
-            ldTopoConf = pfs.ldTopoConf;
+            ldTopoConf = pfs.ldTopoConf,
+            newNodes,
+            newLinks,
+            newPorts;
 
-        pfs.nodes = pfs.constructNodes(ldTopoConf, rySwitches, pfs.collapsedTypes);
-        pfs.links = pfs.constructLinks(ryLinks, pfs.nodes, ldTopoConf.bridges);
-        pfs.ports = pfs.constructPorts(pfs.links);
+        newNodes = pfs.constructNodes(ldTopoConf, rySwitches, pfs.collapsedTypes);
+        newLinks = pfs.constructLinks(ryLinks, newNodes, ldTopoConf.bridges);
+        newPorts = pfs.constructPorts(newLinks);
 
         topologyView.update({
-            nodes: pfs.nodes,
-            links: pfs.links,
-            ports: pfs.ports,
+            nodes: newNodes,
+            links: newLinks,
+            ports: newPorts,
             __END__: null
         });
     };
@@ -612,20 +617,7 @@ APP.model.topology = (function (opts) {
     };
 }());
 
-APP.view = {
-    viewNodes: {},
-    viewLinks: {},
-    viewPorts: {},
-
-    canvas: {},
-    svg: {},
-    force: {},
-    tooltip: {},
-
-    $sliceListPanel: {},
-    $flowListPanel: {},
-    $flowListTemplate: {}
-};
+APP.namespace('APP.view');
 
 APP.namespace('APP.view.topology');
 APP.view.topology = (function (opts) {
@@ -743,6 +735,25 @@ APP.view.topology = (function (opts) {
         return pfs.tooltip.style('visibility', 'hidden');
     };
 
+    pfs.copyViewNodeProps = function (nodes) {
+        var oldObj,
+            newObj,
+            sel = pfs.svg.selectAll('.view-node'),
+            oldObjs= sel.data(),
+            newObjs = nodes,
+            idx = 0;
+        for (idx = 0; idx < oldObjs.length; idx += 1) {
+            oldObj = oldObjs[idx];
+            newObj = newObjs[oldObj.name];
+            if (newObj) {
+                newObj.x = oldObj.x;
+                newObj.y = oldObj.y;
+                newObj.fixed = oldObj.fixed;
+            }
+        }
+        return newObjs;
+    };
+
     pfs.updateViewNodes = function (nodes) {
         var g,
             size = cfg.nodeRectSize;
@@ -830,7 +841,7 @@ APP.view.topology = (function (opts) {
             d3.event.preventDefault();
             pfs.hideTooltip();
             if (d.type !== 'collapsed-layer') {
-                pfs.openNodeContextMenu(d, d3.event);
+                APP.view.operation.remote.openNodeContextMenu(d, d3.event);
             }
         });
 
@@ -890,6 +901,8 @@ APP.view.topology = (function (opts) {
             links = data.links,
             ports = data.ports;
 
+        nodes = pfs.copyViewNodeProps(nodes);
+
         pfs.force
             .on('tick', pfs.tickLayout)
             .nodes(nodes).links(links);
@@ -922,11 +935,35 @@ APP.view.topology = (function (opts) {
     };
 }());
 
-APP.namespace('APP.view.operation');
-APP.view.operation = (function (opts) {
+APP.namespace('APP.view.operation.slices');
+APP.view.operation.slices = (function (opts) {
     var pfs = {},
-        cfg = APP.cfg;
+        cfg = APP.cfg,
+        rpc = APP.rpc,
+        topologyModel = APP.model.topology;
     opts = opts || {};
+
+    pfs.$sliceListPanel = $('#page-main .slice-list-panel');
+    pfs.$postSliceDialogbox = $('#dialogbox-post-slice');
+    pfs.$flowOpMenu = $('#page-main .flow-operation-menu');
+    pfs.$sliceOpMenu = $('#page-main .slice-operation-menu');
+
+    pfs.getSliceListTemplate = function () {
+        return $('.slice-list-template', pfs.sliceListPanel);
+    };
+
+    pfs.getSliceList = function () {
+        return $('.slice-list', pfs.sliceListPanel);
+    };
+
+    pfs.init = function () {
+        pfs.initActions();
+        pfs.initSliceListPanel(pfs.$sliceListPanel);
+        pfs.initSliceOpDialogbox(pfs.$postSliceDialogbox);
+
+        pfs.$flowOpMenu.hide().menu();
+        pfs.$sliceOpMenu.hide().menu();
+    };
 
     pfs.initSliceListPanel = function ($sliceListPanel) {
         var $addSliceButton = $('h3 a', $sliceListPanel),
@@ -951,7 +988,7 @@ APP.view.operation = (function (opts) {
             text: false
         }).click(function () {
             var actionKey = 'createSlice',
-                doAction = pfs.createAction(actionKey);
+                doAction = pfs.getAction(actionKey);
             doAction();
         }).position({
             of: $sliceListPanel.find('h3:first'),
@@ -1000,27 +1037,6 @@ APP.view.operation = (function (opts) {
         });
     };
 
-    pfs.init = function () {
-        pfs.$sliceListPanel = $('.slice-list-panel');
-        pfs.$postSliceDialogbox = $('#dialogbox-post-slice');
-        pfs.$flowOpMenu = $('#page-main .flow-operation-menu');
-        pfs.$sliceOpMenu = $('#page-main .slice-operation-menu');
-        pfs.$nodeContextMenu = $('#page-main .node-context-menu');
-
-        $('a.logout-button').each(function (idx, ele) {
-            var href = $(ele).attr('href'),
-                pathname = encodeURIComponent(window.location.pathname);
-            if (href && href.lastIndexOf('?') > -1) {
-                $(ele).attr('href', (href + '&at=' + pathname));
-            } else if (href && href.lastIndexOf('?') < 0) {
-                $(ele).attr('href', (href + '?at=' + pathname));
-            }
-        });
-
-        pfs.initSliceListPanel(pfs.$sliceListPanel);
-        pfs.initSliceOpDialogbox(pfs.$postSliceDialogbox);
-    };
-
     pfs.findSliceById = function (sliceid, slices) {
         var slice = null,
             idx = 0;
@@ -1048,410 +1064,411 @@ APP.view.operation = (function (opts) {
     pfs.reloadSlices = function () {
         APP.rpc.requestToGetSlices({
             success: function (resJson) {
-                APP.view.setDataToSliceListPanel(resJson.slices);
+                pfs.setDataToSliceListPanel(resJson.slices);
+                topologyModel.setSelectedFlowTypeName();
             }
         });
     };
-    
 
-    APP.log('[INFO] APP.view.operation');
+    pfs.createFlowItem = function (flow, $flowItemTpl) {
+        var $flowItem = $flowItemTpl.clone();
+        $('.flow-id', $flowItem).text(flow.id);
+        $('.flow-name', $flowItem).text(flow.name);
+        $('.flow-type-name', $flowItem).text(flow.flowTypeName);
+        return $flowItem;
+    };
+
+    pfs.updateSliceOpMenuContent = function ($sliceOpMenu, slice) {
+        var $putFlowList    = $('li.put-flow-menu-item    ul.operation-flow-list', $sliceOpMenu),
+            $deleteFlowList = $('li.delete-flow-menu-item ul.operation-flow-list', $sliceOpMenu),
+            $sliceListTpl = pfs.getSliceListTemplate(),
+            $flowItemTpl = $sliceListTpl.find('>.flow-item:first');
+
+        $putFlowList.empty();
+        $deleteFlowList.empty();
+        jQuery.each(slice.flows, function (idx, flow) {
+            var $flowItem = pfs.createFlowItem(flow, $flowItemTpl),
+                $newFlowItem;
+
+            $newFlowItem = $flowItem.clone();
+            $('>.action-key', $putFlowList.parent()).clone().appendTo($newFlowItem);
+            $newFlowItem.appendTo($putFlowList);
+
+            $newFlowItem = $flowItem.clone();
+            $('>.action-key', $deleteFlowList.parent()).clone().appendTo($newFlowItem);
+            $newFlowItem.clone().appendTo($deleteFlowList);
+        });
+        $sliceOpMenu.menu('refresh');
+    };
+
+    pfs.showSliceOpMenu = function ($sliceOpMenu, sliceid, slices, parentUi) {
+        $sliceOpMenu.show().position({
+            of: parentUi,
+            my: 'left top',
+            at: 'left bottom',
+            collision: 'none none'
+        }).one('menuselect', function (event, ui) {
+            var $item = $(ui.item[0]),
+                actionKey = $('>.action-key', $item).text(),
+                flowid = 'N/A',
+                doAction;
+            if ($item.hasClass('flow-item')) {
+                flowid = $('>.flow-id', $item).text();
+            }
+            APP.log('(actionKey, sliceid, flowid) = (' + 
+                    actionKey + ', ' + sliceid + ', ' + flowid + ')');
+            doAction = pfs.getAction(actionKey);
+            doAction(sliceid, flowid, slices);
+        });
+        $(document).one('click', function () {
+            $sliceOpMenu.hide();
+        });
+        return false;
+    };
+
+    pfs.setDataToSliceListPanel = function (slices) {
+        var $sliceListTpl = pfs.getSliceListTemplate(),
+            $sliceTitleTpl = $sliceListTpl.find('>.slice-title:first'),
+            $flowItemTpl = $sliceListTpl.find('>.flow-item:first'),
+            $sliceList = pfs.getSliceList(),
+            $sliceTitle;
+
+        $sliceList.find('>*').remove();
+
+        jQuery.each(slices, function (index, slice) {
+            var $sliceTitle = $sliceTitleTpl.clone();
+            $('.slice-name', $sliceTitle).text(slice.name);
+            $('.slice-id', $sliceTitle).text(slice.id);
+            $sliceTitle.appendTo($sliceList);
+            jQuery.each(slice.flows, function (idxFlow, flow) {
+                var $flowItem = pfs.createFlowItem(flow, $flowItemTpl);
+                $flowItem.appendTo($sliceList);
+            });
+        });
+
+        $sliceList.menu('refresh');
+
+        $('.slice-title', $sliceList).each(function () {
+            var $that = $(this),
+                $editSliceBtn = $('a.edit-slice-op', $that),
+                $sliceOpMenu = pfs.$sliceOpMenu;
+
+            $editSliceBtn.button({
+                icons: {primary: 'ui-icon-carat-1-s'},
+                text: false
+            }).click(function () {
+                // Shows slice-editing menu here.
+                var sliceid = $('.slice-id', $that).text(),
+                    slice = pfs.findSliceById(sliceid, slices);
+
+                pfs.updateSliceOpMenuContent($sliceOpMenu, slice);
+                pfs.showSliceOpMenu($sliceOpMenu, sliceid, slices, this);
+
+                APP.log('Flow edit button clicked. ' + this);
+                return false;
+            }).position({
+                of: $that,
+                my: 'right center',
+                at: 'right-2 center',
+                collision: 'none none'
+            });
+        });
+
+        $sliceList.find('>.flow-item').selectable({
+            stop: function () {
+                $('.flow-type-name', this).each(function () {
+                    var flowTypeName = $(this).text();
+                    APP.log('Flow type name selected : ' + $(this).text());
+                    topologyModel.setSelectedFlowTypeName(flowTypeName);
+                });
+            }
+        });
+    };
+
+    pfs.getSliceObjFromSliceDlg = function (flowType) {
+        var slice = {},
+            $sliceDlg = pfs.$postSliceDialogbox,
+            $form = $('form.create-slice', $sliceDlg);
+
+        slice.name = $('input[name=slice-name]', $form).val();
+        slice.flows = [];
+        $('fieldset.add-flow-fieldset', $form).each(function (idx, fset) {
+            var $fset, 
+                flow = {type:flowType}, 
+                sBandwidth, 
+                sDelay;
+
+            $fset = $(fset, $form);
+            flow.name = $('input[name=flow-name]', $fset).val();
+            flow.srcCENodeName = $('input[name=src-ce-node-name]', $fset).val();
+            flow.srcCEPortNo   = $('input[name=src-ce-port-no]', $fset).val();
+            flow.dstCENodeName = $('input[name=dst-ce-node-name]', $fset).val();
+            flow.dstCEPortNo   = $('input[name=dst-ce-port-no]', $fset).val();
+            sBandwidth =  $('input[name=req-bandwidth]', $fset).val();
+            sDelay     =  $('input[name=req-delay]', $fset).val();
+            flow.reqBandWidth = parseInt(sBandwidth, 10);
+            flow.reqDelay = parseInt(sDelay, 10);
+            flow.protectionLevel = '0';
+            slice.flows.push(flow);
+        });
+        return slice;
+    };
+
+    pfs.initActions = function () {
+        pfs.actions = {
+            createSlice: pfs.doCreateSliceAction,
+            deleteSlice: pfs.doDeleteSliceAction,
+            addFlow: pfs.doAddFlowAction,
+            modifyFlow: pfs.doModifyFlowAction,
+            deleteFlow: pfs.doDeleteFlowAction,
+            __END__: null
+        };
+    };
+
+    pfs.getAction = function (actionKey) {
+        return pfs.actions[actionKey];
+    };
+
+    pfs.doCreateSliceAction = function (sliceid, flowid, slices) {
+        var $sliceDlg = pfs.$postSliceDialogbox,
+            sliceObj,
+            buttonClicked;
+        buttonClicked = function () {
+            sliceObj = pfs.getSliceObjFromSliceDlg('add');
+            rpc.requestToPostSlice({
+                success: function (resJson) {
+                    APP.log(resJson);
+                    pfs.reloadSlices();
+                    $sliceDlg.dialog('close');
+                }
+            }, sliceObj);
+            return false;
+        };
+        $sliceDlg.dialog('option', 'title', 'Creating a slice');
+        $sliceDlg.dialog('option', 'buttons', [
+            {
+                text: 'Create a slice',
+                click: buttonClicked
+            }
+        ]);
+        $sliceDlg.dialog('open');
+    };
+    
+    pfs.doDeleteSliceAction = function (sliceid, flowid, slices) {
+        rpc.requestToDeleteSlice({
+            success: function (resJson) {
+                APP.log(resJson);
+                pfs.reloadSlices();
+            }
+        }, sliceid);
+    };
+
+    pfs.doAddFlowAction = function (sliceid, flowid, slices) {
+        var $sliceDlg = pfs.$postSliceDialogbox,
+            originalSlice = pfs.findSliceById(sliceid, slices),
+            sliceObj,
+            buttonClicked;
+        buttonClicked = function () {
+            sliceObj = pfs.getSliceObjFromSliceDlg('add');
+            sliceObj.id = sliceid;
+            rpc.requestToPutSlice({
+                success: function (resJson) {
+                    APP.log(resJson);
+                    pfs.reloadSlices();
+                    $sliceDlg.dialog('close');
+                }
+            }, sliceObj);
+            return false;
+        };
+        $sliceDlg.dialog('option', 'title', 'Adding flow(s) to sliceid = ' + sliceid);
+        $sliceDlg.dialog('option', 'buttons', [
+            {
+                text: 'Update the slice',
+                click: buttonClicked
+            }
+        ]);
+        $sliceDlg.one('dialogopen', function (event, ui) {
+            var $sliceNameTxtf =  $('form.create-slice input[name=slice-name]', $sliceDlg);
+            APP.log('dialogopen called in adding flow.');
+            $sliceNameTxtf.val(originalSlice.name);
+            $sliceNameTxtf.attr('disabled', 'disabled');
+        });
+        $sliceDlg.dialog('open');
+    };
+
+    pfs.doModifyFlowAction = function (sliceid, flowid, slices) {
+        var $sliceDlg = pfs.$postSliceDialogbox,
+            originalSlice = pfs.findSliceById(sliceid, slices),
+            flowIndex = pfs.findFlowIndexById(flowid, originalSlice),
+            sliceObj,
+            buttonClicked;
+        buttonClicked = function () {
+            sliceObj = pfs.getSliceObjFromSliceDlg('mod');
+            sliceObj.id = sliceid;
+            delete sliceObj.name;
+            if (sliceObj.flows.length === 1) {
+                sliceObj.flows[0].id = flowid;
+                rpc.requestToPutSlice({
+                    success: function (resJson) {
+                        APP.log(resJson);
+                        pfs.reloadSlices();
+                        $sliceDlg.dialog('close');
+                    }
+                }, sliceObj);
+            } else {
+                APP.log('[ERROR] Failed to modify flow. ' + 
+                        'Invalid length of flows: ' + 
+                        '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
+            }
+            return false;
+        };
+        $sliceDlg.dialog('option', 'title', 
+            'Modifying a flow ' + originalSlice.flows[flowIndex].name);
+        $sliceDlg.dialog('option', 'buttons', [
+            {
+                text: 'Update the slice',
+                click: buttonClicked
+            }
+        ]);
+        $sliceDlg.one('dialogopen', function (event, ui) {
+            var $sliceNameTxtf =  $('form.create-slice input[name=slice-name]', $sliceDlg),
+                $flowNameTxtf = $('form.create-slice fieldset.add-flow-fieldset input[name=flow-name]', $sliceDlg),
+                $addFlowButton = $('form.create-slice .add-flow-button', $sliceDlg);
+
+            APP.log('dialogopen called in modifying flow.');
+            $sliceNameTxtf.val(originalSlice.name);
+            $sliceNameTxtf.attr('disabled', 'disabled');
+            $flowNameTxtf.val(originalSlice.flows[flowIndex].name);
+            $addFlowButton.addClass('hidden');
+        });
+        $sliceDlg.dialog('open');
+    };
+
+    pfs.doDeleteFlowAction = function (sliceid, flowid, slices) {
+        var $sliceDlg = pfs.$postSliceDialogbox,
+            originalSlice = pfs.findSliceById(sliceid, slices),
+            flowIndex = pfs.findFlowIndexById(flowid, originalSlice),
+            flow,
+            sliceObj;
+
+        if (flowIndex > -1) {
+            flow = originalSlice.flows[flowIndex];
+            sliceObj = {
+                id: sliceid,
+                flows: [{ type: 'del', id: flowid }]
+            };
+            rpc.requestToPutSlice({
+                success: function (resJson) {
+                    APP.log(resJson);
+                    pfs.reloadSlices();
+                }
+            }, sliceObj);
+        } else {
+            APP.log('[ERROR] Failed to delete flow. Invalid flow id: ' + 
+                    '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
+        }
+    };
+
+    APP.log('[INFO] APP.view.operation.slices');
     return {
+        init: pfs.init,
+        setDataToSliceListPanel: pfs.setDataToSliceListPanel,
         __END__: null
     };
 }());
 
+APP.namespace('APP.view.operation.remote');
+APP.view.operation.remote = (function (opts) {
+    var pfs = {},
+        topologyModel = APP.model.topology;
+    opts = opts || {};
 
-APP.view.init = function () {
-    var topologyView = APP.view.topology;
+    pfs.$nodeContextMenu = $('#page-main .node-context-menu');
+    pfs.$nodeTermDlg = $('#dialog-node-terminal');
 
-    topologyView.init();
+    pfs.init = function () {
+        pfs.$nodeContextMenu.hide().menu();
 
-    this.$flowListPanel = $('.flow-list-panel');
-    this.$flowListTemplate = $('.flow-list-template');
-    this.$sliceListPanel = $('.slice-list-panel');
-    this.$sliceList = $('.slice-list');
-    //this.$sliceListTemplate = this.$sliceListPanel.find('>.slice-list-template:first');
-    this.$sliceListTemplate = $('.slice-list-template:first', this.$sliceListPanel);
-    this.$postSliceDialogbox = $('#dialogbox-post-slice');
-    this.$flowOpMenu = $('#page-main .flow-operation-menu');
-    this.$sliceOpMenu = $('#page-main .slice-operation-menu');
-    this.$nodeContextMenu = $('#page-main .node-context-menu');
+        pfs.initNodeTerminalDialog(pfs.$nodeTermDlg);
+    };
 
-    $('a.logout-button').each(function (idx, ele) {
-        var href = $(ele).attr('href'),
-            pathname = encodeURIComponent(window.location.pathname);
-        if (href && href.lastIndexOf('?') > -1) {
-            $(ele).attr('href', (href + '&at=' + pathname));
-        } else if (href && href.lastIndexOf('?') < 0) {
-            $(ele).attr('href', (href + '?at=' + pathname));
-        }
-    });
+    pfs.openNodeContextMenu = function (nodeData, evt) {
+        var $nodeCntxtMenu = pfs.$nodeContextMenu;
 
-    this._initSliceListPanel();
-
-    (function (view) {
-        view.$flowListPanel.accordion({
-            collapsible: true,
-            active: false,
-            hightstyle: 'fill'
-        });
-        view.$flowListPanel.position({
-            of: $('#topo-canvas'),
+        APP.log('Opening node context menu on ' + nodeData.name);
+        $nodeCntxtMenu.menu('refresh');
+        $nodeCntxtMenu.show().position({
+            of: evt,
             my: 'left top',
-            at: 'left top',
+            at: 'center center',
             collision: 'none none'
+        }).one('menuselect', function (event, ui) {
+            var $item = $(ui.item[0]),
+                actionKey = $('>.action-key', $item).text();
+
+            APP.log('node context menu selected. actionKey = ' + actionKey);
+            if (actionKey === 'connectToNode') {
+                pfs.openNodeAccessDialog(nodeData.name);
+            }
         });
-        view.setUpFlowListAsSelectable(view.$flowListPanel.find('ul'));
-
-        view.$postSliceDialogbox.dialog({
-            autoOpen: false,
-            width: 600,
-            height: 520,
-            modal: true,
-            //show: {effect: 'slide', direction: 'up', duration: 250},
-            buttons: []
+        $(document).one('click', function () {
+            $nodeCntxtMenu.hide();
         });
-        view.$postSliceDialogbox.on('dialogopen', function (event, ui) {
-            // default dialogopen event.
-            var $copyEle,
-                $sliceNameTxtf = $('form>fieldset>input[name=slice-name]', $(this)),
-                $addFlowBtn = $('form>fieldset>.add-flow-button', $(this));
-            APP.log('default dialogopen called.');
+    };
 
-            $sliceNameTxtf.val('');
-            $sliceNameTxtf.removeAttr('disabled');
-
-            $addFlowBtn.removeClass('hidden');
-
-            $('form>fieldset>fieldset.add-flow-fieldset', $(this)).remove();
-            $copyEle = $('.add-flow-fieldset-template .add-flow-fieldset:first').clone();
-            $('a.add-flow-button', $(this)).before($copyEle);
-        });
-
-        $('a.add-flow-button').button({
-            icons: {primary: 'ui-icon-plus'},
-            text: 'Add flow'
-        }).click(function () {
-            var $copyEle = $('.add-flow-fieldset-template .add-flow-fieldset:first').clone();
-            $(this).before($copyEle);
-            $('input:first', $copyEle).focus();
-        });
-        view.$flowOpMenu.hide().menu();
-        view.$sliceOpMenu.hide().menu();
-        view.$nodeContextMenu.hide().menu();
-    }(this));
-
-    this.initNodeTerminalDialog();
-
-    //this.setSampleFlowListItems();
-    //window.APP.view.setFlowListItems('slice-1', [{flowName: 'flow-1', flowTypeName: 'osaka11slow'},{flowName: 'flow-2', flowTypeName: 'akashi23cutthrough'}]);
-    window.APP.view.setFlowListItems(null, null);
-};
-
-APP.view.setSampleFlowListItems = function () {
-    this.setFlowListItems('slice-1', [
-        {flowName: 'flow-1-1', flowTypeName: 'of1'},
-        {flowName: 'flow-1-2', flowTypeName: 'of2'},
-        {flowName: 'flow-1-3', flowTypeName: 'of3'},
-        {flowName: 'flow-1-4', flowTypeName: 'of4'}
-    ]);
-};
-
-APP.view.setUpFlowListAsSelectable = function ($flowList) {
-    $flowList.selectable({
-        stop: function () {
-            $('.ui-selected .flow-type-name', this).each(function () {
-                var flowTypeName = $(this).text();
-                APP.log('Flow type name selected : ' + $(this).text());
-                APP.model.topology.setSelectedFlowTypeName(flowTypeName);
-            });
-        }
-    });
-};
-
-APP.view.setFlowListItems = function (sliceName, flowListItems) {
-    var $titleHeadline = this.$flowListTemplate.find('h3:first').clone(),
-        $flowList = this.$flowListTemplate.find('ul:first').clone(),
-        $flowItemTpl = this.$flowListTemplate.find('ul li:first'),
-        $flowItem,
-        idx = 0;
-
-    this.$flowListPanel.find('> *').remove();
-
-    $flowList.find('li').remove();
-
-    if (sliceName && sliceName.length > 0) {
-        $titleHeadline.text(sliceName);
-        $titleHeadline.appendTo(this.$flowListPanel);
-    }
-
-    for (idx = 0; flowListItems && idx < flowListItems.length; idx += 1) {
-       $flowItem = $flowItemTpl.clone();
-       $flowItem.find('.flow-name').text(flowListItems[idx].flowName);
-       $flowItem.find('.flow-type-name').text(flowListItems[idx].flowTypeName);
-       $flowItem.appendTo($flowList);
-    }
-    if (flowListItems) {
-        $flowList.appendTo(this.$flowListPanel);
-    }
-
-    this.setUpFlowListAsSelectable($flowList);
-
-    this.$flowListPanel.accordion('refresh');
-};
-
-APP.view.findSliceById = function (sliceid, slices) {
-    var slice = null,
-        idx = 0;
-    for (idx = 0; idx < slices.length; idx += 1) {
-        if (('' + slices[idx].id) === ('' + sliceid)) {
-            slice = slices[idx];
-            break;
-        }
-    }
-    return slice;
-};
-
-APP.view.findFlowIndexById = function (flowid, slice) {
-    var flowIdx = -1,
-        idx = 0;
-    for (idx = 0; idx < slice.flows.length; idx += 1) {
-        if (('' + slice.flows[idx].id) === ('' + flowid)) {
-            flowIdx = idx;
-            break;
-        }
-    }
-    return flowIdx;
-};
-
-APP.view.reloadSlices = function () {
-    APP.rpc.requestToGetSlices({
-        success: function (resJson) {
-            APP.view.setDataToSliceListPanel(resJson.slices);
-        }
-    });
-};
-
-APP.view.getSliceObjFromSliceDlg = function (flowType) {
-    var view = this,
-        slice = {},
-        $sliceDlg = view.$postSliceDialogbox,
-        $form = $('form.create-slice', $sliceDlg);
-
-    slice.name = $('input[name=slice-name]', $form).val();
-    slice.flows = [];
-    $('fieldset.add-flow-fieldset', $form).each(function (idx, fset) {
-        var $fset, flow = {type:flowType}, sBandwidth, sDelay;
-        $fset = $(fset, $form);
-        flow.name = $('input[name=flow-name]', $fset).val();
-        flow.srcCENodeName = $('input[name=src-ce-node-name]', $fset).val();
-        flow.srcCEPortNo   = $('input[name=src-ce-port-no]', $fset).val();
-        flow.dstCENodeName = $('input[name=dst-ce-node-name]', $fset).val();
-        flow.dstCEPortNo   = $('input[name=dst-ce-port-no]', $fset).val();
-        sBandwidth =  $('input[name=req-bandwidth]', $fset).val();
-        sDelay     =  $('input[name=req-delay]', $fset).val();
-        flow.reqBandWidth = parseInt(sBandwidth, 10);
-        flow.reqDelay = parseInt(sDelay, 10);
-        flow.protectionLevel = '0';
-        slice.flows.push(flow);
-    });
-    return slice;
-};
-
-APP.view.createAction = function (actionKey, slices) {
-    var view = this,
-        actions,
-        action = null;
-
-    actions = {
-        // createSlice-action
-        createSlice: function (sliceid, flowid) {
-            var $sliceDlg = view.$postSliceDialogbox,
-                sliceObj,
-                buttonClicked;
-            buttonClicked = function () {
-                sliceObj = view.getSliceObjFromSliceDlg('add');
-                APP.rpc.requestToPostSlice({
-                    success: function (resJson) {
-                        APP.log(resJson);
-                        view.reloadSlices();
-                        $sliceDlg.dialog('close');
-                    }
-                }, sliceObj);
-                return false;
-            };
-            $sliceDlg.dialog('option', 'title', 'Creating a slice');
-            $sliceDlg.dialog('option', 'buttons', [
-                {
-                    text: 'Create a slice',
-                    click: buttonClicked
-                }
-            ]);
-            $sliceDlg.dialog('open');
-        },
-        // deleteSlice-action
-        deleteSlice: function (sliceid, flowid) {
-            APP.rpc.requestToDeleteSlice({
-                success: function (resJson) {
-                    APP.log(resJson);
-                    view.reloadSlices();
-                }
-            }, sliceid);
-        },
-        // addFlow-action
-        addFlow: function (sliceid, flowid) {
-            var $sliceDlg = view.$postSliceDialogbox,
-                originalSlice = view.findSliceById(sliceid, slices),
-                sliceObj,
-                buttonClicked;
-            buttonClicked = function () {
-                sliceObj = view.getSliceObjFromSliceDlg('add');
-                sliceObj.id = sliceid;
-                APP.rpc.requestToPutSlice({
-                    success: function (resJson) {
-                        APP.log(resJson);
-                        view.reloadSlices();
-                        $sliceDlg.dialog('close');
-                    }
-                }, sliceObj);
-                return false;
-            };
-            $sliceDlg.dialog('option', 'title', 'Adding flow(s) to sliceid = ' + sliceid);
-            $sliceDlg.dialog('option', 'buttons', [
-                {
-                    text: 'Update the slice',
-                    click: buttonClicked
-                }
-            ]);
-            $sliceDlg.one('dialogopen', function (event, ui) {
-                var $sliceNameTxtf =  $('form.create-slice input[name=slice-name]', $sliceDlg);
-                APP.log('dialogopen called in adding flow.');
-                $sliceNameTxtf.val(originalSlice.name);
-                $sliceNameTxtf.attr('disabled', 'disabled');
-            });
-            $sliceDlg.dialog('open');
-        },
-        // modifyFlow-action
-        modifyFlow: function (sliceid, flowid) {
-            var $sliceDlg = view.$postSliceDialogbox,
-                originalSlice = view.findSliceById(sliceid, slices),
-                flowIndex = view.findFlowIndexById(flowid, originalSlice),
-                sliceObj,
-                buttonClicked;
-            buttonClicked = function () {
-                sliceObj = view.getSliceObjFromSliceDlg('mod');
-                sliceObj.id = sliceid;
-                delete sliceObj.name;
-                if (sliceObj.flows.length === 1) {
-                    sliceObj.flows[0].id = flowid;
-                    APP.rpc.requestToPutSlice({
-                        success: function (resJson) {
-                            APP.log(resJson);
-                            view.reloadSlices();
-                            $sliceDlg.dialog('close');
-                        }
-                    }, sliceObj);
-                } else {
-                    APP.log('[ERROR] Failed to modify flow. ' + 
-                            'Invalid length of flows: ' + 
-                            '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
-                }
-                return false;
-            };
-            $sliceDlg.dialog('option', 'title', 
-                'Modifying a flow ' + originalSlice.flows[flowIndex].name);
-            $sliceDlg.dialog('option', 'buttons', [
-                {
-                    text: 'Update the slice',
-                    click: buttonClicked
-                }
-            ]);
-            $sliceDlg.one('dialogopen', function (event, ui) {
-                var $sliceNameTxtf =  $('form.create-slice input[name=slice-name]', $sliceDlg),
-                    $flowNameTxtf = $('form.create-slice fieldset.add-flow-fieldset input[name=flow-name]', $sliceDlg),
-                    $addFlowButton = $('form.create-slice .add-flow-button', $sliceDlg);
-                APP.log('dialogopen called in modifying flow.');
-                $sliceNameTxtf.val(originalSlice.name);
-                $sliceNameTxtf.attr('disabled', 'disabled');
-                $flowNameTxtf.val(originalSlice.flows[flowIndex].name);
-                $addFlowButton.addClass('hidden');
-            });
-            $sliceDlg.dialog('open');
-        },
-        // deleteFlow-action
-        deleteFlow: function (sliceid, flowid) {
-            var $sliceDlg = view.$postSliceDialogbox,
-                originalSlice = view.findSliceById(sliceid, slices),
-                flowIndex = view.findFlowIndexById(flowid, originalSlice),
-                flow,
-                sliceObj;
-            if (flowIndex > -1) {
-                flow = originalSlice.flows[flowIndex];
-                sliceObj = {
-                    id: sliceid,
-                    flows: [{ type: 'del', id: flowid }]
-                };
-                APP.rpc.requestToPutSlice({
-                    success: function (resJson) {
-                        APP.log(resJson);
-                        view.reloadSlices();
-                    }
-                }, sliceObj);
-            } else {
-                APP.log('[ERROR] Failed to delete flow. Invalid flow id: ' + 
-                        '(sliceid, flowid) = (' + sliceid + ', ' + flowid + ')');
+    pfs.openNodeAccessDialog = function (nodeName) {
+        if ((typeof mloApi !== 'undefined') && mloApi.openNodeAccessDialogbox) {
+            mloApi.openNodeAccessDialogbox(nodeName);
+        } else {
+            try {
+                pfs.openNodeTerminal();
+            } catch (e) {
+                APP.log('Failed to open node access view. e = ' + e);
+                alert('This operation is not supported yet.');
             }
         }
     };
-    return actions[actionKey];
-};
 
-APP.view._initSliceListPanel = function () {
-    var view = this,
-        $addSliceButton = $('h3 a', view.$sliceListPanel);
-        $sliceDlg = view.$postSliceDialogbox;
+    // not available yet.
+    pfs.initNodeTerminalDialog = function ($termDlg) {
+        var $execCmdBtn = $('.exec-cmd-button', $termDlg),
+            $termInTxtf = $('.term-in', $termDlg),
+            $termOutTxta = $('.term-out', $termDlg);
 
-    // Initializes sliceListPanel
-    view.$sliceListPanel.position({
-        of: $('#topo-canvas'),
-        my: 'left top',
-        at: 'left+4 top',
-        collision: 'none none'
-    });
+        $termDlg.dialog({
+            modal: true,
+            autoOpen: false,
+            width: 600,
+            height: 400,
+            title: 'Node terminal',
+            buttons: []
+        });
+        $termDlg.on('dialogbeforeclose', function (event, ui) {
+            APP.log('termDlg dialogbeforeclose called.');
+            pfs.webSocket.close();
+        });
 
-    // Initializes sliceList as menu
-    view.$sliceList.menu({
-        items: '> :not(.ui-widget-header)'
-    });
+        $execCmdBtn.button({
+            icons: { primary: 'ui-icon-arrowthick-1-w' },
+            text: null
+        }).click(function () {
+            var msg;
+            msg = JSON.stringify($termInTxtf.val() + '\n');
+            pfs.sendMessage(pfs.webSocket, msg);
+            return false;
+        });
 
-    // Initializes addSlice button.
-    $addSliceButton.button({
-        icons: {primary: 'ui-icon-plus'},
-        text: false
-    }).click(function () {
-        var actionKey = 'createSlice',
-            doAction = view.createAction(actionKey);
-        doAction();
-    }).position({
-        of: view.$sliceListPanel.find('h3:first'),
-        my: 'right center',
-        at: 'right-2 center',
-        collision: 'none none'
-    });
-};
+        $termInTxtf.keypress(function (event) {
+            var msg;
+            if (event.which === 13) {
+                msg = JSON.stringify($termInTxtf.val() + '\n');
+                pfs.sendMessage(pfs.webSocket, msg);
+                return false;
+            }
+        });
+    };
 
-APP.view.initNodeTerminalDialog = function () {
-    var view = this,
-        $termDlg = $('#dialog-node-terminal'),
-        $execCmdBtn = $('.exec-cmd-button', $termDlg),
-        $termInTxtf = $('.term-in', $termDlg),
-        $termOutTxta = $('.term-out', $termDlg),
-        webSocket,
-        connectWs,
-        webSocketOnMessageReceived,
-        sendMessage;
-
-    connectWs = function (wsUri, onMessageCallback) {
+    pfs.connectWs = function (wsUri, onMessageCallback) {
         var ws;
         APP.log('Creating web socket ...');
         try {
@@ -1476,14 +1493,18 @@ APP.view.initNodeTerminalDialog = function () {
         return ws;
     };
 
-    sendMessage = function (ws, msg) {
+    pfs.sendMessage = function (ws, msg) {
         APP.log('execCmdBtn clicked.');
         ws.send(msg);
     };
 
-    webSocketOnMessageReceived = function (msg) {
-        var origValue = $termOutTxta.val(),
+    pfs.webSocketOnMessageReceived = function (msg) {
+        var $termDlg = pfs.$nodeTermDlg,
+            $termInTxtf = $('.term-in', $termDlg),
+            $termOutTxta = $('.term-out', $termDlg),
+            origValue = $termOutTxta.val(),
             newValue = origValue + msg;
+
         $termOutTxta.val(newValue);
         if (newValue.length) {
             $termOutTxta.scrollTop($termOutTxta[0].scrollHeight - $termOutTxta.height());
@@ -1493,220 +1514,38 @@ APP.view.initNodeTerminalDialog = function () {
         $termInTxtf.focus();
     };
 
-    $termDlg.dialog({
-        modal: true,
-        autoOpen: false,
-        width: 600,
-        height: 400,
-        title: 'Node terminal',
-        buttons: []
-    });
-    $termDlg.on('dialogbeforeclose', function (event, ui) {
-        APP.log('termDlg dialogbeforeclose called.');
-        webSocket.close();
-    });
-
-    $execCmdBtn.button({
-        icons: { primary: 'ui-icon-arrowthick-1-w' },
-        text: null
-    }).click(function () {
-        var msg;
-        msg = JSON.stringify($termInTxtf.val() + '\n');
-        sendMessage(webSocket, msg);
-        return false;
-    });
-
-    $termInTxtf.keypress(function (event) {
-        var msg;
-        if (event.which === 13) {
-            msg = JSON.stringify($termInTxtf.val() + '\n');
-            sendMessage(webSocket, msg);
-            return false;
-        }
-    });
-
-    view.openNodeTerminal = function (nodeData) {
-        var webSocketUri = 'ws://133.108.84.185:9280/ws';
-        webSocket = connectWs(webSocketUri, webSocketOnMessageReceived);
-        $termDlg.dialog('open');
-    };
-};
-
-APP.view.setDataToSliceListPanel = function (slices) {
-    var that = this,
-        view = this,
-        $sliceTitleTpl = this.$sliceListTemplate.find('>.slice-title:first'),
-        $flowItemTpl = this.$sliceListTemplate.find('>.flow-item:first'),
-        $sliceList = this.$sliceList,
-        $sliceTitle;
-
-    var createFlowItem = function (flow) {
-        var $flowItem = $flowItemTpl.clone();
-        $('.flow-id', $flowItem).text(flow.id);
-        $('.flow-name', $flowItem).text(flow.name);
-        $('.flow-type-name', $flowItem).text(flow.flowTypeName);
-        return $flowItem;
+    pfs.openNodeTerminal = function (nodeData) {
+        var webSocketUri = 'ws://' + window.location.hostname + ':8080/DEMO/remote';
+        pfs.webSocket = pfs.connectWs(webSocketUri, pfs.webSocketOnMessageReceived);
+        pfs.$nodeTermDlg.dialog('open');
     };
 
-    $sliceList.find('>*').remove();
+    APP.log('[INFO] APP.view.operation.remote');
+    return {
+        init: pfs.init,
+        openNodeContextMenu: pfs.openNodeContextMenu,
+        __END__: null
+    };
+}());
 
-    jQuery.each(slices, function (index, slice) {
-        var $sliceTitle = $sliceTitleTpl.clone();
-        $('.slice-name', $sliceTitle).text(slice.name);
-        $('.slice-id', $sliceTitle).text(slice.id);
-        $sliceTitle.appendTo($sliceList);
-        jQuery.each(slice.flows, function (idxFlow, flow) {
-            var $flowItem = createFlowItem(flow);
-            $flowItem.appendTo($sliceList);
-        });
-    });
+APP.view.init = function () {
+    var topologyView = APP.view.topology,
+        sliceOpView = APP.view.operation.slices,
+        remoteOpView = APP.view.operation.remote;
 
-    $sliceList.menu('refresh');
-
-    $('.slice-title', $sliceList).each(function () {
-        var $that = $(this),
-            $delSliceBtn = $('a.delete-slice-op', $that),
-            $editSliceBtn = $('a.edit-slice-op', $that);
-        $delSliceBtn.button({
-            icons: {primary: 'ui-icon-minus'},
-            text: false
-        }).click(function () {
-            // Delete this slice here.
-            var sliceid = $('.slice-id', $that).text();
-            APP.rpc.requestToDeleteSlice({
-                success: function (resJson) {
-                    APP.log(resJson);
-                    APP.rpc.requestToGetSlices({
-                        success: function (resJson) {
-                            APP.view.setDataToSliceListPanel(resJson.slices);
-                        }
-                    });
-                }
-            }, sliceid);
-        }).position({
-            of: $that,
-            my: 'right center',
-            at: 'right-34 center',
-            collision: 'none none'
-        });
-
-        $editSliceBtn.button({
-            icons: {primary: 'ui-icon-carat-1-s'},
-            text: false
-        }).click(function () {
-            // Shows slice-editing menu here.
-            var sliceid = $('.slice-id', $that).text();
-            var updateSliceOpMenu = function ($menu, $flowItems) {
-                var $putFlowList    = $('li.put-flow-menu-item    ul.operation-flow-list', $menu),
-                    $deleteFlowList = $('li.delete-flow-menu-item ul.operation-flow-list', $menu),
-                    slice = view.findSliceById(sliceid, slices);
-
-                $putFlowList.empty();
-                $deleteFlowList.empty();
-                jQuery.each(slice.flows, function (idx, flow) {
-                    var $flowItem = createFlowItem(flow),
-                        $newFlowItem,
-                        $actionTag;
-                    $newFlowItem = $flowItem.clone();
-                    $('>.action-key', $putFlowList.parent()).clone().appendTo($newFlowItem);
-                    $newFlowItem.appendTo($putFlowList);
-                    $newFlowItem = $flowItem.clone();
-                    $('>.action-key', $deleteFlowList.parent()).clone().appendTo($newFlowItem);
-                    $newFlowItem.clone().appendTo($deleteFlowList);
-                });
-
-                $menu.menu('refresh');
-            };
-            updateSliceOpMenu(view.$sliceOpMenu, $that.next());
-            view.$sliceOpMenu.show().position({
-                of: this,
-                my: 'left top',
-                at: 'left bottom',
-                collision: 'none none'
-            }).one('menuselect', function (event, ui) {
-                var $item = $(ui.item[0]),
-                    actionKey = $('>.action-key', $item).text(),
-                    flowid = 'N/A',
-                    doAction;
-                if ($item.hasClass('flow-item')) {
-                    flowid = $('>.flow-id', $item).text();
-                }
-                APP.log('(actionKey, sliceid, flowid) = (' + 
-                        actionKey + ', ' + sliceid + ', ' + flowid + ')');
-                doAction = view.createAction(actionKey, slices);
-                doAction(sliceid, flowid);
-            });
-            $(document).one('click', function () {
-                view.$sliceOpMenu.hide();
-            });
-            APP.log('Flow edit button clicked. ' + this);
-            return false;
-        }).position({
-            of: $that,
-            my: 'right center',
-            at: 'right-2 center',
-            collision: 'none none'
-        });
-    });
-
-    $sliceList.find('>.flow-item').selectable({
-        stop: function () {
-            $('.flow-type-name', this).each(function () {
-                var flowTypeName = $(this).text();
-                APP.log('Flow type name selected : ' + $(this).text());
-                APP.model.topology.setSelectedFlowTypeName(flowTypeName);
-            });
+    $('a.logout-button').each(function (idx, ele) {
+        var href = $(ele).attr('href'),
+            pathname = encodeURIComponent(window.location.pathname);
+        if (href && href.lastIndexOf('?') > -1) {
+            $(ele).attr('href', (href + '&at=' + pathname));
+        } else if (href && href.lastIndexOf('?') < 0) {
+            $(ele).attr('href', (href + '?at=' + pathname));
         }
     });
 
-    $('#page-main > button').button({
-        icons: {
-            primary: 'ui-icon-gear',
-            secondary: 'ui-icon-carat-1-s'
-        },
-        text: false
-    });
-};
-
-APP.view.openNodeContextMenu = function (nodeData, evt) {
-    var view = this,
-        $nodeCntxtMenu = view.$nodeContextMenu;
-
-    APP.log('Opening node context menu on ' + nodeData.name);
-    $nodeCntxtMenu.menu('refresh');
-    $nodeCntxtMenu.show().position({
-        of: evt,
-        my: 'left top',
-        at: 'center center',
-        collision: 'none none'
-    }).one('menuselect', function (event, ui) {
-        var $item = $(ui.item[0]),
-            actionKey = $('>.action-key', $item).text(),
-            doAction;
-        APP.log('node context menu selected. actionKey = ' + actionKey);
-        if (actionKey === 'connectToNode') {
-            //view.openNodeTerminal(nodeData);
-            APP.api.openNodeAccessDialog(nodeData.name);
-        }
-    });
-    $(document).one('click', function () {
-        $nodeCntxtMenu.hide();
-    });
-};
-
-APP.api = APP.api || {};
-
-APP.api.setFlowListItems = function (sliceName, flowListItems) {
-    APP.view.setAllLinksToUnselected();
-    APP.view.setFlowListItems(sliceName, flowListItems);
-};
-
-APP.api.openNodeAccessDialog = function (nodeName) {
-    if ((typeof mloApi !== 'undefined') && mloApi.openNodeAccessDialogbox) {
-        mloApi.openNodeAccessDialogbox(nodeName);
-    } else {
-        APP.log('Failed to open node access view.');
-    }
+    topologyView.init();
+    sliceOpView.init();
+    remoteOpView.init();
 };
 
 APP.load = function () {
@@ -1714,28 +1553,28 @@ APP.load = function () {
     APP.model.topology.load(APP.cfg);
 };
 
-APP.initWebSocket = function () {
+APP.connectToEventsApi = function () {
     var ws = new WebSocket("ws://" + location.hostname + ":8080/DEMO/events");
     ws.onopen = function(){
-    	APP.log('Websocket connection is opened.');
+        APP.log('Websocket connection is opened.');
     };
     ws.onclose = function() {
-    	APP.log('Websocket connection is closed.');
-    }
+        APP.log('Websocket connection is closed.');
+    };
     ws.onmessage = function(message){
         APP.log(message.data + "\n");
         var obj = JSON.parse(message.data);
-    	APP.log(obj);
-    	APP.load();
+        APP.log(obj);
+        APP.load();
     };
-}
+};
 
 APP.init = function () {
     var ua = window.navigator.userAgent;
     this.cfg.queryParams = this.getQueryParams();
+    this.connectToEventsApi();
     this.view.init();
     this.load();
-    APP.log('user-agent: ' + ua);
-	this.initWebSocket();
+    APP.log('[INFO] user-agent: ' + ua);
 };
 
