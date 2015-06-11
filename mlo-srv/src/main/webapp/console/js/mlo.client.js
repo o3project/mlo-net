@@ -205,6 +205,7 @@ APP.rpc = (function (opts) {
         $.ajax(settings);
     };
 
+    APP.log('[INFO] APP.rpc');
     return {
         requestToGetSlices: pfs.requestToGetSlices,
         requestToPostSlice: pfs.requestToPostSlice,
@@ -257,7 +258,7 @@ APP.model.topology = (function (opts) {
                     pfs.init(rySwitches, ryLinks, topoConf);
                     rpc.requestToGetSlices({
                         success: function (resJson) {
-                            APP.view.operation.setDataToSliceListPanel(resJson.slices);
+                            APP.view.operation.slices.setDataToSliceListPanel(resJson.slices);
                         }
                     });
                 });
@@ -612,20 +613,7 @@ APP.model.topology = (function (opts) {
     };
 }());
 
-APP.view = {
-    viewNodes: {},
-    viewLinks: {},
-    viewPorts: {},
-
-    canvas: {},
-    svg: {},
-    force: {},
-    tooltip: {},
-
-    $sliceListPanel: {},
-    $flowListPanel: {},
-    $flowListTemplate: {}
-};
+APP.namespace('APP.view');
 
 APP.namespace('APP.view.topology');
 APP.view.topology = (function (opts) {
@@ -830,7 +818,7 @@ APP.view.topology = (function (opts) {
             d3.event.preventDefault();
             pfs.hideTooltip();
             if (d.type !== 'collapsed-layer') {
-                pfs.openNodeContextMenu(d, d3.event);
+                APP.view.operation.remote.openNodeContextMenu(d, d3.event);
             }
         });
 
@@ -922,18 +910,18 @@ APP.view.topology = (function (opts) {
     };
 }());
 
-APP.namespace('APP.view.operation');
-APP.view.operation = (function (opts) {
+APP.namespace('APP.view.operation.slices');
+APP.view.operation.slices = (function (opts) {
     var pfs = {},
         cfg = APP.cfg,
-        rpc = APP.rpc;
+        rpc = APP.rpc,
+        topologyModel = APP.model.topology;
     opts = opts || {};
 
     pfs.$sliceListPanel = $('#page-main .slice-list-panel');
     pfs.$postSliceDialogbox = $('#dialogbox-post-slice');
     pfs.$flowOpMenu = $('#page-main .flow-operation-menu');
     pfs.$sliceOpMenu = $('#page-main .slice-operation-menu');
-    pfs.$nodeContextMenu = $('#page-main .node-context-menu');
 
     pfs.getSliceListTemplate = function () {
         return $('.slice-list-template', pfs.sliceListPanel);
@@ -950,7 +938,6 @@ APP.view.operation = (function (opts) {
 
         pfs.$flowOpMenu.hide().menu();
         pfs.$sliceOpMenu.hide().menu();
-        pfs.$nodeContextMenu.hide().menu();
     };
 
     pfs.initSliceListPanel = function ($sliceListPanel) {
@@ -1053,6 +1040,7 @@ APP.view.operation = (function (opts) {
         APP.rpc.requestToGetSlices({
             success: function (resJson) {
                 pfs.setDataToSliceListPanel(resJson.slices);
+                topologyModel.setSelectedFlowTypeName();
             }
         });
     };
@@ -1166,7 +1154,7 @@ APP.view.operation = (function (opts) {
                 $('.flow-type-name', this).each(function () {
                     var flowTypeName = $(this).text();
                     APP.log('Flow type name selected : ' + $(this).text());
-                    APP.model.topology.setSelectedFlowTypeName(flowTypeName);
+                    topologyModel.setSelectedFlowTypeName(flowTypeName);
                 });
             }
         });
@@ -1356,7 +1344,7 @@ APP.view.operation = (function (opts) {
         }
     };
 
-    APP.log('[INFO] APP.view.operation');
+    APP.log('[INFO] APP.view.operation.slices');
     return {
         init: pfs.init,
         setDataToSliceListPanel: pfs.setDataToSliceListPanel,
@@ -1364,41 +1352,98 @@ APP.view.operation = (function (opts) {
     };
 }());
 
+APP.namespace('APP.view.operation.remote');
+APP.view.operation.remote = (function (opts) {
+    var pfs = {},
+        topologyModel = APP.model.topology;
+    opts = opts || {};
 
-APP.view.init = function () {
-    var topologyView = APP.view.topology,
-        operationView = APP.view.operation;
+    pfs.$nodeContextMenu = $('#page-main .node-context-menu');
+    pfs.$nodeTermDlg = $('#dialog-node-terminal');
 
-    topologyView.init();
-    operationView.init();
+    pfs.init = function () {
+        pfs.$nodeContextMenu.hide().menu();
 
-    this.$nodeContextMenu = $('#page-main .node-context-menu');
+        pfs.initNodeTerminalDialog(pfs.$nodeTermDlg);
+    };
 
-    $('a.logout-button').each(function (idx, ele) {
-        var href = $(ele).attr('href'),
-            pathname = encodeURIComponent(window.location.pathname);
-        if (href && href.lastIndexOf('?') > -1) {
-            $(ele).attr('href', (href + '&at=' + pathname));
-        } else if (href && href.lastIndexOf('?') < 0) {
-            $(ele).attr('href', (href + '?at=' + pathname));
+    pfs.openNodeContextMenu = function (nodeData, evt) {
+        var $nodeCntxtMenu = pfs.$nodeContextMenu;
+
+        APP.log('Opening node context menu on ' + nodeData.name);
+        $nodeCntxtMenu.menu('refresh');
+        $nodeCntxtMenu.show().position({
+            of: evt,
+            my: 'left top',
+            at: 'center center',
+            collision: 'none none'
+        }).one('menuselect', function (event, ui) {
+            var $item = $(ui.item[0]),
+                actionKey = $('>.action-key', $item).text();
+
+            APP.log('node context menu selected. actionKey = ' + actionKey);
+            if (actionKey === 'connectToNode') {
+                pfs.openNodeAccessDialog(nodeData.name);
+            }
+        });
+        $(document).one('click', function () {
+            $nodeCntxtMenu.hide();
+        });
+    };
+
+    pfs.openNodeAccessDialog = function (nodeName) {
+        if ((typeof mloApi !== 'undefined') && mloApi.openNodeAccessDialogbox) {
+            mloApi.openNodeAccessDialogbox(nodeName);
+        } else {
+            try {
+                pfs.openNodeTerminal();
+            } catch (e) {
+                APP.log('Failed to open node access view. e = ' + e);
+                alert('This operation is not supported yet.');
+            }
         }
-    });
+    };
 
-    this.initNodeTerminalDialog();
-};
+    // not available yet.
+    pfs.initNodeTerminalDialog = function ($termDlg) {
+        var $execCmdBtn = $('.exec-cmd-button', $termDlg),
+            $termInTxtf = $('.term-in', $termDlg),
+            $termOutTxta = $('.term-out', $termDlg);
 
-APP.view.initNodeTerminalDialog = function () {
-    var view = this,
-        $termDlg = $('#dialog-node-terminal'),
-        $execCmdBtn = $('.exec-cmd-button', $termDlg),
-        $termInTxtf = $('.term-in', $termDlg),
-        $termOutTxta = $('.term-out', $termDlg),
-        webSocket,
-        connectWs,
-        webSocketOnMessageReceived,
-        sendMessage;
+        $termDlg.dialog({
+            modal: true,
+            autoOpen: false,
+            width: 600,
+            height: 400,
+            title: 'Node terminal',
+            buttons: []
+        });
+        $termDlg.on('dialogbeforeclose', function (event, ui) {
+            APP.log('termDlg dialogbeforeclose called.');
+            pfs.webSocket.close();
+        });
 
-    connectWs = function (wsUri, onMessageCallback) {
+        $execCmdBtn.button({
+            icons: { primary: 'ui-icon-arrowthick-1-w' },
+            text: null
+        }).click(function () {
+            var msg;
+            msg = JSON.stringify($termInTxtf.val() + '\n');
+            pfs.sendMessage(pfs.webSocket, msg);
+            return false;
+        });
+
+        $termInTxtf.keypress(function (event) {
+            var msg;
+            if (event.which === 13) {
+                msg = JSON.stringify($termInTxtf.val() + '\n');
+                pfs.sendMessage(pfs.webSocket, msg);
+                return false;
+            }
+        });
+    };
+
+    pfs.connectWs = function (wsUri, onMessageCallback) {
         var ws;
         APP.log('Creating web socket ...');
         try {
@@ -1423,14 +1468,18 @@ APP.view.initNodeTerminalDialog = function () {
         return ws;
     };
 
-    sendMessage = function (ws, msg) {
+    pfs.sendMessage = function (ws, msg) {
         APP.log('execCmdBtn clicked.');
         ws.send(msg);
     };
 
-    webSocketOnMessageReceived = function (msg) {
-        var origValue = $termOutTxta.val(),
+    pfs.webSocketOnMessageReceived = function (msg) {
+        var $termDlg = pfs.$nodeTermDlg,
+            $termInTxtf = $('.term-in', $termDlg),
+            $termOutTxta = $('.term-out', $termDlg),
+            origValue = $termOutTxta.val(),
             newValue = origValue + msg;
+
         $termOutTxta.val(newValue);
         if (newValue.length) {
             $termOutTxta.scrollTop($termOutTxta[0].scrollHeight - $termOutTxta.height());
@@ -1440,79 +1489,38 @@ APP.view.initNodeTerminalDialog = function () {
         $termInTxtf.focus();
     };
 
-    $termDlg.dialog({
-        modal: true,
-        autoOpen: false,
-        width: 600,
-        height: 400,
-        title: 'Node terminal',
-        buttons: []
-    });
-    $termDlg.on('dialogbeforeclose', function (event, ui) {
-        APP.log('termDlg dialogbeforeclose called.');
-        webSocket.close();
-    });
-
-    $execCmdBtn.button({
-        icons: { primary: 'ui-icon-arrowthick-1-w' },
-        text: null
-    }).click(function () {
-        var msg;
-        msg = JSON.stringify($termInTxtf.val() + '\n');
-        sendMessage(webSocket, msg);
-        return false;
-    });
-
-    $termInTxtf.keypress(function (event) {
-        var msg;
-        if (event.which === 13) {
-            msg = JSON.stringify($termInTxtf.val() + '\n');
-            sendMessage(webSocket, msg);
-            return false;
-        }
-    });
-
-    view.openNodeTerminal = function (nodeData) {
-        var webSocketUri = 'ws://133.108.84.185:9280/ws';
-        webSocket = connectWs(webSocketUri, webSocketOnMessageReceived);
-        $termDlg.dialog('open');
+    pfs.openNodeTerminal = function (nodeData) {
+        var webSocketUri = 'ws://' + window.location.hostname + ':8080/DEMO/remote';
+        pfs.webSocket = pfs.connectWs(webSocketUri, pfs.webSocketOnMessageReceived);
+        pfs.$nodeTermDlg.dialog('open');
     };
-};
 
-APP.view.openNodeContextMenu = function (nodeData, evt) {
-    var view = this,
-        $nodeCntxtMenu = view.$nodeContextMenu;
+    APP.log('[INFO] APP.view.operation.remote');
+    return {
+        init: pfs.init,
+        openNodeContextMenu: pfs.openNodeContextMenu,
+        __END__: null
+    };
+}());
 
-    APP.log('Opening node context menu on ' + nodeData.name);
-    $nodeCntxtMenu.menu('refresh');
-    $nodeCntxtMenu.show().position({
-        of: evt,
-        my: 'left top',
-        at: 'center center',
-        collision: 'none none'
-    }).one('menuselect', function (event, ui) {
-        var $item = $(ui.item[0]),
-            actionKey = $('>.action-key', $item).text(),
-            doAction;
-        APP.log('node context menu selected. actionKey = ' + actionKey);
-        if (actionKey === 'connectToNode') {
-            //view.openNodeTerminal(nodeData);
-            APP.api.openNodeAccessDialog(nodeData.name);
+APP.view.init = function () {
+    var topologyView = APP.view.topology,
+        sliceOpView = APP.view.operation.slices,
+        remoteOpView = APP.view.operation.remote;
+
+    $('a.logout-button').each(function (idx, ele) {
+        var href = $(ele).attr('href'),
+            pathname = encodeURIComponent(window.location.pathname);
+        if (href && href.lastIndexOf('?') > -1) {
+            $(ele).attr('href', (href + '&at=' + pathname));
+        } else if (href && href.lastIndexOf('?') < 0) {
+            $(ele).attr('href', (href + '?at=' + pathname));
         }
     });
-    $(document).one('click', function () {
-        $nodeCntxtMenu.hide();
-    });
-};
 
-APP.api = APP.api || {};
-
-APP.api.openNodeAccessDialog = function (nodeName) {
-    if ((typeof mloApi !== 'undefined') && mloApi.openNodeAccessDialogbox) {
-        mloApi.openNodeAccessDialogbox(nodeName);
-    } else {
-        APP.log('Failed to open node access view.');
-    }
+    topologyView.init();
+    sliceOpView.init();
+    remoteOpView.init();
 };
 
 APP.load = function () {
