@@ -10,19 +10,19 @@ import javax.websocket.server.ServerEndpointConfig;
 
 public class EventsApplicationConfig implements ServerApplicationConfig {
 
-	  @Override
-	  public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> set) {
-	    return new HashSet<ServerEndpointConfig>() {
-	      {
-	        add(ServerEndpointConfig.Builder
-	            .create(EventsEndpoint.class, "/events")
-	            .build());
-	      }
-	    };
-	  }
+	@Override
+	public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> set) {
+		return new HashSet<ServerEndpointConfig>() {
+			{
+				add(ServerEndpointConfig.Builder
+				.create(EventsEndpoint.class, "/events")
+				.build());
+			}
+		};
+	}
 
-	  @Override
-	  public Set<Class<?>> getAnnotatedEndpointClasses(Set<Class<?>> set) {
-	    return Collections.emptySet();
-	  }
+	@Override
+	public Set<Class<?>> getAnnotatedEndpointClasses(Set<Class<?>> set) {
+	return Collections.emptySet();
+	}
 }

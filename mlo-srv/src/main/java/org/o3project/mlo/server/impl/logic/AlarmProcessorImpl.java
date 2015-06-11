@@ -56,14 +56,10 @@ public class AlarmProcessorImpl implements AlarmProcessor {
 		synchronized (alarmidAlarmDtoMap) {
 			for (AlarmDto alarmDto : alarmDtos) {
 				alarmDto.id = String.format("%08x", alarmDto.hashCode());
-				//if (!alarmidAlarmDtoMap.containsKey(alarmDto.id)) {
-					alarmidAlarmDtoMap.put(alarmDto.id, alarmDto);
-					newAlarmDtos.add(alarmDto);
+				alarmidAlarmDtoMap.put(alarmDto.id, alarmDto);
+				newAlarmDtos.add(alarmDto);
 					
-					notifyAlarm(alarmDto);
-				//}
-				
-				
+				notifyAlarm(alarmDto);
 			}
 			
 			if (alarmidAlarmDtoMap.size() > alarmidAlarmDtoMapMaxSize) {
