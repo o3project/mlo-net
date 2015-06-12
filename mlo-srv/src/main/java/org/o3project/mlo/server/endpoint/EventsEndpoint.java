@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
 import net.arnx.jsonic.JSON;
@@ -28,12 +27,6 @@ public class EventsEndpoint extends Endpoint implements NotificationObserver {
 	public void onOpen(final Session session, EndpointConfig ec) {
 		this.session = session;
 		
-		session.addMessageHandler(new MessageHandler.Whole<String>() {
-			@Override
-			public void onMessage(String text) {
-				LOG.debug("Recieved message from client : " + text);
-			}
-		});
 		LOG.debug("WebSocket Connection is opened.");
 		
 		notificationCenter = (NotificationCenter) SingletonS2Container.getComponent("notificationCenter");
@@ -55,7 +48,7 @@ public class EventsEndpoint extends Endpoint implements NotificationObserver {
 			try {
 				this.session.getBasicRemote().sendText(JSON.encode(eventDto));
 			} catch (IOException e) {
-				LOG.error("Failed to send eventDto.",e);
+				LOG.error("Failed to send a eventDto.",e);
 			}
 		} else {
 			LOG.warn("Session is close. Cancelled transmission of a eventDto.");
