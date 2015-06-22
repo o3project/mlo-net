@@ -558,7 +558,7 @@ main() {
     echo "}" 								>>"${_START}"
     echo 								>>"${_START}"
     cat "${_START}"
-    echo "    docker ps -q | xargs docker kill -f >/dev/null 2>&1"	>>"${_STOP}"
+    echo "    docker ps -q | xargs docker kill >/dev/null 2>&1"	>>"${_STOP}"
     for br in ${LINKS}; do
         if [[ "${br}" =~ ^br.* ]]; then 
             echo "    [ -e /sys/class/net/${br} ] && {"			>>"${_STOP}"
