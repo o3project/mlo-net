@@ -64,6 +64,14 @@ input[type=text]:disabled {
 #topo-canvas .with-lattice {
 }
 
+#topo-canvas,
+#topo-canvas * {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+} /* disables text selection */
+
 #topo-canvas > svg {
     margin-left: 216px;
     border: 1px solid rgba(255, 255, 255, 0.5);

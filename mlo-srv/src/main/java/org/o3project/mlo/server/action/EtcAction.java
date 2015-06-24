@@ -16,11 +16,15 @@ import net.arnx.jsonic.JSON;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.o3project.mlo.server.component.NodeObj;
+import org.o3project.mlo.server.dto.LdNodeDto;
 import org.o3project.mlo.server.dto.LdTopoDto;
 import org.o3project.mlo.server.dto.RyLinkDto;
 import org.o3project.mlo.server.dto.RySwitchDto;
+import org.o3project.mlo.server.impl.logic.TopologyRepositoryDefaultImpl;
 import org.o3project.mlo.server.logic.LdTopologyRepository;
 import org.o3project.mlo.server.logic.MloException;
+import org.o3project.mlo.server.logic.TopologyRepository;
 import org.seasar.struts.annotation.Execute;
 
 /**
@@ -37,13 +41,15 @@ public class EtcAction {
 	@Resource 
 	private HttpServletResponse response;
 	
-	private LdTopologyRepository topologyRepository;
+	private TopologyRepository topologyRepository;
+	private LdTopologyRepository ldTopologyRepository;
 	
 	/**
 	 * @param topologyRepository the topologyRepository to set
 	 */
-	public void setTopologyRepository(LdTopologyRepository topologyRepository) {
+	public void setTopologyRepository(TopologyRepositoryDefaultImpl topologyRepository) {
 		this.topologyRepository = topologyRepository;
+		this.ldTopologyRepository = topologyRepository;
 	}
 
 	/**
@@ -57,7 +63,26 @@ public class EtcAction {
 		logAccess(request);
 		if (isGetMethod(request.getMethod())) {
 			response.setContentType("application/json; charset=utf-8");
-			LdTopoDto obj = topologyRepository.getLdTopo();
+			LdTopoDto ldTopoDto = ldTopologyRepository.getLdTopo();
+			LdTopoDto obj = createClonedObject(ldTopoDto);
+			if (obj.switches != null) {
+				for (LdNodeDto node : obj.switches) {
+					String state = topologyRepository.getComponentState(NodeObj.class, node.name);
+					if (state == null) {
+						state = "ok";
+					}
+					node.state = state;
+				}
+			}
+			if (obj.hosts != null) {
+				for (LdNodeDto node : obj.hosts) {
+					String state = topologyRepository.getComponentState(NodeObj.class, node.name);
+					if (state == null) {
+						state = "ok";
+					}
+					node.state = state;
+				}
+			}
 			writeJsonTo(obj, response.getOutputStream());
 		} else {
 			throw new UnsupportedOperationException("Unsupported HTTP method.");
@@ -76,7 +101,7 @@ public class EtcAction {
 		logAccess(request);
 		if (isGetMethod(request.getMethod())) {
 			response.setContentType("application/json; charset=utf-8");
-			List<RySwitchDto> obj = topologyRepository.getRySwitches();
+			List<RySwitchDto> obj = ldTopologyRepository.getRySwitches();
 			writeJsonTo(obj, response.getOutputStream());
 		} else {
 			throw new UnsupportedOperationException("Unsupported HTTP method.");
@@ -95,7 +120,7 @@ public class EtcAction {
 		logAccess(request);
 		if (isGetMethod(request.getMethod())) {
 			response.setContentType("application/json; charset=utf-8");
-			List<RyLinkDto> obj = topologyRepository.getRyLinks();
+			List<RyLinkDto> obj = ldTopologyRepository.getRyLinks();
 			writeJsonTo(obj, response.getOutputStream());
 		} else {
 			throw new UnsupportedOperationException("Unsupported HTTP method.");
@@ -116,6 +141,13 @@ public class EtcAction {
 			LOG.debug("The following body written.");
 			LOG.debug(body);
 		}
+	}
+	
+	<TYPE> TYPE createClonedObject(TYPE obj) throws IOException {
+		String body = JSON.encode(obj, true);
+		@SuppressWarnings("unchecked")
+		TYPE cloned = (TYPE) JSON.decode(body, obj.getClass());
+		return cloned;
 	}
 
 	private boolean isGetMethod(String methodName) {

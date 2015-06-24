@@ -259,5 +259,4 @@ public class SlicesAction implements NbiConstants {
     				req.getMethod(), req.getRequestURI(), req.getQueryString()));
     	}
     }
-	
 }

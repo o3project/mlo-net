@@ -7,7 +7,7 @@ RUN apt-get install -y build-essential libexpat-dev libgmp-dev libncurses-dev \
 	libssl-dev libpcap-dev byacc flex libreadline-dev \
 	python-dev python-pastedeploy python-paste python-twisted git
 WORKDIR /src
-RUN git clone -b release-0.1.2 https://github.com/lagopus/lagopus.git
+RUN git clone -b v0.1.2 https://github.com/lagopus/lagopus.git
 WORKDIR /src/lagopus
 RUN ./configure
 RUN make OPT_CFLAGS=-O2

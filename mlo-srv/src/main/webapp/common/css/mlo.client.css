@@ -1,0 +1,521 @@
+
+/*
+ * Elements
+ */
+
+html {
+    height: 100%;
+}
+
+body {
+    font-family: "Helvetica", "Arial",  "Verdana", "sans-serif";
+    height: 100%;
+}
+
+input[type=text]:disabled {
+    background: gainsboro;
+    cursor:not-allowed;
+}
+
+/*
+ * d3.js
+ */
+.axis .tick line {
+    fill: none;
+    stroke: white;
+    opacity: 0.4;
+    shape-rendering: crispedges;
+    stroke-dasharray: 2, 2;
+}
+
+/*
+ * jquery ui
+ */
+.ui-accordion .ui-accordion-content {
+    padding: 0px;
+    border-width: 0px;
+}
+
+.ui-accordion .ui-accordion-header-active {
+    background-color: lightgray;
+    border-color: lightgray;
+}
+
+.ui-menu {
+    /*
+    position: absolute;
+    width: 200px;
+    */
+}
+
+.ui-button-text,
+.ui-button-text-only {
+    font-weight: normal;
+    font-size: 12px;
+}
+
+/*
+ * App
+ */
+
+.dark-grad {
+    background-color: #191d22;
+    background: 
+        -moz-radial-gradient(top center, ellipse cover, rgba(114,131,148,0.8), rgba(255,255,255,0)),
+        linear-gradient(#38424b 0%, #1f2429 50%, #191d22 100%);
+    background: 
+        -webkit-gradient(radial, center top, 0, center top, 400, from(rgba(114,131,148,0.8)), to(rgba(255,255,255,0))),
+        linear-gradient(#38424b 0%, #1f2429 50%, #191d22 100%);
+    font-size: 16px;
+    color: white;
+}
+
+.dark {
+    background-color: #191d22;
+}
+
+#page-main {
+    background-color: #191d22;
+    min-width:  940px;
+    min-height: 600px;
+    height: 100%;
+}
+
+div.header,
+div.footer {
+    color: white;
+    width: 100%;
+}
+
+div.header a,
+div.footer a {
+    color: white;
+}
+
+div.header {
+    height: 66px;
+    line-height: 66px;
+    padding: 0;
+}
+
+.title {
+    padding: 0 16px;
+    font-size: 20px;
+}
+
+div.header .account-menu {
+    float: right;
+    padding: 0 12px;
+}
+
+.dark-button,
+div.header .logout-button {
+    width: 120px;
+    padding: 4px 16px;
+    margin: 0 8px;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    border-style: solid;
+    border-width: 4px;
+    border-color: black;
+    border-radius: 4px;
+}
+
+div.header .user {
+    padding: 4px;
+    margin: 0 8px;
+}
+
+div.footer {
+    position: fixed !important;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 10px 0;
+    background-color: #191d22;
+}
+
+div.footer .copyright {
+    float: right;
+    font-size: 12px;
+    padding: 0 20px;
+}
+
+#topo-canvas {
+    margin: 0;
+    border: 0;
+    width: 100%;
+    height: 100%;
+    /*
+    text-align: right;
+    */
+}
+
+#topo-canvas .with-lattice {
+}
+
+#topo-canvas,
+#topo-canvas * {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+} /* disables text selection */
+
+#topo-canvas > svg {
+    margin-left: 216px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    /*
+    left: 240px;
+    position: absolute;
+    margin: 0 4px;
+    background-image: url('../images/lattice.c.png');
+    */
+}
+
+#topo-canvas .view-node rect {
+}
+
+#topo-canvas .view-node-mpls rect {
+    rx: 4;
+    fill: lightblue;
+    stroke: darkblue;
+    stroke-width: 2;
+}
+
+#topo-canvas .view-node-edge rect {
+    rx: 4;
+    fill: lightgreen;
+    stroke: darkgreen;
+    stroke-width: 2;
+}
+
+#topo-canvas .view-node-host rect {
+    fill: yellow;
+    stroke: orange;
+    stroke-width: 2;
+}
+
+#topo-canvas .view-node text, 
+#topo-canvas .view-node-edge text, 
+#topo-canvas .view-node-mpls text, 
+#topo-canvas .view-node-metro text, 
+#topo-canvas .view-node-core text, 
+#topo-canvas .view-node-host text {
+    fill: white;
+    stroke-width: 0;
+}
+
+#topo-canvas .alarm {
+    fill: red;
+    color: red;
+    stroke: red;
+    stroke-width: 4;
+}
+
+#topo-canvas .view-link {
+    fill: none;
+    stroke: darkgray;
+    stroke-width: 2;
+    shape-rendering: crispEdges;
+}
+
+#topo-canvas .view-link.view-link-selected {
+    stroke: orange;
+    stroke-width: 8;
+}
+
+#topo-canvas .view-link rect {
+    fill: rgba(255, 255, 255, 0.75);
+    stroke: black;
+    stroke-width: 0;
+}
+
+#topo-canvas .view-port rect {
+    fill: darkgray;
+    stroke: darkgray;
+    stroke-width: 1;
+}
+
+#topo-canvas .view-port text {
+    font-family: sans-serif;
+    font-size: 9px;
+}
+
+#topo-canvas .tooltip {
+    position: absolute;
+    z-index: 10;
+    visibility: hidden;
+    padding: 4px 8px 4px 8px;
+    font-family: sans-serif;
+    font-size: 12px;
+    border: 1px solid dimgray;
+    background-color: white;
+    border-radius: 4px;
+    text-align: left;
+}
+
+#topo-canvas .tooltip h1 {
+    border-bottom: solid 1px gray;
+    font-size: 12px;
+}
+
+#topo-canvas .tooltip dd {
+    margin-left: 16px;
+}
+
+.flow-list-panel {
+    position: absolute;
+    display: block;
+    width: 240px;
+}
+
+.flow-list-panel.ui-widget-content {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-width: 0;
+}
+
+.flow-list-panel ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.flow-list-panel li {
+    margin: 2px;
+    padding: 4px;
+    height: 18px;
+    font-size: 12px;
+    background-color: #f6f6f6;
+    color: #454545;
+}
+
+.flow-list-panel .ui-selecting {
+    background-color: lightgray;
+}
+
+.flow-list-panel .ui-selected {
+    background-color: #d3d3d3;
+    color: white;
+}
+
+.flow-list-template {
+    visibility: hidden;
+}
+
+.flow-id,
+.flow-type-name {
+    display: none;
+}
+
+.slice-list-panel {
+    /*
+    background-color: rgba(200, 200, 255, 1.0);
+    background-color: white;
+    background-color: #d1dee3;
+    */
+    background-color: #d1dee3;
+    box-shadow: 4px -4px 8px 4px rgba(128,128,128,0.2) inset;
+    position: absolute;
+    display: block;
+    border-radius: 4px;
+    width: 200px;
+    height: calc(100% - 108px);
+}
+
+.wrapper {
+    background-color: #d1dee3;
+    /*
+    background-color: rgba(200, 200, 255, 0.2);
+    */
+    width: 100%;
+    height: 100%;
+}
+
+.slice-list {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.5);
+    width: 100%;
+    box-sizing: border-box;
+    /*
+    background-color: rgba(0, 0, 0, 0.5);
+    */
+}
+
+.slice-list-template {
+    position: absolute;
+    display: none;
+}
+
+.slice-list-panel h3 {
+    padding: 8px 16px;
+}
+
+.slice-list li span.slice-name {
+    padding: 0 8px 0 0;
+}
+
+.flow-item {
+}
+
+.flow-operation-menu {
+    position: absolute;
+    width: 120px;
+}
+
+.slice-operation-menu {
+    position: absolute;
+    width: 160px;
+}
+
+.slice-operation-menu .operation-flow-list {
+    width: 240px;
+}
+
+.action-key {
+    display: none;
+}
+
+.node-context-menu {
+    position: absolute;
+    width: 240px;
+}
+
+#dialogbox-post-slice fieldset {
+    padding: 0;
+    border: 0;
+    margin-top: 25px;
+}
+
+#dialogbox-post-slice fieldset.add-flow-fieldset-template {
+    display: none;
+}
+
+#dialogbox-post-slice .block {
+    display: block;
+}
+
+#dialogbox-post-slice label,
+#dialogbox-post-slice input {/*
+    display: block;*/
+}
+
+#dialogbox-post-slice label {
+    display: block;
+    float: left;
+    width: 120px;
+}
+
+#dialogbox-post-slice input,
+#dialogbox-post-slice text {
+    margin-bottom: 10px;/*
+    width: 95%;*/
+    padding: .4em;
+}
+
+#dialogbox-post-slice input[type=text] {
+    width: 320px;
+}
+
+#dialogbox-post-slice input.middle {
+    width: 240px;
+}
+
+#dialogbox-post-slice input.short {
+    width: 80px;
+}
+
+
+#dialogbox-post-slice .keyboard-submission {
+    position: absolute;
+    top: -1000px;
+}
+
+#dialogbox-post-slice fieldset.add-flow-fieldset {
+    margin: 4px;
+    padding: 4px;
+    border: 1px lightgray solid;
+}
+
+#dialogbox-post-slice fieldset.add-flow-fieldset legend {
+    margin: 4px;
+    padding: 4px 16px;
+}
+
+.busy {
+    width: 200px;
+    height: 200px;
+    background-color: rgba(255,255,255,0.5);
+    position: absolute;
+    display: block;
+}
+
+#page-main > button {
+    margin-left: 1000px;
+}
+
+
+.login-form {
+    position: absolute;
+    top: 64px;
+    left: 50%;
+    margin-left: -200px;
+    padding: 16px;
+    width: 400px;
+    border-radius: 8px;
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.4);
+}
+
+#page-login {
+    height: 100%;
+}
+
+.login-form .title {
+    line-height: 64px;
+}
+
+.login-form fieldset {
+    padding: 8px 64px 32px 64px;
+    border-width: 0;
+}
+
+.login-form ul {
+    list-style-type: none;
+}
+
+.login-form li {
+    margin: 12px 0;
+}
+
+.login-form label,
+.login-form input[type=text],
+.login-form input[type=password] {
+    width: 100%;
+    display: block;
+}
+
+.login-form input[type=text],
+.login-form input[type=password] {
+    height: 20px;
+    background-color: rgb(218, 226, 224);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+.login-form input[type=text]:focus,
+.login-form input[type=password]:focus {
+    background-color: white;
+}
+
+.login-form .dark-button {
+}
+
+.login-form .submit-panel {
+    width: 100%;
+    text-align: right;
+}
+
+

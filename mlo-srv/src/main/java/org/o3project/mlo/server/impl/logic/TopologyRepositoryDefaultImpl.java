@@ -7,11 +7,15 @@ package org.o3project.mlo.server.impl.logic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.arnx.jsonic.JSON;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +25,8 @@ import org.o3project.mlo.server.component.FlowRelayObj;
 import org.o3project.mlo.server.component.NetDeviceObj;
 import org.o3project.mlo.server.component.NodeObj;
 import org.o3project.mlo.server.component.TopologyObj;
+import org.o3project.mlo.server.dto.AlarmDto;
+import org.o3project.mlo.server.dto.EventDto;
 import org.o3project.mlo.server.dto.FlowDto;
 import org.o3project.mlo.server.dto.LdTopoDto;
 import org.o3project.mlo.server.dto.LinkInfoDto;
@@ -29,8 +35,12 @@ import org.o3project.mlo.server.dto.RySwitchDto;
 import org.o3project.mlo.server.logic.ApiCallException;
 import org.o3project.mlo.server.logic.ConfigConstants;
 import org.o3project.mlo.server.logic.ConfigProvider;
+import org.o3project.mlo.server.logic.EventRepository;
 import org.o3project.mlo.server.logic.LdTopologyRepository;
 import org.o3project.mlo.server.logic.MloException;
+import org.o3project.mlo.server.logic.Notification;
+import org.o3project.mlo.server.logic.NotificationCenter;
+import org.o3project.mlo.server.logic.NotificationObserver;
 import org.o3project.mlo.server.logic.TopologyConfigConstants;
 import org.o3project.mlo.server.logic.TopologyProvider;
 import org.o3project.mlo.server.logic.TopologyRepository;
@@ -53,6 +63,10 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 	private TopologyProviderRemoteLdImpl topologyProviderRemoteLdImpl;
 	
 	private final CacheData cacheData = new CacheData();
+	
+	private NotificationCenter notificationCenter;
+	
+	private EventRepository eventRepository;
 
 	/**
 	 * Setter method (for DI setter injection).
@@ -60,6 +74,13 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 	 */
 	public void setConfigProvider(ConfigProvider configProvider) {
 		this.configProvider = configProvider;
+	}
+	
+	/**
+	 * @param eventRepository the eventRepository to set
+	 */
+	public void setEventRepository(EventRepository eventRepository) {
+		this.eventRepository = eventRepository;
 	}
 	
 	/**
@@ -87,12 +108,64 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 	}
 	
 	/**
+	 * Setter method (for DI setter injection).
+	 * @param notificationCenter the notificationCenter to set
+	 */
+	public void setNotificationCenter(NotificationCenter notificationCenter) {
+		this.notificationCenter = notificationCenter;
+	}
+	
+	/**
 	 * Initializes the instance.
 	 */
 	public void init() {
 		synchronized (cacheData) {
 			cacheData.isLoaded = false;
 		}
+		
+		notificationCenter.addObserver(new NotificationObserver() {
+			@Override
+			public void notificationObserved(Notification notification) {
+				loadData();
+				synchronized (cacheData) {
+					if (cacheData.isLoaded) {
+						AlarmDto alarmDto = (AlarmDto) notification.data;
+						
+						// Changes state of the node.
+						NodeObj targetNodeObj = cacheData.topologyObj.nodeMap.get(alarmDto.targetId);
+						String stateKey = getStateKey(targetNodeObj.getClass(), targetNodeObj.meta.id);
+						
+						if(cacheData.componentStateMap.containsKey(stateKey)){
+							if (!cacheData.componentStateMap.get(stateKey).equals(alarmDto.state)){
+								cacheData.componentStateMap.put(stateKey, alarmDto.state);
+								eventRepository.addEventToAllUsers(createTopologyStateChangedEvent());
+							}
+						}else{
+							cacheData.componentStateMap.put(stateKey, alarmDto.state);
+							eventRepository.addEventToAllUsers(createTopologyStateChangedEvent());
+						}
+						
+						// Changes state of flows.
+						for (Entry<String, FlowObj> entry : cacheData.flowObjMap.entrySet()) {
+							for (FlowRelayObj flowRelayObj : entry.getValue().flowRelays) {
+								if (flowRelayObj.relayNode.meta.id.equals(targetNodeObj.meta.id)) {
+									entry.getValue().meta.attributes.put("state", alarmDto.state);
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			private EventDto createTopologyStateChangedEvent() {
+				EventDto eventDto = new EventDto();
+				eventDto.timestamp = new Date();
+				eventDto.type = "modified";
+				eventDto.targetType = "topology-state";
+				return eventDto;
+			}
+		}, AlarmDto.class.getName());
 	}
 	
 	/* (non-Javadoc)
@@ -145,6 +218,7 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 		FlowDto flow = null;
 		for (FlowDto tmpl : tmpls) {
 			if (isCeChannelMatch(srcChannel, dstChannel, tmpl)
+					&& "ok".equals(getState(tmpl))
 					&& (reqFlowDto.reqBandWidth <= tmpl.usedBandWidth)
 					&& (reqFlowDto.reqDelay >= tmpl.delayTime)) {
 				flow = tmpl;
@@ -164,6 +238,19 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 			}
 		}
 		return flow;
+	}
+
+	/**
+	 * @param tmpl
+	 * @return
+	 */
+	private String getState(FlowDto tmpl) {
+		String state = "ok";
+		FlowObj flowObj = (FlowObj) tmpl.attributes.get(FlowObj.class.getSimpleName());
+		if (flowObj != null && flowObj.meta.attributes.get("state") != null) {
+			state = (String) flowObj.meta.attributes.get("state");
+		}
+		return state;
 	}
 
 	/**
@@ -292,6 +379,21 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.o3project.mlo.server.logic.TopologyRepository#getComponentState(java.lang.Class, java.lang.String)
+	 */
+	@Override
+	public String getComponentState(Class<?> componentObjClass, String name) {
+		String key = getStateKey(componentObjClass, name);
+		String stateValue = null;
+		synchronized (cacheData) {
+			if (cacheData.isLoaded) {
+				stateValue = cacheData.componentStateMap.get(key);
+			}
+		}
+		return stateValue;
+	}
+
 	/**
 	 * Loads a topology data.
 	 */
@@ -322,6 +424,7 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 			cache.topologyObj = topologyObj;
 			cache.flowObjMap = flowObjMap;
 			cache.flowDtoTemplates = createFlowDtoTemplates(flowObjFlowDtoMap);
+			cache.componentStateMap = new LinkedHashMap<>();
 			
 			if (LOG.isDebugEnabled()) {
 				for (FlowDto tmpl : cache.flowDtoTemplates) {
@@ -521,6 +624,13 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 	private Integer getDelayMsec(ChannelObj channel) {
 		return (Integer) channel.meta.attributes.get("delayMsec");
 	}
+	
+	private String getStateKey(Class<?> clazz, String id) {
+		LinkedHashMap<String, Object> keySeed = new LinkedHashMap<>();
+		keySeed.put("Type", clazz.getSimpleName());
+		keySeed.put("id", id);
+		return JSON.encode(keySeed);
+	}
 
 	boolean isMplsNode(NodeObj node) {
 		boolean isMplsNode = (node != null);
@@ -565,5 +675,7 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 		Map<String, FlowObj> flowObjMap = null;
 		
 		List<FlowDto> flowDtoTemplates = null;
+		
+		Map<String, String> componentStateMap = null;
 	}
 }

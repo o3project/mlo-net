@@ -67,9 +67,10 @@ The following software is required.
 All are installed in executing *setup.sh* command.
 
 - lagopus-docker, including docker.io and so on.
-- jdk-7
+- openssh-server
+- jdk7
 - maven
-- ODENOS
+- [ODENOS 1.0.0](https://github.com/o3project/odenos/releases/tag/1.0.0)
 - tomcat6, tomcat6-admin
 
 
