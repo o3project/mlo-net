@@ -111,12 +111,13 @@ case "$1" in
 	sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
 	sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
 	sudo apt-get update
-	sudo apt-get install -y --force-yes lxc-docker-1.6.0
+	sudo apt-get install -y --force-yes lxc-docker-1.6.2
 	sudo ln -sf /usr/bin/docker.io /usr/local/bin/docker
 	sudo gpasswd -a `whoami` docker
 	sudo apt-get install -y --force-yes iputils-arping
 	sudo apt-get install -y --force-yes bridge-utils
 	sudo apt-get install -y --force-yes curl
+	sudo service docker restart
 	sudo docker pull osrg/ryu
 	sudo docker run --name ryu-p1 -it osrg/ryu sed -i -e "s/^LLDP_MAC_NEAREST_BRIDGE/###LLDP_MAC_NEAREST_BRIDGE/" /root/ryu-master/ryu/lib/packet/lldp.py
 	sudo docker commit ryu-p1 ryu:lldp
@@ -124,7 +125,9 @@ case "$1" in
 	sudo docker commit ryu-p2 ryu:lldp
 	sudo docker run --name ryu-p3 -it ryu:lldp bash -c "cd /root/ryu-master; python ./setup.py install"
 	sudo docker commit ryu-p3 ryu:lldp
-	sudo docker rm -f ryu-p1 ryu-p2 ryu-p3
+	sudo docker run --name ryu-p4 -it ryu:lldp bash -c "pip install oslo.config --upgrade"
+	sudo docker commit ryu-p4 ryu:lldp
+	sudo docker rm -f ryu-p1 ryu-p2 ryu-p3 ryu-p4
 	docker_build_lagopus_vswitch
 	mod_sudoers
 	;;
