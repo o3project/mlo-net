@@ -426,4 +426,24 @@ public interface ConfigConstants {
 	 * The type of the property value is string.
 	 */
 	String PROP_KEY_LD_RY_LINKS_URI    = PROP_KEY_PREFIX_ + "ld.ryLinks.uri";
+	
+	/**
+	 * Property key of topology view URI.
+	 * The type of the property value is string.
+	 */
+	String PROP_KEY_SERVER_TOPOLOGY_VIEW_URI = PROP_KEY_PREFIX_ + "server.topologyViewUri";
+	
+	String PROP_KEY_REMOTE_NODE_ACCESS_HOST = PROP_KEY_PREFIX_ + "remoteNodeAccess.host";
+	
+	String PROP_KEY_REMOTE_NODE_ACCESS_SSH_PORT = PROP_KEY_PREFIX_ + "remoteNodeAccess.sshPort";
+	
+	String PROP_KEY_REMOTE_NODE_ACCESS_USERID = PROP_KEY_PREFIX_ + "remoteNodeAccess.userid";
+	
+	String PROP_KEY_REMOTE_NODE_ACCESS_PASSWORD = PROP_KEY_PREFIX_ + "remoteNodeAccess.password";
+	
+	String PROP_KEY_REMOTE_NODE_ACCESS_SSH_SESSION_TIMEOUT_MSEC = PROP_KEY_PREFIX_ + "remoteNodeAccess.sshSessionTimeoutMsec";
+	
+	String PROP_KEY_REMOTE_NODE_ACCESS_SSH_CHANNEL_TIMEOUT_MSEC = PROP_KEY_PREFIX_ + "remoteNodeAccess.sshChannelTimeoutMsec";
+	
+	String PROP_KEY_REMOTE_NODE_ACCESS_LD_WORKSPACE_DIRPATH = PROP_KEY_PREFIX_ + "remoteNodeAccess.ldWorkspaceDirpath";
 }

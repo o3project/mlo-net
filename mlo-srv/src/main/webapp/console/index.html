@@ -6,6 +6,8 @@
     <link rel="stylesheet" type="text/css" href="../common/externals/jquery-ui/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="../common/css/base.css">
     <link rel="stylesheet" type="text/css" href="../common/css/mlo.client.css">
+    <style type="text/css">
+	</style>
 </head>
 <body>
     <div id="page-main" >
@@ -131,14 +133,18 @@
         </fieldset>
     </div>
     <div id="dialog-node-terminal">
-        <form >
+        <form>
             <div>
-                <input type="text" class="term-in">
+            	<p style="display:inline;">$</p>
+                <input type="text" style="width: 80%"class="term-in" style="display:inline;">
                 <a class="exec-cmd-button" href="#">Send</a>
             </div>
         </form>
         <div>
-            <textarea class="term-out"></textarea>
+            <textarea class="term-out" readOnly></textarea>
+        </div>
+        <div>
+			<p class="status">connecting..</p>
         </div>
     </div>
     <script src="../common/externals/d3.v3.min.js"></script>

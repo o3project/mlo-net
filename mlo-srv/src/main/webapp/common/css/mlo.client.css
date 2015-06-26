@@ -518,4 +518,9 @@ div.footer .copyright {
     text-align: right;
 }
 
-
+#dialog-node-terminal textarea {
+	margin-top:5px;
+	margin-bottom:5px;
+	width: 100%;
+	resize:none;
+}

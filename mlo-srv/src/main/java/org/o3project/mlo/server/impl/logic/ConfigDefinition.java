@@ -70,6 +70,11 @@ final class ConfigDefinition implements ConfigConstants, TopologyConfigConstants
 		 * For Network topology.
 		 */
 		definePropsForNetworkTopology(props);
+		
+		/*
+		 * For Remote Access.
+		 */
+		definePropsForRemoteAccess(props);
 	}
 
 	/**
@@ -276,5 +281,19 @@ final class ConfigDefinition implements ConfigConstants, TopologyConfigConstants
 		props.put(PROP_KEY_LD_LD_TOPO_URI,     "http://127.0.0.1:8080/nbiService/etc/ld/topo");
 		props.put(PROP_KEY_LD_RY_SWITCHES_URI, "http://127.0.0.1:8888/v1.0/topology/switches");
 		props.put(PROP_KEY_LD_RY_LINKS_URI,    "http://127.0.0.1:8888/v1.0/topology/links");
+	}
+	
+	/**
+	 * @param props
+	 */
+	static void definePropsForRemoteAccess(Map<String, String> props) {
+		props.put(PROP_KEY_SERVER_TOPOLOGY_VIEW_URI, "");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_HOST, "133.108.120.176");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_SSH_PORT, "22");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_USERID,       "developer");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_PASSWORD,     "developer");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_SSH_SESSION_TIMEOUT_MSEC, "120000");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_SSH_CHANNEL_TIMEOUT_MSEC, "120000");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_LD_WORKSPACE_DIRPATH,     "mlo-net.css/lagopus-docker/workspace");
 	}
 }

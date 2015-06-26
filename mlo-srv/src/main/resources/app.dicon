@@ -188,4 +188,11 @@
       class="org.o3project.mlo.server.impl.rpc.service.SdtncInvokerDummyImpl" 
       instance="singleton">
   </component>
+  
+  <component name="sshAccessFactory" 
+      class="org.o3project.mlo.server.logic.SshAccessFactory" 
+      instance="singleton">
+      <initMethod name="init" />
+      <destroyMethod name="destroy" />
+  </component>
 </components>

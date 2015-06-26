@@ -1,3 +1,7 @@
+/**
+ * EventsEndpoint.java
+ * (C) 2015, Hitachi, Ltd.
+ */
 package org.o3project.mlo.server.endpoint;
 
 import java.io.IOException;
@@ -17,28 +21,42 @@ import org.o3project.mlo.server.logic.NotificationCenter;
 import org.o3project.mlo.server.logic.NotificationObserver;
 import org.seasar.framework.container.SingletonS2Container;
 
+/**
+ * This class is the endpoint class for events.
+ */
 public class EventsEndpoint extends Endpoint implements NotificationObserver {
 	private static final Log LOG = LogFactory.getLog(EventsEndpoint.class);
 	
-	private Session session;;
+	private Session session;
 	private NotificationCenter notificationCenter;
 	
+	/*
+	 * (non-Javadoc)
+	 * @see javax.websocket.Endpoint#onOpen(javax.websocket.Session, javax.websocket.EndpointConfig)
+	 */
 	@Override
 	public void onOpen(final Session session, EndpointConfig ec) {
 		this.session = session;
-		
+
 		LOG.debug("WebSocket Connection is opened.");
 		
 		notificationCenter = (NotificationCenter) SingletonS2Container.getComponent("notificationCenter");
 		notificationCenter.addObserver(this, EventDto.class.getName());
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see javax.websocket.Endpoint#onClose(javax.websocket.Session, javax.websocket.CloseReason)
+	 */
 	@Override
     public void onClose(Session session, CloseReason closeReason){
 		notificationCenter.removeObserver(this, EventDto.class.getName());
 		LOG.debug("WebSocket Connection is closed.");
     }
 
+	/* (non-Javadoc)
+	 * @see org.o3project.mlo.server.logic.NotificationObserver#notificationObserved( org.o3project.mlo.server.logic.Notification)
+	 */
 	@Override
 	public void notificationObserved(Notification notification){
 		EventDto eventDto = (EventDto) notification.data;

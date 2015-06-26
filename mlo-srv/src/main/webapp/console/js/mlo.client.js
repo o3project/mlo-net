@@ -1421,7 +1421,7 @@ APP.view.operation.remote = (function (opts) {
             mloApi.openNodeAccessDialogbox(nodeName);
         } else {
             try {
-                pfs.openNodeTerminal();
+                pfs.openNodeTerminal(nodeName);
             } catch (e) {
                 APP.log('Failed to open node access view. e = ' + e);
                 alert('This operation is not supported yet.');
@@ -1434,15 +1434,33 @@ APP.view.operation.remote = (function (opts) {
         var $execCmdBtn = $('.exec-cmd-button', $termDlg),
             $termInTxtf = $('.term-in', $termDlg),
             $termOutTxta = $('.term-out', $termDlg);
-
+        
         $termDlg.dialog({
-            modal: true,
+            modal: false,
             autoOpen: false,
             width: 600,
             height: 400,
+            maxWidth: 1000,
+        	maxHeight: 1000,
             title: 'Node terminal',
-            buttons: []
+            buttons: [],
+        
+        	resize: function(event) {
+        		$('.term-out', $termDlg).height($termDlg.height() - 55);
+        		$('.term-in', $termDlg).width($termDlg.width() - $execCmdBtn.width() - 35);
+        		$('.exec-cmd-button', $termDlg).width($execCmdBtn.width());
+        	},
+        	open: function(event) {
+                $('.term-out', '#dialog-node-terminal').val('');
+                $('.term-in', '#dialog-node-terminal').attr('disabled', 'disabled');
+        		$('.status', '#dialog-node-terminal').html("connecting..");
+        		$('.status', '#dialog-node-terminal').css("color", "black");
+        		$('.term-out', $termDlg).height($termDlg.height() - 55);
+        		$('.term-in', $termDlg).width($termDlg.width() - $execCmdBtn.width() - 35);
+        	}
+        	
         });
+        
         $termDlg.on('dialogbeforeclose', function (event, ui) {
             APP.log('termDlg dialogbeforeclose called.');
             pfs.webSocket.close();
@@ -1452,20 +1470,37 @@ APP.view.operation.remote = (function (opts) {
             icons: { primary: 'ui-icon-arrowthick-1-w' },
             text: null
         }).click(function () {
-            var msg;
-            msg = JSON.stringify($termInTxtf.val() + '\n');
-            pfs.sendMessage(pfs.webSocket, msg);
+        	if ( $termInTxtf.is(':disabled') === false ) {
+        		var msg;
+            	msg = $termInTxtf.val();
+            	pfs.sendMessage(pfs.webSocket, msg);
+        	}
             return false;
         });
 
         $termInTxtf.keypress(function (event) {
             var msg;
             if (event.which === 13) {
-                msg = JSON.stringify($termInTxtf.val() + '\n');
+                msg = $termInTxtf.val();
                 pfs.sendMessage(pfs.webSocket, msg);
                 return false;
             }
         });
+        
+        $termInTxtf.focus(function(){
+    		if(this.value == "Input command here, and then click execute button."){
+    			$(this).val("").css("color","#000");
+    		}
+    	});
+        $termInTxtf.blur(function(){
+    		if(this.value === ""){
+    			$(this).val("Input command here, and then click execute button.")
+    			     .css("color","#969696");
+    		}
+    		if(this.value != "Input command here, and then click execute button."){
+    			$(this).css("color","#000");
+    		}
+    	});
     };
 
     pfs.connectWs = function (wsUri, onMessageCallback) {
@@ -1477,7 +1512,20 @@ APP.view.operation.remote = (function (opts) {
                 APP.log('web socket opened.');
             };
             ws.onmessage = function (event) {
-                onMessageCallback(event.data);
+            	var alarmResponseDto = JSON.parse(event.data);
+            	if (alarmResponseDto.status == "ok") {
+            		$('.term-in', '#dialog-node-terminal').removeAttr("disabled");
+            		$('.term-in', '#dialog-node-terminal').val("Input command here, and then click execute button.") .css("color","#969696");
+            		$('.status', '#dialog-node-terminal').html("status is good.");
+            		$('.status', '#dialog-node-terminal').css("color", "green");
+            		onMessageCallback(alarmResponseDto.result);
+            	} else if (alarmResponseDto.status == "ng") {
+            		ws.close();
+            		$('.term-in', '#dialog-node-terminal').attr("disabled", "disabled");
+            		$('.status', '#dialog-node-terminal').html("SSH error ! : " + alarmResponseDto.exception);
+            		$('.status', '#dialog-node-terminal').css("color", "red");
+            		APP.log(alarmResponseDto.exception);
+            	}
             };
             ws.onerror = function (event) {
                 APP.log('web socket error occurred.');
@@ -1495,7 +1543,13 @@ APP.view.operation.remote = (function (opts) {
 
     pfs.sendMessage = function (ws, msg) {
         APP.log('execCmdBtn clicked.');
-        ws.send(msg);
+        
+        var remoteAccessRequestDto = {
+    		targetId : "s5",
+    		commandString : msg,
+    	};
+        
+        ws.send(JSON.stringify(remoteAccessRequestDto));
     };
 
     pfs.webSocketOnMessageReceived = function (msg) {
@@ -1504,7 +1558,7 @@ APP.view.operation.remote = (function (opts) {
             $termOutTxta = $('.term-out', $termDlg),
             origValue = $termOutTxta.val(),
             newValue = origValue + msg;
-
+        
         $termOutTxta.val(newValue);
         if (newValue.length) {
             $termOutTxta.scrollTop($termOutTxta[0].scrollHeight - $termOutTxta.height());
@@ -1515,8 +1569,10 @@ APP.view.operation.remote = (function (opts) {
     };
 
     pfs.openNodeTerminal = function (nodeData) {
-        var webSocketUri = 'ws://' + window.location.hostname + ':8080/DEMO/remote';
+        var webSocketUri = 'ws://' + window.location.hostname + ':8080/DEMO/remote/' + nodeData;
+        
         pfs.webSocket = pfs.connectWs(webSocketUri, pfs.webSocketOnMessageReceived);
+        
         pfs.$nodeTermDlg.dialog('open');
     };
 
@@ -1556,10 +1612,10 @@ APP.load = function () {
 APP.connectToEventsApi = function () {
     var ws = new WebSocket("ws://" + location.hostname + ":8080/DEMO/events");
     ws.onopen = function(){
-        APP.log('Websocket connection is opened.');
+        APP.log('Events connection is opened.');
     };
     ws.onclose = function() {
-        APP.log('Websocket connection is closed.');
+        APP.log('Events connection is closed.');
     };
     ws.onmessage = function(message){
         APP.log(message.data + "\n");
@@ -1568,7 +1624,7 @@ APP.connectToEventsApi = function () {
         APP.load();
     };
 };
-
+	
 APP.init = function () {
     var ua = window.navigator.userAgent;
     this.cfg.queryParams = this.getQueryParams();
@@ -1577,4 +1633,3 @@ APP.init = function () {
     this.load();
     APP.log('[INFO] user-agent: ' + ua);
 };
-
