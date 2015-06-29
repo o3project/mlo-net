@@ -1443,7 +1443,7 @@ APP.view.operation.remote = (function (opts) {
             height: 400,
             title: 'Node terminal',
             buttons: [],
-        
+            	
         	resize: function(event) {
         		$termOutTxta.height($termDlg.height() - 55);
         	},
