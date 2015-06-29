@@ -518,9 +518,18 @@ div.footer .copyright {
     text-align: right;
 }
 
-#dialog-node-terminal textarea {
+.term-out {
 	margin-top:5px;
 	margin-bottom:5px;
 	width: 100%;
 	resize:none;
+}
+
+.term-in { 
+	margin-top:3px;
+	width: calc(100% - 64px); 
+} 
+ 
+.exec-cmd-button { 
+	float: right; 
 }

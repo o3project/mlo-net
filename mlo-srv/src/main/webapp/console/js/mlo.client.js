@@ -1433,32 +1433,25 @@ APP.view.operation.remote = (function (opts) {
     pfs.initNodeTerminalDialog = function ($termDlg) {
         var $execCmdBtn = $('.exec-cmd-button', $termDlg),
             $termInTxtf = $('.term-in', $termDlg),
-            $termOutTxta = $('.term-out', $termDlg);
+            $termOutTxta = $('.term-out', $termDlg),
+        	$status = $('.status', $termDlg);
         
         $termDlg.dialog({
             modal: false,
             autoOpen: false,
             width: 600,
             height: 400,
-            maxWidth: 1000,
-        	maxHeight: 1000,
             title: 'Node terminal',
             buttons: [],
         
         	resize: function(event) {
-        		$('.term-out', $termDlg).height($termDlg.height() - 55);
-        		$('.term-in', $termDlg).width($termDlg.width() - $execCmdBtn.width() - 35);
-        		$('.exec-cmd-button', $termDlg).width($execCmdBtn.width());
+        		$termOutTxta.height($termDlg.height() - 55);
         	},
         	open: function(event) {
-                $('.term-out', '#dialog-node-terminal').val('');
-                $('.term-in', '#dialog-node-terminal').attr('disabled', 'disabled');
-        		$('.status', '#dialog-node-terminal').html("connecting..");
-        		$('.status', '#dialog-node-terminal').css("color", "black");
-        		$('.term-out', $termDlg).height($termDlg.height() - 55);
-        		$('.term-in', $termDlg).width($termDlg.width() - $execCmdBtn.width() - 35);
+        		$termOutTxta.val('').height($termDlg.height() - 55);
+                $termInTxtf.attr('disabled', 'disabled');
+                $status.html("connecting..").css("color", "black");
         	}
-        	
         });
         
         $termDlg.on('dialogbeforeclose', function (event, ui) {
@@ -1504,7 +1497,11 @@ APP.view.operation.remote = (function (opts) {
     };
 
     pfs.connectWs = function (wsUri, onMessageCallback) {
+        var $termInTxtf = $('.term-in', '#dialog-node-terminal'),
+    	$status = $('.status', '#dialog-node-terminal');
+        
         var ws;
+        
         APP.log('Creating web socket ...');
         try {
             ws = new WebSocket(wsUri);
@@ -1514,16 +1511,14 @@ APP.view.operation.remote = (function (opts) {
             ws.onmessage = function (event) {
             	var alarmResponseDto = JSON.parse(event.data);
             	if (alarmResponseDto.status == "ok") {
-            		$('.term-in', '#dialog-node-terminal').removeAttr("disabled");
-            		$('.term-in', '#dialog-node-terminal').val("Input command here, and then click execute button.") .css("color","#969696");
-            		$('.status', '#dialog-node-terminal').html("status is good.");
-            		$('.status', '#dialog-node-terminal').css("color", "green");
+            		$termInTxtf.removeAttr("disabled");
+            		$termInTxtf.val("Input command here, and then click execute button.") .css("color","#969696");
+            		$status.html("status is good.").css("color", "green");
             		onMessageCallback(alarmResponseDto.result);
             	} else if (alarmResponseDto.status == "ng") {
             		ws.close();
-            		$('.term-in', '#dialog-node-terminal').attr("disabled", "disabled");
-            		$('.status', '#dialog-node-terminal').html("SSH error ! : " + alarmResponseDto.exception);
-            		$('.status', '#dialog-node-terminal').css("color", "red");
+            		$termInTxtf.attr("disabled", "disabled");
+            		$status.html("SSH error ! : " + alarmResponseDto.exception).css("color", "red");
             		APP.log(alarmResponseDto.exception);
             	}
             };
