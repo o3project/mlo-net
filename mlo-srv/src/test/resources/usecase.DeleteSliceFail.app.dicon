@@ -24,7 +24,13 @@
       <arg>"default.mlo-srv.properties"</arg>
       <arg>"org/o3project/mlo/server/test/usecase/usecase.delete.delete.fail.mlo-srv.properties"</arg>
   </component>
-  
+  <component name="notificationCenter" 
+      class="org.o3project.mlo.server.impl.logic.NotificationCenterImpl" 
+      instance="singleton">
+      <aspect>traceInterceptor</aspect>
+      <initMethod name="init" />
+      <destroyMethod name="destroy" />
+  </component>
   <component name="componentFactory"
       class="org.o3project.mlo.server.component.ComponentFactory" 
       instance="singleton">
