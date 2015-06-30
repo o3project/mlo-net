@@ -17,7 +17,7 @@ public class EventsApplicationConfigTest {
 	 */
 	@Test
 	public void testGetEndpointConfigs() {
-		EventsApplicationConfig obj = new EventsApplicationConfig();
+		MloServerApplicationConfig obj = new MloServerApplicationConfig();
 		HashSet<ServerEndpointConfig> serverEndpointConfigSet;
 		
 		serverEndpointConfigSet = (HashSet<ServerEndpointConfig>) obj.getEndpointConfigs(null);
@@ -25,19 +25,19 @@ public class EventsApplicationConfigTest {
 		assertEquals(2, serverEndpointConfigSet.size());
 		Iterator<ServerEndpointConfig> it = serverEndpointConfigSet.iterator();
 		serverEndpointConfig = it.next();
-		assertEquals(EventsEndpoint.class, serverEndpointConfig.getEndpointClass());
-		assertEquals("/events", serverEndpointConfig.getPath());
-		serverEndpointConfig = it.next();
 		assertEquals(RemoteEndpoint.class, serverEndpointConfig.getEndpointClass());
 		assertEquals("/remote/{nodeName}", serverEndpointConfig.getPath());
+		serverEndpointConfig = it.next();
+		assertEquals(EventsEndpoint.class, serverEndpointConfig.getEndpointClass());
+		assertEquals("/events", serverEndpointConfig.getPath());
 	}
 	
 	/**
-	 * Test method for {@link org.o3project.mlo.server.logic.EventsApplicationConfig#getAnnotatedEndpointClasses(getAnnotatedEndpointClasses)}.
+	 * Test method for {@link org.o3project.mlo.server.logic.MloServerApplicationConfig#getAnnotatedEndpointClasses(getAnnotatedEndpointClasses)}.
 	 */
 	@Test
 	public void testGetAnnotatedEndpointClasses() {
-		EventsApplicationConfig obj = new EventsApplicationConfig();
+		MloServerApplicationConfig obj = new MloServerApplicationConfig();
 		
 		Set<Class<?>> emptySet = obj.getAnnotatedEndpointClasses(null);
 		assertEquals(0, emptySet.size());

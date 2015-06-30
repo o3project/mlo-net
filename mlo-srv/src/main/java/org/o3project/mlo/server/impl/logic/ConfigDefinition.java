@@ -288,7 +288,7 @@ final class ConfigDefinition implements ConfigConstants, TopologyConfigConstants
 	 */
 	static void definePropsForRemoteAccess(Map<String, String> props) {
 		props.put(PROP_KEY_SERVER_TOPOLOGY_VIEW_URI, "");
-		props.put(PROP_KEY_REMOTE_NODE_ACCESS_HOST, "133.108.120.176");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_HOST, "127.0.0.1");
 		props.put(PROP_KEY_REMOTE_NODE_ACCESS_SSH_PORT, "22");
 		props.put(PROP_KEY_REMOTE_NODE_ACCESS_USERID,       "developer");
 		props.put(PROP_KEY_REMOTE_NODE_ACCESS_PASSWORD,     "developer");

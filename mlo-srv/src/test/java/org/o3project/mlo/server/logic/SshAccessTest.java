@@ -105,8 +105,8 @@ public class SshAccessTest {
 		} catch (InterruptedException e) {
 			fail();
 		} finally {
+			executorService.shutdown();
 			obj.close();
-			executorService.shutdownNow();
 			executorService = null;
 		}
 	}
@@ -151,8 +151,8 @@ public class SshAccessTest {
 		} catch (InterruptedException e) {
 			fail();
 		} finally {
+			executorService.shutdown();
 			obj.close();
-			executorService.shutdownNow();
 			executorService = null;
 		}
 	}
@@ -188,8 +188,8 @@ public class SshAccessTest {
 		} catch (InterruptedException e) {
 			fail();
 		} finally {
+			executorService.shutdown();
 			obj.close();
-			executorService.shutdownNow();
 			executorService = null;
 		}
 	}
@@ -226,10 +226,9 @@ public class SshAccessTest {
 		} catch (InterruptedException e) {
 			fail();
 		}
+		
 		executorService.shutdown();
 		assertTrue(obj.close());
-		assertTrue(executorService.isTerminated());
-		executorService = null;
 		
 	}
 	
@@ -270,7 +269,6 @@ public class SshAccessTest {
 		executorService.shutdown();
 		assertTrue(obj.close());
 		assertFalse(obj.close());
-		assertTrue(executorService.isTerminated());
 		executorService = null;
 		
 	}

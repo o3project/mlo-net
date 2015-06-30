@@ -13,9 +13,9 @@ import javax.websocket.server.ServerApplicationConfig;
 import javax.websocket.server.ServerEndpointConfig;
 
 /**
- * This class is the application config class for events.
+ * This class is the application config class.
  */
-public class EventsApplicationConfig implements ServerApplicationConfig {
+public class MloServerApplicationConfig implements ServerApplicationConfig {
 
 	/*
 	 * (non-Javadoc)
