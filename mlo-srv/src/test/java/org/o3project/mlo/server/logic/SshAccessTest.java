@@ -423,7 +423,7 @@ public class SshAccessTest {
 		ConfigProvider configProvider = new ConfigProviderImpl("default.mlo-srv.properties", "/etc/mlo/mlo-srv.properties");
 		obj.setConfigProvider(configProvider);
 		SshNodeConfig sshNodeConfig = obj.createSshNodeConfig();
-		assertEquals("133.108.120.176", sshNodeConfig.getHost());
+		assertEquals("127.0.0.1", sshNodeConfig.getHost());
 		assertEquals(22, sshNodeConfig.getSshPort());
 		assertEquals("developer", sshNodeConfig.getUserid());
 		assertEquals("developer", sshNodeConfig.getPassword());
