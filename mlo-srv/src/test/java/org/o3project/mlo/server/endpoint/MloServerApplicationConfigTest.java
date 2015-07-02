@@ -10,7 +10,7 @@ import javax.websocket.server.ServerEndpointConfig;
 
 import org.junit.Test;
 
-public class EventsApplicationConfigTest {
+public class MloServerApplicationConfigTest {
 
 	/**
 	 * Test method for {@link org.o3project.mlo.server.logic.EventsApplicationConfig#getEndpointConfigs(java.util.Set<Class<? extends Endpoint>>)}.
