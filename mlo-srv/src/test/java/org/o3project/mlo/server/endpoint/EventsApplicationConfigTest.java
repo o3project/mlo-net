@@ -25,11 +25,20 @@ public class EventsApplicationConfigTest {
 		assertEquals(2, serverEndpointConfigSet.size());
 		Iterator<ServerEndpointConfig> it = serverEndpointConfigSet.iterator();
 		serverEndpointConfig = it.next();
-		assertEquals(RemoteEndpoint.class, serverEndpointConfig.getEndpointClass());
-		assertEquals("/remote/{nodeName}", serverEndpointConfig.getPath());
-		serverEndpointConfig = it.next();
-		assertEquals(EventsEndpoint.class, serverEndpointConfig.getEndpointClass());
-		assertEquals("/events", serverEndpointConfig.getPath());
+		
+		if (RemoteEndpoint.class.equals(serverEndpointConfig.getEndpointClass())){
+			assertEquals(RemoteEndpoint.class, serverEndpointConfig.getEndpointClass());
+			assertEquals("/remote/{nodeName}", serverEndpointConfig.getPath());
+			serverEndpointConfig = it.next();
+			assertEquals(EventsEndpoint.class, serverEndpointConfig.getEndpointClass());
+			assertEquals("/events", serverEndpointConfig.getPath());
+		} else {
+			assertEquals(EventsEndpoint.class, serverEndpointConfig.getEndpointClass());
+			assertEquals("/events", serverEndpointConfig.getPath());
+			serverEndpointConfig = it.next();
+			assertEquals(RemoteEndpoint.class, serverEndpointConfig.getEndpointClass());
+			assertEquals("/remote/{nodeName}", serverEndpointConfig.getPath());
+		}
 	}
 	
 	/**
