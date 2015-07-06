@@ -2,8 +2,8 @@ package org.o3project.mlo.server.logic;
 
 import static org.junit.Assert.*;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 import org.o3project.mlo.server.endpoint.RemoteEndpoint;
@@ -15,13 +15,13 @@ public class SshShellPipeTest {
 	 */
 	@Test
 	public void testSshShellPipe() {
+		SshShellPipe obj = null; 
 		try{
-			SshShellPipe obj = new SshShellPipe();
-			obj.close();
-		} catch (Throwable th) {
-			fail();
+			obj = new SshShellPipe();
 		} finally {
+			obj.close();
 		}
+		assertNotNull(obj);
 	}
 	
 	/**
@@ -132,21 +132,21 @@ public class SshShellPipeTest {
 	@Test
 	public void testHandleMessage() {
 		SshShellPipe obj = new SshShellPipe();
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		obj.setSshMessageHandler(new SshMessageHandler() {
-			@Override
-			public void onMessage(String line) {
-				countDownLatch.countDown();
-			}
-		});
-			obj.handleMessage("test");
-			try {
-				assertTrue(countDownLatch.await(30 , TimeUnit.SECONDS));
-			} catch (InterruptedException e) {
-				fail();
-			} finally{
-				obj.close();
-			}
+		
+		DummySshMessageHandler handler = new DummySshMessageHandler();
+		obj.setSshMessageHandler(handler);
+		String line = "dummy line";
+	
+		// execute
+		try {
+			obj.handleMessage(line);
+		} finally {
+			obj.close();
+		}
+		
+		// test
+		assertEquals(1, handler.lines.size());
+		assertEquals("dummy line", handler.lines.get(0));
 	}
 	
 	/**
@@ -155,22 +155,20 @@ public class SshShellPipeTest {
 	@Test
 	public void testHandleMessage_null() {
 		SshShellPipe obj = new SshShellPipe();
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		obj.setSshMessageHandler(new SshMessageHandler() {
-			@Override
-			public void onMessage(String line) {
-				countDownLatch.countDown();
-			}
-		});
+		
+		obj.setSshMessageHandler(null);
+		
+		NullPointerException npe = null;
 		try{
-			obj.setSshMessageHandler(null);
 			obj.handleMessage("test");
-			assertFalse(countDownLatch.await(30 , TimeUnit.SECONDS));
-		} catch (InterruptedException e) {
-			fail();
+		} catch (NullPointerException e) {
+			npe = e;
 		} finally {
 			obj.close();
 		}
+		
+		// Null pointer exception must not be thrown.
+		assertNull(npe);
 	}
 	
 	/**
@@ -179,21 +177,21 @@ public class SshShellPipeTest {
 	@Test
 	public void testHandleException() {
 		SshShellPipe obj = new SshShellPipe();
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		obj.setSshExceptionHandler(new SshExceptionHandler() {
-			@Override
-			public void onException(Throwable throwable) {
-				countDownLatch.countDown();
-			}
-		});
-		try{
-			obj.handleException(new Exception());
-			assertTrue(countDownLatch.await(30 , TimeUnit.SECONDS));
-		} catch (InterruptedException e) {
-			fail();
+	
+		DummySshExceptionHandler handler = new DummySshExceptionHandler();
+		obj.setSshExceptionHandler(handler);
+		Exception exception = new Exception("dummy exception");
+
+		// execute
+		try {
+			obj.handleException(exception);
 		} finally {
 			obj.close();
 		}
+
+		// test
+		assertEquals(1, handler.throwables.size());
+		assertEquals("dummy exception", handler.throwables.get(0).getMessage());
 	}
 	
 	/**
@@ -202,22 +200,43 @@ public class SshShellPipeTest {
 	@Test
 	public void testHandleException_null() {
 		SshShellPipe obj = new SshShellPipe();
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		obj.setSshExceptionHandler(new SshExceptionHandler() {
-			@Override
-			public void onException(Throwable throwable) {
-				countDownLatch.countDown();
-			}
-		});
+		
+		obj.setSshExceptionHandler(null);
+		
+		NullPointerException npe = null;
 		try{
-			obj.setSshExceptionHandler(null);
 			obj.handleException(new Exception());
-			assertFalse(countDownLatch.await(30 , TimeUnit.SECONDS));
-		} catch (InterruptedException e) {
-			fail();
+		} catch (NullPointerException e) {
+			npe = e;
 		} finally {
 			obj.close();
 		}
+		
+		// Null pointer exception must not be thrown.
+		assertNull(npe);
 	}
-
 }
+
+class DummySshMessageHandler implements SshMessageHandler {
+	public List<String> lines = new ArrayList<>();
+	
+	/* (non-Javadoc)
+	 * @see org.o3project.mlo.server.logic.SshMessageHandler#onMessage(java.lang.String)
+	 */
+	@Override
+	public void onMessage(String line) {
+		lines.add(line);
+	}
+}
+
+class DummySshExceptionHandler implements SshExceptionHandler {
+	public List<Throwable> throwables = new ArrayList<>();
+	/* (non-Javadoc)
+	 * @see org.o3project.mlo.server.logic.SshExceptionHandler#onException(java.lang.Throwable)
+	 */
+	@Override
+	public void onException(Throwable throwable) {
+		throwables.add(throwable);
+	}
+}
+

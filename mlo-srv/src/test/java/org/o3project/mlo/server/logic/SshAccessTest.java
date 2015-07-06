@@ -163,12 +163,9 @@ public class SshAccessTest {
 	@Test
 	public void testOpen_twice() {
 		SshAccess obj = new SshAccess(); 
-		final CountDownLatch countDownLatch = new CountDownLatch(2);
 		SshShellTask sshShellTask = new SshShellTask() {
-			
 			@Override
 			public Void call() {
-				countDownLatch.countDown();
 				return null;
 			}
 		};
@@ -179,14 +176,9 @@ public class SshAccessTest {
 		obj.setConfigProvider(configProvider);
 		obj.setSshShellPipe(new SshShellPipe());
 
-		assertTrue(obj.open("s1", null, null));
-		assertFalse(obj.open("s1", null, null));
-		
 		try {
-			boolean isCalled = countDownLatch.await(30 , TimeUnit.SECONDS);
-			assertFalse(isCalled);
-		} catch (InterruptedException e) {
-			fail();
+			assertTrue(obj.open("s1", null, null));
+			assertFalse(obj.open("s1", null, null));
 		} finally {
 			executorService.shutdown();
 			obj.close();
