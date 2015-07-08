@@ -96,9 +96,15 @@ public class AlarmProcessorImpl implements AlarmProcessor {
 	 */
 	void notifyAlarm(AlarmDto alarmDto) {
 		Notification notification = new Notification();
-		notification.notificationName = alarmDto.getClass().getName();
+		notification.notificationName = createNotificationName(alarmDto);
 		notification.sender = this;
 		notification.data = alarmDto;
 		notificationCenter.postNotification(notification);
+	}
+	
+	String createNotificationName(AlarmDto alarmDto) {
+		String className = alarmDto.getClass().getName();
+		String type = alarmDto.type;
+		return String.format("%s?type=%s", className, type);
 	}
 }

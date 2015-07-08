@@ -55,7 +55,7 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 	private static final Integer START_EXTRA_PORT_ID = 100;
 	
 	private static final Pattern PTN_INTEGER = Pattern.compile("^[^\\d]*(\\d+).*$");
-
+	
 	private ConfigProvider configProvider;
 	
 	private TopologyProvider topologyProviderLocalImpl;
@@ -123,6 +123,7 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 			cacheData.isLoaded = false;
 		}
 		
+		String notificationName = AlarmDto.class.getName() + "?type=topology";
 		notificationCenter.addObserver(new NotificationObserver() {
 			@Override
 			public void notificationObserved(Notification notification) {
@@ -157,15 +158,15 @@ public class TopologyRepositoryDefaultImpl implements TopologyRepository, LdTopo
 					}
 				}
 			}
+		}, notificationName);
+	}
 			
-			private EventDto createTopologyStateChangedEvent() {
-				EventDto eventDto = new EventDto();
-				eventDto.timestamp = new Date();
-				eventDto.type = "modified";
-				eventDto.targetType = "topology-state";
-				return eventDto;
-			}
-		}, AlarmDto.class.getName());
+	private EventDto createTopologyStateChangedEvent() {
+		EventDto eventDto = new EventDto();
+		eventDto.timestamp = new Date();
+		eventDto.type = "modified";
+		eventDto.targetType = "topology-state";
+		return eventDto;
 	}
 	
 	/* (non-Javadoc)
