@@ -71,7 +71,7 @@ All are installed in executing *setup.sh* command.
 - jdk7
 - maven
 - [ODENOS 1.0.0](https://github.com/o3project/odenos/releases/tag/1.0.0)
-- tomcat6, tomcat6-admin
+- tomcat7, tomcat7-admin
 
 
 Building and deploying mlo-net

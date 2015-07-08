@@ -7,7 +7,7 @@
 	<name>mlo-srv</name>
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tomcat6.deployment.server.url>http://127.0.0.1:8080/manager</tomcat6.deployment.server.url>
+        <tomcat.deployment.server.url>http://127.0.0.1:8080/manager</tomcat.deployment.server.url>
 	</properties>
 	<profiles>
 		<profile>
@@ -135,7 +135,7 @@
 				<groupId>org.apache.tomcat.maven</groupId>
 				<artifactId>tomcat7-maven-plugin</artifactId>
 				<configuration>
-					<url>${tomcat6.deployment.server.url}</url>
+					<url>${tomcat.deployment.server.url}</url>
 					<username>mlo</username>
 					<password>m10-developer</password>
 					<path>/DEMO</path>
