@@ -9,8 +9,8 @@ mvn clean package $M2_EXTRA_OPTS -f odenos-1.0.0/pom.xml
 
 # Deploys MLO
 mvn clean install -Pproduct $M2_EXTRA_OPTS -f mlo-srv/pom.xml
-mvn clean tomcat6:redeploy $M2_EXTRA_OPTS -f mlo-psdtnc/pom.xml
-mvn clean tomcat6:redeploy -Pproduct $M2_EXTRA_OPTS -f mlo-srv/pom.xml
+mvn clean tomcat7:redeploy $M2_EXTRA_OPTS -f mlo-psdtnc/pom.xml
+mvn clean tomcat7:redeploy -Pproduct $M2_EXTRA_OPTS -f mlo-srv/pom.xml
 
 sh system.restart.sh
 

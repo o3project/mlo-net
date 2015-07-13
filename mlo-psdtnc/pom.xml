@@ -11,7 +11,7 @@
     <version>1.0</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tomcat6.deployment.server.url>http://127.0.0.1:8080/manager</tomcat6.deployment.server.url>
+        <tomcat.deployment.server.url>http://127.0.0.1:8080/manager</tomcat.deployment.server.url>
     </properties>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -90,9 +90,9 @@
             </plugin>
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat6-maven-plugin</artifactId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
 				<configuration>
-					<url>${tomcat6.deployment.server.url}</url>
+					<url>${tomcat.deployment.server.url}</url>
 					<username>mlo</username>
 					<password>m10-developer</password>
 					<path>/nbiService</path>
