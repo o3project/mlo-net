@@ -1564,7 +1564,9 @@ APP.view.operation.remote = (function (opts) {
     };
 
     pfs.openNodeTerminal = function (nodeData) {
-        var webSocketUri = 'ws://' + window.location.hostname + ':8080/DEMO/remote/' + nodeData;
+        var webSocketUri = ('ws://' + 
+            window.location.hostname + ':' + window.location.port + 
+            '/DEMO/remote/' + nodeData);
         
         pfs.webSocket = pfs.connectWs(webSocketUri, pfs.webSocketOnMessageReceived);
         
@@ -1605,15 +1607,21 @@ APP.load = function () {
 };
 
 APP.connectToEventsApi = function () {
-    var ws = new WebSocket("ws://" + location.hostname + ":8080/DEMO/events");
-    ws.onopen = function(){
+    var ws, 
+        url;
+
+    url = ('ws://' + 
+            window.location.hostname + ':' + window.location.port + 
+            '/DEMO/events');
+    ws = new WebSocket(url);
+    ws.onopen = function () {
         APP.log('Events connection is opened.');
     };
-    ws.onclose = function() {
+    ws.onclose = function () {
         APP.log('Events connection is closed.');
     };
-    ws.onmessage = function(message){
-        APP.log(message.data + "\n");
+    ws.onmessage = function (message) {
+        APP.log(message.data + '\n');
         var obj = JSON.parse(message.data);
         APP.log(obj);
         APP.load();
@@ -1628,3 +1636,4 @@ APP.init = function () {
     this.load();
     APP.log('[INFO] user-agent: ' + ua);
 };
+
