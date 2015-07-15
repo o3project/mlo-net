@@ -423,6 +423,7 @@
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-websocket-api</artifactId>
 			<version>7.0.62</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
     
