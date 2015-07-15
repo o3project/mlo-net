@@ -11,7 +11,7 @@
     <version>1.0</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tomcat.deployment.server.url>http://127.0.0.1:8080/manager</tomcat.deployment.server.url>
+        <tomcat.deployment.server.url>http://127.0.0.1:8080/manager/text</tomcat.deployment.server.url>
     </properties>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

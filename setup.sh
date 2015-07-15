@@ -21,6 +21,8 @@ TOMCAT_USERS_XML=var/lib/tomcat7/conf/tomcat-users.xml
 sudo install --mode=644 --owner=root --group=tomcat7 conf/$TOMCAT_USERS_XML /$TOMCAT_USERS_XML
 CRON_TOMCAT=etc/logrotate.d/tomcat7
 sudo install --mode=644 --owner=root --group=root conf/$CRON_TOMCAT /$CRON_TOMCAT
+DEFAULT_TOMCAT=etc/default/tomcat7
+sudo install --mode=644 --owner=root --group=root conf/$DEFAULT_TOMCAT /$DEFAULT_TOMCAT
 sudo service tomcat7 restart
 
 
