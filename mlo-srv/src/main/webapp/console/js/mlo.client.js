@@ -1450,7 +1450,7 @@ APP.view.operation.remote = (function (opts) {
         	open: function(event) {
         		$termOutTxta.val('').height($termDlg.height() - 55);
                 $termInTxtf.attr('disabled', 'disabled');
-                $status.html("connecting..").css("color", "black");
+                $status.html('connecting..').css('color', 'black');
         	}
         });
         
@@ -1481,17 +1481,17 @@ APP.view.operation.remote = (function (opts) {
         });
         
         $termInTxtf.focus(function(){
-    		if(this.value == "Input command here, and then click execute button."){
-    			$(this).val("").css("color","#000");
+    		if(this.value == 'Input command here, and then click execute button.'){
+    			$(this).val('').css('color', '#000');
     		}
     	});
         $termInTxtf.blur(function(){
-    		if(this.value === ""){
-    			$(this).val("Input command here, and then click execute button.")
-    			     .css("color","#969696");
+    		if(this.value === ''){
+    			$(this).val('Input command here, and then click execute button.')
+    			     .css('color', '#969696');
     		}
-    		if(this.value != "Input command here, and then click execute button."){
-    			$(this).css("color","#000");
+    		if(this.value != 'Input command here, and then click execute button.'){
+    			$(this).css('color', '#000');
     		}
     	});
     };
@@ -1510,15 +1510,15 @@ APP.view.operation.remote = (function (opts) {
             };
             ws.onmessage = function (event) {
             	var alarmResponseDto = JSON.parse(event.data);
-            	if (alarmResponseDto.status == "ok") {
-            		$termInTxtf.removeAttr("disabled");
-            		$termInTxtf.val("Input command here, and then click execute button.") .css("color","#969696");
-            		$status.html("status is good.").css("color", "green");
+            	if (alarmResponseDto.status == 'ok') {
+            		$termInTxtf.removeAttr('disabled');
+            		$termInTxtf.val('Input command here, and then click execute button.') .css('color', '#969696');
+            		$status.html('status is good.').css('color', 'green');
             		onMessageCallback(alarmResponseDto.result);
-            	} else if (alarmResponseDto.status == "ng") {
+            	} else if (alarmResponseDto.status == 'ng') {
             		ws.close();
-            		$termInTxtf.attr("disabled", "disabled");
-            		$status.html("SSH error ! : " + alarmResponseDto.exception).css("color", "red");
+            		$termInTxtf.attr('disabled', 'disabled');
+            		$status.html('SSH error ! : ' + alarmResponseDto.exception).css('color', 'red');
             		APP.log(alarmResponseDto.exception);
             	}
             };
@@ -1540,7 +1540,7 @@ APP.view.operation.remote = (function (opts) {
         APP.log('execCmdBtn clicked.');
         
         var remoteAccessRequestDto = {
-    		targetId : "s5",
+    		targetId : 's5',
     		commandString : msg,
     	};
         
