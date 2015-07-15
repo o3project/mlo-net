@@ -1,6 +1,9 @@
 #!/bin/bash
 
 export CATALINA_HOME=/opt/tomcat-7
+
+# For simplicity, env variables are defined here, not in $CATALINA_HOME/bin/setenv.sh
+export CATALINA_PID=/var/run/tomcat-7-catalina.pid
 export CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
@@ -10,7 +13,7 @@ start() {
 }
 
 stop() {
-    sh $CATALINA_HOME/bin/shutdown.sh
+    sh $CATALINA_HOME/bin/shutdown.sh 15 -force
 }
 case $1 in
     start|stop) $1;;
