@@ -43,10 +43,5 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jsonic-1.3.7.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jsch-0.1.51.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/mlo-srv-1.0-classes.jar"/>
-	<classpathentry kind="var" path="TOMCAT_HOME/lib/servlet-api.jar"/>
-	<classpathentry kind="var" path="TOMCAT_HOME/lib/jasper.jar"/>
-	<classpathentry kind="var" path="TOMCAT_HOME/lib/jsp-api.jar"/>
-	<classpathentry kind="var" path="TOMCAT_HOME/lib/el-api.jar"/>
-	<classpathentry kind="var" path="TOMCAT_HOME/lib/annotations-api.jar"/>
 	<classpathentry kind="output" path="src/main/webapp/WEB-INF/classes"/>
 </classpath>
