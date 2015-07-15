@@ -294,6 +294,6 @@ final class ConfigDefinition implements ConfigConstants, TopologyConfigConstants
 		props.put(PROP_KEY_REMOTE_NODE_ACCESS_PASSWORD,     "developer");
 		props.put(PROP_KEY_REMOTE_NODE_ACCESS_SSH_SESSION_TIMEOUT_MSEC, "120000");
 		props.put(PROP_KEY_REMOTE_NODE_ACCESS_SSH_CHANNEL_TIMEOUT_MSEC, "120000");
-		props.put(PROP_KEY_REMOTE_NODE_ACCESS_LD_WORKSPACE_DIRPATH,     "mlo-net.css/lagopus-docker/workspace");
+		props.put(PROP_KEY_REMOTE_NODE_ACCESS_LD_WORKSPACE_DIRPATH,     "mlo-net/lagopus-docker/workspace");
 	}
 }

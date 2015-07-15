@@ -421,6 +421,6 @@ public class SshAccessTest {
 		assertEquals("developer", sshNodeConfig.getPassword());
 		assertEquals(120000, sshNodeConfig.getSshSessionTimeout());
 		assertEquals(120000, sshNodeConfig.getSshChannelTimeout());
-		assertEquals("mlo-net.css/lagopus-docker/workspace", sshNodeConfig.getLdWorkspaceDirpash());
+		assertEquals("mlo-net/lagopus-docker/workspace", sshNodeConfig.getLdWorkspaceDirpash());
 	}
 }
