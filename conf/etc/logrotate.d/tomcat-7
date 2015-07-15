@@ -1,0 +1,9 @@
+/opt/tomcat-7/catalina.out {
+  copytruncate
+  size 1000000000
+  rotate 52
+  compress
+  missingok
+  create 640 tomcat-7 adm
+}
+
