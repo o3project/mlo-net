@@ -438,9 +438,34 @@ public class SliceManager implements NbiConstants {
 			SliceDto resSliceDto = new SliceDto();
 			resSliceDto.id = sliceEntity.getSliceDto().id;
 			resSliceDto.name = sliceEntity.getSliceDto().name;
+			if (sliceEntity.getSliceDto().flows != null
+					&& "true".equalsIgnoreCase(paramMap.get(REQPARAM_WITH_FLOW_LIST))) {
+				resSliceDto.flows = new ArrayList<>();
+				FlowDto appendedFlowDto = null;
+				for (FlowDto flowDto : sliceEntity.getSliceDto().flows) {
+					appendedFlowDto = createSimplifiedFlowDto(flowDto);
+					resSliceDto.flows.add(appendedFlowDto);
+				}
+			}
 			resDto.slices.add(resSliceDto);
 		}
 		return resDto;
+	}
+
+	/**
+	 * @param originalFlowDto
+	 * @return
+	 */
+	private FlowDto createSimplifiedFlowDto(FlowDto originalFlowDto) {
+		FlowDto flowDto;
+		flowDto = new FlowDto();
+		flowDto.id = originalFlowDto.id;
+		flowDto.name = originalFlowDto.name;
+		Object oFlowTypeName = originalFlowDto.attributes.get(TopologyConfigConstants.FLOW_ATTR_KEY_SDTNC_LINK_ID);
+		if (oFlowTypeName != null) {
+			flowDto.flowTypeName = oFlowTypeName.toString();
+		}
+		return flowDto;
 	}
 	
 	/**

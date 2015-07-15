@@ -1,0 +1,483 @@
+{
+	"bridges": [
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br1"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br9"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br3"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br10"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br2"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br11"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br4"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br12"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br5"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br13"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br7"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br14"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br6"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br15"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br8"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br16"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br17"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br18"
+		},
+		{
+			"bw": "40000000kbps",
+			"delay": "5ms",
+			"name": "br19"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br20"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br21"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br23"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br24"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br25"
+		},
+		{
+			"bw": null,
+			"delay": null,
+			"name": "br22"
+		}
+	],
+	"controllers": [
+		"c0"
+	],
+	"flows": [
+		{
+			"brNames": [
+				"br1",
+				"br9",
+				"br17",
+				"br19",
+				"br12",
+				"br4"
+			],
+			"name": "of1"
+		},
+		{
+			"brNames": [
+				"br1",
+				"br9",
+				"br17",
+				"br18",
+				"br10",
+				"br3"
+			],
+			"name": "of12"
+		},
+		{
+			"brNames": [
+				"br1",
+				"br9",
+				"br17",
+				"br22",
+				"br23",
+				"br13",
+				"br5"
+			],
+			"name": "of3"
+		},
+		{
+			"brNames": [
+				"br1",
+				"br9",
+				"br17",
+				"br22",
+				"br25",
+				"br16",
+				"br8"
+			],
+			"name": "of4"
+		}
+	],
+	"hosts": [
+		{
+			"brNames": [
+				"br1",
+				"br2"
+			],
+			"dpid": "0.52:54:00:00:00:1",
+			"ip": "169.254.0.11/24 169.254.0.12/24",
+			"mac": "52:54:00:00:00:11 52:54:00:00:00:12",
+			"name": "h1",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "host"
+		},
+		{
+			"brNames": [
+				"br4",
+				"br3"
+			],
+			"dpid": "0.52:54:00:00:00:2",
+			"ip": "169.254.0.21/24 169.254.0.22/24",
+			"mac": "52:54:00:00:00:21 52:54:00:00:00:22",
+			"name": "h2",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "host"
+		},
+		{
+			"brNames": [
+				"br5",
+				"br6"
+			],
+			"dpid": "0.52:54:00:00:00:3",
+			"ip": "169.254.0.31/24 169.254.0.32/24",
+			"mac": "52:54:00:00:00:31 52:54:00:00:00:32",
+			"name": "h3",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "host"
+		},
+		{
+			"brNames": [
+				"br8",
+				"br7"
+			],
+			"dpid": "0.52:54:00:00:00:4",
+			"ip": "169.254.0.41/24 169.254.0.42/24",
+			"mac": "52:54:00:00:00:41 52:54:00:00:00:42",
+			"name": "h4",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "host"
+		}
+	],
+	"switches": [
+		{
+			"brNames": [
+				"br1",
+				"br9"
+			],
+			"dpid": "0.00:00:00:00:00:01",
+			"ip": null,
+			"mac": null,
+			"name": "s1",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br3",
+				"br10"
+			],
+			"dpid": "0.00:00:00:00:00:02",
+			"ip": null,
+			"mac": null,
+			"name": "s2",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br2",
+				"br11"
+			],
+			"dpid": "0.00:00:00:00:00:03",
+			"ip": null,
+			"mac": null,
+			"name": "s3",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br4",
+				"br12"
+			],
+			"dpid": "0.00:00:00:00:00:04",
+			"ip": null,
+			"mac": null,
+			"name": "s4",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br5",
+				"br13"
+			],
+			"dpid": "0.00:00:00:00:00:05",
+			"ip": null,
+			"mac": null,
+			"name": "s5",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br7",
+				"br14"
+			],
+			"dpid": "0.00:00:00:00:00:06",
+			"ip": null,
+			"mac": null,
+			"name": "s6",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br6",
+				"br15"
+			],
+			"dpid": "0.00:00:00:00:00:07",
+			"ip": null,
+			"mac": null,
+			"name": "s7",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br8",
+				"br16"
+			],
+			"dpid": "0.00:00:00:00:00:08",
+			"ip": null,
+			"mac": null,
+			"name": "s8",
+			"portNames": [
+				"eth1",
+				"eth2"
+			],
+			"type": "edge"
+		},
+		{
+			"brNames": [
+				"br10",
+				"br9",
+				"br17",
+				"br18"
+			],
+			"dpid": "0.00:00:00:00:00:09",
+			"ip": null,
+			"mac": null,
+			"name": "s9",
+			"portNames": [
+				"eth1",
+				"eth2",
+				"eth3",
+				"eth4"
+			],
+			"type": "metro"
+		},
+		{
+			"brNames": [
+				"br12",
+				"br11",
+				"br19",
+				"br20"
+			],
+			"dpid": "0.00:00:00:00:00:0a",
+			"ip": null,
+			"mac": null,
+			"name": "s10",
+			"portNames": [
+				"eth1",
+				"eth2",
+				"eth3",
+				"eth4"
+			],
+			"type": "metro"
+		},
+		{
+			"brNames": [
+				"br14",
+				"br13",
+				"br21",
+				"br23",
+				"br24"
+			],
+			"dpid": "0.00:00:00:00:00:0b",
+			"ip": null,
+			"mac": null,
+			"name": "s11",
+			"portNames": [
+				"eth1",
+				"eth2",
+				"eth3",
+				"eth4",
+				"eth5"
+			],
+			"type": "metro"
+		},
+		{
+			"brNames": [
+				"br16",
+				"br15",
+				"br24",
+				"br25"
+			],
+			"dpid": "0.00:00:00:00:00:0c",
+			"ip": null,
+			"mac": null,
+			"name": "s12",
+			"portNames": [
+				"eth1",
+				"eth2",
+				"eth3",
+				"eth4"
+			],
+			"type": "metro"
+		},
+		{
+			"brNames": [
+				"br21",
+				"br19",
+				"br18",
+				"br17",
+				"br22"
+			],
+			"dpid": "0.00:00:00:00:00:0d",
+			"ip": null,
+			"mac": null,
+			"name": "s13",
+			"portNames": [
+				"eth1",
+				"eth2",
+				"eth3",
+				"eth4",
+				"eth5"
+			],
+			"type": "core"
+		},
+		{
+			"brNames": [
+				"br23",
+				"br20",
+				"br22",
+				"br25"
+			],
+			"dpid": "0.00:00:00:00:00:0e",
+			"ip": null,
+			"mac": null,
+			"name": "s14",
+			"portNames": [
+				"eth1",
+				"eth2",
+				"eth3",
+				"eth4"
+			],
+			"type": "core"
+		}
+	]
+}
+

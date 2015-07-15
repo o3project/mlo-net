@@ -399,12 +399,15 @@ public class TopologyRepositoryDefaultImplTest {
 	 * @return
 	 */
 	private static TopologyRepositoryDefaultImpl createObj(ConfigProvider configProvider, TopologyProviderRemoteLdImpl topologyProviderRemoteLdImpl) {
+		NotificationCenterImpl notificationCenterImpl = new NotificationCenterImpl(); // do not call init()
+		
 		ComponentFactory componentFactory = new ComponentFactory();
 		
 		TopologyProviderLocalImpl topologyProviderLocalImpl = new TopologyProviderLocalImpl();
 		topologyProviderLocalImpl.setComponentFactory(componentFactory);
 		
 		TopologyRepositoryDefaultImpl obj = new TopologyRepositoryDefaultImpl();
+		obj.setNotificationCenter(notificationCenterImpl);
 		obj.setConfigProvider(configProvider);
 		obj.setTopologyProviderLocalImpl(topologyProviderLocalImpl);
 		obj.setTopologyProviderRemoteLdImpl(topologyProviderRemoteLdImpl);

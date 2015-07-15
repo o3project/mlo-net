@@ -33,6 +33,14 @@
   <user username="both" password="tomcat" roles="tomcat,role1"/>
   <user username="role1" password="tomcat" roles="role1"/>
 -->
-  <role rolename="manager" />
-  <user username="mlo" password="m10-developer" roles="manager" />
+
+  <role rolename="manager-gui"/>
+  <user username="tomcat" password="tomcat" roles="manager-gui"/>
+
+  <role rolename="manager-script"/>
+  <user username="mlo" password="m10-developer" roles="manager-script" />
+
+  <role rolename="mlo-user"/>
+  <user username="developer" password="developer" roles="mlo-user" />
 </tomcat-users>
+

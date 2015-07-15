@@ -1,0 +1,20 @@
+#!/bin/bash
+
+export CATALINA_HOME=/opt/tomcat-7
+export CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+start() {
+    sh $CATALINA_HOME/bin/startup.sh
+}
+
+stop() {
+    sh $CATALINA_HOME/bin/shutdown.sh
+}
+case $1 in
+    start|stop) $1;;
+    restart) stop; start;;
+    *) echo "Run as $0 <start|stop|restart>"; exit 1;;
+esac
+

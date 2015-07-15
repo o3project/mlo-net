@@ -41,4 +41,6 @@ public interface TopologyRepository {
 	 * @return the offset value of VLAN ID.
 	 */
 	Integer getExtraVlanIdOffset();
+	
+	String getComponentState(Class<?> componentObjClass, String name);
 }

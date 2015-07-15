@@ -2,28 +2,122 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="externals/jquery-ui-1.11.3/jquery-ui.css">
+    <title>MLO web console</title>
+    <link rel="stylesheet" type="text/css" href="externals/jquery-ui/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="css/base.css">
     <link rel="stylesheet" type="text/css" href="css/mlo.client.css">
 </head>
 <body>
-    <div >
+    <div id="page-main" >
         <div id="topo-canvas"></div>
-        <div class="ui-widget-content flow-list-panel">
+        <div class="ui-widget-content flow-list-panel hidden">
         </div>
         <div class="flow-list-template">
             <h3>slice-sample</h3>
             <ul>
-                <li class="ui-widget-content">
+                <li >
                     <span class="flow-name">flow-sample-1</span>
                     <span class="flow-type-name">of1</span>
                 </li>
             </ul>
         </div>
+        <div class="slice-list-panel">
+            <h3>
+                Service slice list<a href="#">Create new slice</a>
+            </h3>
+            <ul class="slice-list">
+            </ul>
+            <ul class="slice-list-template">
+                <li class="ui-widget-header slice-title">
+                    <span class="slice-name">slice-sample-1</span>
+                    (id:<span class="slice-id">1</span>)
+                    <a class="edit-slice-op" href="#">Edit this slice</a>
+                </li>
+                <li class="flow-item">
+                    <span class="flow-id">1</span>
+                    <span class="flow-name">flow-sample-1-1</span>
+                    <span class="flow-type-name">of1</span>
+                </li>
+            </ul>
+        </div>
+        <ul class="flow-operation-menu">
+            <li><span>Modify</span><span class="action-key">modifyFlow</span></li>
+            <li><span>Delete</span><span class="action-key">deleteFlow</span></li>
+        </ul>
+        <ul class="slice-operation-menu">
+            <li class="delete-slice-menu-item">
+                <span>Delete slice</span><span class="action-key">deleteSlice</span>
+            </li>
+            <li class="post-flow-menu-item">
+                <span>Add flow ...</span><span class="action-key">addFlow</span>
+            </li>
+            <li class="put-flow-menu-item">
+                <span>Modify flow ...</span><span class="action-key">modifyFlow</span>
+                <ul class="operation-flow-list">
+                </ul>
+            </li>
+            <li class="delete-flow-menu-item">
+                <span>Delete flow</span><span class="action-key">deleteFlow</span>
+                <ul class="operation-flow-list">
+                </ul>
+            </li>
+        </ul>
+        <ul class="node-context-menu">
+            <li class="connect-to-node">
+                <span>Connect to node ...</span><span class="action-key">connectToNode</span>
+            </li>
+        </ul>
+    </div>
+    <div id="dialogbox-post-slice" title="Create a slice" >
+        <form class="create-slice" >
+            <fieldset>
+                <label for="slice-name">Slice Name</label>
+                <input type="text" name="slice-name" class="text ui-widget-content ui-corner-all">
+
+                <a href="#" class="add-flow-button">Add flow</a>
+
+                <input type="submit" tabindex="-1" class="keyboard-submission">
+                
+            </fieldset>
+        </form>
+        <fieldset class="add-flow-fieldset-template" disabled="true">
+            <fieldset class="add-flow-fieldset">
+                <legend>Flow</legend>
+                <div>
+                    <label for="flow-name">Flow Name</label>
+                    <input type="text" name="flow-name" class="text ui-widget-content ui-corner-all">
+                </div>
+                <div>
+                    <label for="src-ce-node-name">Source CE</label>
+                    <input type="text" name="src-ce-node-name" value="h1"
+                        placeholder="Node name" class="text ui-widget-content ui-corner-all middle">
+                    <input type="text" name="src-ce-port-no" value="eth1"
+                        placeholder="Port" class="text ui-widget-content ui-corner-all short">
+                </div>
+                <div>
+                    <label for="src-ce-node-name">Destination CE</label>
+                    <input type="text" name="dst-ce-node-name" value="h2"
+                        placeholder="Node name" class="text ui-widget-content ui-corner-all middle">
+                    <input type="text" name="dst-ce-port-no" value="eth1"
+                        placeholder="Port" class="text ui-widget-content ui-corner-all short">
+                </div>
+                <div>
+                    <label for="req-bandwidth">Bandwidth</label>
+                    <input type="text" name="req-bandwidth" value="10"
+                        class="text ui-widget-content ui-corner-all short"> Mbps or more
+                </div>
+                <div>
+                    <label for="req-delay">Delay</label>
+                    <input type="text" name="req-delay" value="25"
+                        class="text ui-widget-content ui-corner-all short"> msec or less
+                </div>
+            </fieldset>
+        </fieldset>
     </div>
     <script src="externals/d3.v3.min.js"></script>
     <script src="externals/jquery-1.11.0.min.js"></script>
-    <script src="externals/jquery-ui-1.11.3/jquery-ui.min.js"></script>
+    <script src="externals/jquery-ui/jquery-ui.min.js"></script>
+    <script src="externals/jquery.activity-indicator-1.0.0.min.js"></script>
     <script src="js/mlo.client.js"></script>
 </body>
 </html>

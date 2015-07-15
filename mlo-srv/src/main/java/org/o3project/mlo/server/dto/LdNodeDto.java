@@ -31,6 +31,8 @@ public class LdNodeDto {
 	 * </dl>
 	 */
 	public String type;
+
+	public String state = "ok";
 	
 	/**
 	 * The IP address of the node.
