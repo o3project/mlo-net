@@ -1429,12 +1429,11 @@ APP.view.operation.remote = (function (opts) {
         }
     };
 
-    // not available yet.
     pfs.initNodeTerminalDialog = function ($termDlg) {
         var $execCmdBtn = $('.exec-cmd-button', $termDlg),
             $termInTxtf = $('.term-in', $termDlg),
             $termOutTxta = $('.term-out', $termDlg),
-        	$status = $('.status', $termDlg);
+            $statusLbl = $('.status-bar span', $termDlg);
         
         $termDlg.dialog({
             modal: false,
@@ -1443,15 +1442,11 @@ APP.view.operation.remote = (function (opts) {
             height: 400,
             title: 'Node terminal',
             buttons: [],
-            	
-        	resize: function(event) {
-        		$termOutTxta.height($termDlg.height() - 55);
-        	},
-        	open: function(event) {
-        		$termOutTxta.val('').height($termDlg.height() - 55);
+            open: function (event) {
                 $termInTxtf.attr('disabled', 'disabled');
-                $status.html('connecting..').css('color', 'black');
-        	}
+                $termOutTxta.val('');
+                $statusLbl.text('Connecting ... ');
+            }
         });
         
         $termDlg.on('dialogbeforeclose', function (event, ui) {
@@ -1463,11 +1458,11 @@ APP.view.operation.remote = (function (opts) {
             icons: { primary: 'ui-icon-arrowthick-1-w' },
             text: null
         }).click(function () {
-        	if ( $termInTxtf.is(':disabled') === false ) {
-        		var msg;
-            	msg = $termInTxtf.val();
-            	pfs.sendMessage(pfs.webSocket, msg);
-        	}
+            var msg;
+            if ($termInTxtf.is(':disabled') === false) {
+                msg = $termInTxtf.val();
+                pfs.sendMessage(pfs.webSocket, msg);
+            }
             return false;
         });
 
@@ -1479,28 +1474,12 @@ APP.view.operation.remote = (function (opts) {
                 return false;
             }
         });
-        
-        $termInTxtf.focus(function(){
-    		if(this.value == 'Input command here, and then click execute button.'){
-    			$(this).val('').css('color', '#000');
-    		}
-    	});
-        $termInTxtf.blur(function(){
-    		if(this.value === ''){
-    			$(this).val('Input command here, and then click execute button.')
-    			     .css('color', '#969696');
-    		}
-    		if(this.value != 'Input command here, and then click execute button.'){
-    			$(this).css('color', '#000');
-    		}
-    	});
     };
 
     pfs.connectWs = function (wsUri, onMessageCallback) {
-        var $termInTxtf = $('.term-in', '#dialog-node-terminal'),
-    	$status = $('.status', '#dialog-node-terminal');
-        
-        var ws;
+        var ws,
+            $termInTxtf = $('.term-in', '#dialog-node-terminal'),
+            $statusLbl = $('.status-bar span', '#dialog-node-terminal');
         
         APP.log('Creating web socket ...');
         try {
@@ -1509,18 +1488,20 @@ APP.view.operation.remote = (function (opts) {
                 APP.log('web socket opened.');
             };
             ws.onmessage = function (event) {
-            	var alarmResponseDto = JSON.parse(event.data);
-            	if (alarmResponseDto.status == 'ok') {
-            		$termInTxtf.removeAttr('disabled');
-            		$termInTxtf.val('Input command here, and then click execute button.') .css('color', '#969696');
-            		$status.html('status is good.').css('color', 'green');
-            		onMessageCallback(alarmResponseDto.result);
-            	} else if (alarmResponseDto.status == 'ng') {
-            		ws.close();
-            		$termInTxtf.attr('disabled', 'disabled');
-            		$status.html('SSH error ! : ' + alarmResponseDto.exception).css('color', 'red');
-            		APP.log(alarmResponseDto.exception);
-            	}
+                var alarmResponseDto = JSON.parse(event.data);
+                if (alarmResponseDto.status === 'ok') {
+                    $termInTxtf.removeAttr('disabled');
+                    $termInTxtf.val('');
+                    $statusLbl.removeClass('error');
+                    $statusLbl.html('Connected.');
+                    onMessageCallback(alarmResponseDto.result);
+                } else if (alarmResponseDto.status === 'ng') {
+                    ws.close();
+                    $termInTxtf.attr('disabled', 'disabled');
+                    $statusLbl.addClass('error');
+                    $statusLbl.html('ERROR: ' + alarmResponseDto.exception);
+                    APP.log(alarmResponseDto.exception);
+                }
             };
             ws.onerror = function (event) {
                 APP.log('web socket error occurred.');
@@ -1537,13 +1518,10 @@ APP.view.operation.remote = (function (opts) {
     };
 
     pfs.sendMessage = function (ws, msg) {
-        APP.log('execCmdBtn clicked.');
-        
         var remoteAccessRequestDto = {
-    		targetId : 's5',
-    		commandString : msg,
-    	};
-        
+            commandString : msg
+        };
+        APP.log('execCmdBtn clicked.');
         ws.send(JSON.stringify(remoteAccessRequestDto));
     };
 
@@ -1569,7 +1547,8 @@ APP.view.operation.remote = (function (opts) {
             '/DEMO/remote/' + nodeData);
         
         pfs.webSocket = pfs.connectWs(webSocketUri, pfs.webSocketOnMessageReceived);
-        
+       
+        pfs.$nodeTermDlg.dialog('option', 'title', 'Node terminal: Connecting to ' + nodeData);
         pfs.$nodeTermDlg.dialog('open');
     };
 
@@ -1627,7 +1606,7 @@ APP.connectToEventsApi = function () {
         APP.load();
     };
 };
-	
+
 APP.init = function () {
     var ua = window.navigator.userAgent;
     this.cfg.queryParams = this.getQueryParams();

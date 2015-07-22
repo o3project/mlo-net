@@ -135,16 +135,17 @@
     <div id="dialog-node-terminal">
         <form>
             <div>
-            	<p style="display:inline;">$</p>
-                <input type="text" class="term-in">
+                <span>$</span>
+                <input type="text" class="term-in text ui-widget-content" 
+                    placeholder="Input command here, and then click execute button.">
                 <a class="exec-cmd-button" href="#">Send</a>
             </div>
         </form>
-        <div>
-            <textarea class="term-out" disabled></textarea>
+        <div class="term-out-area">
+            <textarea class="term-out ui-widget-content" readonly></textarea>
         </div>
-        <div>
-			<p class="status">connecting..</p>
+        <div class="status-bar">
+            <span>Connecting..</span>
         </div>
     </div>
     <script src="../common/externals/d3.v3.min.js"></script>
