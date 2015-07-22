@@ -71,12 +71,12 @@ public final class FlowDtoUtil implements TopologyConfigConstants {
 		int lastIdx = links.size() - 1;
 		if (lastIdx > -1) {
 			flow = new FlowDto();
+			flow.usedBandWidth = width;
+			flow.delayTime = delay;
 			flow.srcPTNodeName = links.get(0).srcPTNodeName;
 			flow.srcPTNodeId = links.get(0).srcPTNodeId;
 			flow.dstPTNodeName = links.get(lastIdx).dstPTNodeName;
 			flow.dstPTNodeId = links.get(lastIdx).dstPTNodeId;
-			flow.usedBandWidth = width;
-			flow.delayTime = delay;
 			flow.overlayLogicalList = String.format("%08d_%08d", flow.srcPTNodeId, flow.dstPTNodeId);
 			flow.underlayLogicalList = String.format("%08d", flow.srcPTNodeId);
 			flow.linkInfoList = new ArrayList<LinkInfoDto>();
@@ -86,6 +86,17 @@ public final class FlowDtoUtil implements TopologyConfigConstants {
 				newLinkInfoDto.attributes.putAll(lid.attributes);
 				flow.linkInfoList.add(newLinkInfoDto);
 			}
+		} else {
+			flow = new FlowDto();
+			flow.usedBandWidth = width;
+			flow.delayTime = delay;
+			flow.srcPTNodeName = null;
+			flow.srcPTNodeId = null;
+			flow.dstPTNodeName = null;
+			flow.dstPTNodeId = null;
+			flow.overlayLogicalList = "";
+			flow.underlayLogicalList = "";
+			flow.linkInfoList = new ArrayList<LinkInfoDto>();
 		}
 		return flow;
 	}
