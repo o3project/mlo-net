@@ -143,23 +143,24 @@ print_path() {
             local br_a=(${brlist})
             eval local nbrlist=\${${nnode}_BR:-}
             local nbr_a=(${nbrlist})
-            local fmatch=0
+            local match=0
             for ((j=0; j<${#br_a[@]}; j++)); do
                 local br=${br_a[${j}]}
                 for ((k=0; k<${#nbr_a[@]}; k++)); do
                     local nbr=${nbr_a[${k}]}
                     if [ "$br" = "$nbr" ]; then
-                        fmatch=1
-                        if [ $((${i}+2)) -eq ${n} ]; then
-                            echo -n "$br"
+                        match=$((${match}+1))
+                        if [ ${match} -gt 1 ]; then
+                            echo -n "|$br"
                         else
-                            echo -n "$br "
+                            echo -n "$br"
                         fi
                         break
                     fi
                 done
-                [ ${fmatch} -eq 1 ] && break
+                #[ ${match} -eq 1 ] && break
             done
+            [ $((${i}+2)) -eq ${n} ] || echo -n " "
         fi
     done
     echo "\""

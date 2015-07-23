@@ -64,6 +64,7 @@ dpid2decimal() {
     local macaddr=`echo $1 | cut -d '.' -f2`
     local str=
     local IFS=:
+    local byte
     for byte in ${macaddr}; do
         str="${str}${byte}"
     done
