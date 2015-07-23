@@ -34,6 +34,9 @@ register_flowentry_validate() {
     echo "    local matches=\$3"
     echo "    local file=\`mktemp\`"
     echo "    local http_code=\$(curl -s -o \${file} -w "%{http_code}" -X GET http://REST:${PORT}/stats/flow/\${dpid_n})"
+    echo "    local i"
+    echo "    local _action"
+    echo "    local _match"
     echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && return 2"
     echo "    if [ -e \${file} ]; then"
     echo "        local idx=0"
@@ -80,6 +83,7 @@ register_padding() {
     echo "    local macaddr=\$1"
     echo "    local IFS=:"
     echo "    local count=1"
+    echo "    local byte"
     echo "    for byte in \${macaddr}; do"
     echo "        local str=\${byte}"
     echo "        if [ \${#str} -eq 1 -a \${count} -lt 6 ]; then"
@@ -343,7 +347,7 @@ decode() {
     local eth=$2
     eval local label="\${${dp}_${eth}_LABEL}"
     local port_n=`expr "${eth}" : '[^0-9]*\([0-9]*\)'`
-    label=`echo ${label} | sed -e 's/^0*//'`
+    local label=`echo ${label} | sed -e 's/^0*//'`
     echo "${port_n} ${label}"
 }
 
@@ -483,6 +487,10 @@ setup_datapath() {
     local dp_a=(${DP?})
     local dp_s=${#dp_a[@]}
     local dup_a=(${DUP?})
+    local i
+    local dp
+    local j
+    local prt
     for ((i=0; i<${dp_s}; i++)); do
         local dup=
         local dpid=${dp_a[${i}]}
@@ -560,6 +568,8 @@ setup_datapath() {
 }
 
 main() {
+    local k
+    local dp
     # banner
     echo "#!/bin/bash"
     echo "# run script for ryu NBI client program"

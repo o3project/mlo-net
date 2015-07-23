@@ -83,6 +83,7 @@ conf_delay() {
 
 brlist2links() {
     local brlist=$1
+    local br
     for br in ${brlist}; do
         if [ -z "${LINKS}" ]; then
             LINKS="${br}"
@@ -122,6 +123,7 @@ conf_ethlist() {
     local brlist=$1
     local ethlist=
     local var=1
+    local br
     for br in ${brlist}; do
         if [ ${var} -eq 1 ]; then
             ethlist="eth1"
@@ -137,6 +139,7 @@ conf_lagopus_conf() {
     local ethlist=$1
     local dpid=$2
     local outfile=$3
+    local eth
     echo "interface {"							>>"${outfile}"
     echo "    ethernet {"						>>"${outfile}"
     for eth in ${ethlist}; do
@@ -255,6 +258,8 @@ conf_ryu() {
 }
 
 conf_switch() {
+    local i
+    local app
     for switch in ${only:-${SWITCHES?}}; do
         local conf_file=${WORKDIR}/lagopus-${switch}.conf
         local outfile=${WORKDIR}/${switch}.sh
@@ -297,6 +302,10 @@ conf_switch() {
 }
 
 conf_host() {
+    local host
+    local eth
+    local i
+    local app
     for host in ${only:-${HOSTS?}}; do
         local conf_file=${WORKDIR}/lagopus-${host}.conf
         local outfile=${WORKDIR}/${host}.sh
@@ -362,6 +371,13 @@ conf_host() {
 }
 
 conf_flow() {
+    local flow
+    local i
+    local j
+    local k
+    local l
+    local m
+    local n
     for flow in ${only:-${FLOWS?}}; do
         local label=`expr "${flow}" : '[^0-9]*\([0-9]*\)'`
         [ "${label}" ] || {
@@ -486,6 +502,7 @@ conf_flow() {
 }
 
 conf_bridge_p1() {
+    local br
     . "${_LINKS}"
     echo "LINKS=\"${LINKS}\""						>>"${BRGFILE}"
     for br in ${LINKS}; do
@@ -500,6 +517,8 @@ conf_bridge_p1() {
 }
 
 conf_bridge_p2() {
+    local br
+    local port
     for br in ${LINKS}; do
         eval local ports=\${${br}_PORTS:-}
         eval local delay=\${${br}_DELAY:-${INIT_DELAY}}
@@ -521,6 +540,7 @@ register_clean() {
 }
 
 main() {
+    local br
     # banner
     echo "#!/bin/bash"
     echo "# run script for VLAN/MPLS switch network emulator"
