@@ -259,6 +259,33 @@ register_push_mpls() {
     echo
 }
 
+register_push_mpls_multiple() {
+    echo "push_mpls_multiple() {"
+    echo "    local dpid_n=\$1"
+    echo "    local ilabel=\$((\$2+${LABEL}))"
+    echo "    local iport=\$((\$3+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local oport=\$((\$4+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local olabel=\$((\$5+${LABEL}))"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"${PROTO_MPLS}\\\",\\"
+    echo " \\\"mpls_label\\\": \\\"\${ilabel}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"PUSH_MPLS\\\",\\"
+    echo " \\\"ethertype\\\": \\\"${PROTO_MPLS}\\\"},\\"
+    echo " {\\\"type\\\": \\\"SET_FIELD\\\",\\\"field\\\":\\"
+    echo " \\\"mpls_label\\\",\\\"value\\\": \${olabel}},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"PUSH_MPLS:${PROTO_MPLS}\\\" \\\"SET_FIELD:!{mpls_label:\${olabel}}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+    echo " \"\\\"mpls_label\\\"!\${ilabel} \\\"dl_type\\\"!${PROTO_MPLS} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"push_mpls_multiple Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
 register_pop_mpls_push_vlan() {
     echo "pop_mpls_push_vlan() {"
     echo "    local dpid_n=\$1"
@@ -312,6 +339,31 @@ register_pop_mpls() {
     echo " \"\\\"POP_MPLS:\${ethertype}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
     echo " \"\\\"mpls_label\\\"!\${ilabel} \\\"dl_type\\\"!${PROTO_MPLS} \\\"in_port\\\"!\${iport}\""
     echo "    [ \$? -ne 0 ] && echo \"pop_mpls Validatinon NG!\" && exit 2"
+    echo "}"
+    echo
+}
+
+register_pop_mpls_multiple() {
+    echo "pop_mpls_multiple() {"
+    echo "    local dpid_n=\$1"
+    echo "    local iport=\$((\$2+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local ilabel=\$((\$3+${LABEL}))"
+    echo "    local oport=\$((\$4+${LAGOPUS_PORT_OFFSET}))"
+    echo "    local http_code=\$(curl -s -o ${FILE} -w "%{http_code}" -X POST -d \"{\\"
+    echo " \\\"dpid\\\": \\\"\${dpid_n}\\\",\\"
+    echo " \\\"match\\\": {\\\"in_port\\\": \\\"\${iport}\\\",\\"
+    echo " \\\"dl_type\\\": \\\"${PROTO_MPLS}\\\",\\"
+    echo " \\\"mpls_label\\\": \\\"\${ilabel}\\\"},\\"
+    echo " \\\"actions\\\": [{\\\"type\\\": \\\"POP_MPLS\\\",\\"
+    echo " \\\"ethertype\\\": \\\"${PROTO_MPLS}\\\"},\\"
+    echo " {\\\"type\\\": \\\"OUTPUT\\\",\\"
+    echo " \\\"port\\\": \\\"\${oport}\\\"}]}\"\\"
+    echo " http://REST:${PORT}/stats/flowentry/\${CMD})"
+    echo "    [ \$? -ne 0 -o \${http_code} != ${HTTP_OK} ] && exit 2"
+    echo "    flowentry_validate \${dpid_n}\\"
+    echo " \"\\\"POP_MPLS:${PROTO_MPLS}\\\" \\\"OUTPUT:\${oport}\\\"\"\\"
+    echo " \"\\\"mpls_label\\\"!\${ilabel} \\\"dl_type\\\"!${PROTO_MPLS} \\\"in_port\\\"!\${iport}\""
+    echo "    [ \$? -ne 0 ] && echo \"pop_mpls_multiple Validatinon NG!\" && exit 2"
     echo "}"
     echo
 }
@@ -457,7 +509,12 @@ doit() {
                 echo "    _m2=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${_eth2}\"\`"
                 echo "    push_vlan ${dpid_n} ${prt} ${dp} ${up} ${LABEL} \${_m2} \${_m1} ${dm} ${sm}"
                 echo "    pop_vlan ${dpid_n} ${prt} ${up} ${LABEL} ${dp} ${sm} ${dm} \${_m1} \${_m2}"
-            else
+            elif [ "${EDGE_TYPE}" = "mplsvlan" ]; then
+                #echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${ul}"
+                echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${LABEL}"
+                #echo "    pop_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp}"
+                echo "    pop_mpls ${dpid_n} ${prt} ${up} ${LABEL} ${dp}"
+            elif [ "${EDGE_TYPE}" = "tagvlan" ]; then
                 echo "    push_vlan ${dpid_n} ${prt} ${dp} ${up} ${LABEL} ${dm} ${sm} ${dm} ${sm}"
                 echo "    pop_vlan ${dpid_n} ${prt} ${up} ${LABEL} ${dp} ${sm} ${dm} ${sm} ${dm}"
             fi
@@ -466,7 +523,11 @@ doit() {
             if [ "${EDGE_TYPE}" = "simple" ]; then
                 echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${ul}"
                 echo "    pop_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp}"
-            else
+            elif [ "${EDGE_TYPE}" = "mplsvlan" ]; then
+                #echo "    push_mpls_multiple ${dpid_n} ${dl} ${dp} ${up} ${ul}"
+                echo "    push_mpls_multiple ${dpid_n} ${LABEL} ${dp} ${up} ${ul}"
+                echo "    pop_mpls_multiple ${dpid_n} ${up} ${ul} ${dp}"
+            elif [ "${EDGE_TYPE}" = "tagvlan" ]; then
                 echo "    push_mpls_pop_vlan ${dpid_n} ${prt} ${dp} ${LABEL} ${up} ${ul}"
                 echo "    pop_mpls_push_vlan ${dpid_n} ${prt} ${up} ${ul} ${dp} ${LABEL}"
             fi
@@ -585,6 +646,8 @@ main() {
     register_push_mpls
     register_pop_mpls
     register_swap_mpls
+    register_push_mpls_multiple
+    register_pop_mpls_multiple
     setup_datapath
     # argv processing
     echo "CMD='add'"
