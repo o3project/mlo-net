@@ -314,6 +314,7 @@ conf_host() {
         eval local iplist=\${${host}_IP:-$ALL_IP$((${INIT_IP}))}
         eval local maclist=\${${host}_MAC:-$ALL_MAC$((${INIT_MAC}))}
         eval local dpid=\${${host}_DPID:-}
+        eval local type=\${${host}_TYPE:-}
         local ethlist=$(conf_ethlist "${brlist}")
         conf_lagopus_conf "${ethlist}" ${dpid} "${conf_file}"
         echo "#!/bin/bash -" 						>>"${outfile}"
@@ -322,9 +323,11 @@ conf_host() {
             echo "${SRCWRKDIR}/pipework --wait -i ${eth}" 		>>"${outfile}"
             echo "ip link set dev ${eth} mtu 1454" 			>>"${outfile}"
         done
-        echo "install -m 644 ${SRCWRKDIR}/`basename ${conf_file}`\\"	>>"${outfile}"
-        echo " /usr/local/etc/lagopus/lagopus.conf" 			>>"${outfile}"
-        echo "lagopus -d -l /tmp/lagopus.log -- -- -p3 &"		>>"${outfile}"
+        [ ${type} = "service" ] || {
+            echo "install -m 644 ${SRCWRKDIR}/`basename ${conf_file}`\\"	>>"${outfile}"
+            echo " /usr/local/etc/lagopus/lagopus.conf" 			>>"${outfile}"
+            echo "lagopus -d -l /tmp/lagopus.log -- -- -p3 &"		>>"${outfile}"
+        }
         register_docker_quickstart_vswitch ${host}
         brlist2links "${brlist}"
         local br_a=(${brlist})
@@ -348,9 +351,9 @@ conf_host() {
             [ ${ipaddr} = "0.0.0.0" ] || {
                 echo "echo \"${ipaddr} ${host}\" >>/etc/hosts"		>>"${_HOSTS}"
                 echo "echo \"${ipaddr} ${host}-${eth}\" >>/etc/hosts"	>>"${_HOSTS}"
-                echo "    sudo ${WORKDIR}/pipework ${br}\\"
-                echo " -i ${eth} \`cat ${CONTDIR}/${host}\` ${ip} ${mac}"
             }
+            echo "    sudo ${WORKDIR}/pipework ${br}\\"
+            echo " -i ${eth} \`cat ${CONTDIR}/${host}\` ${ip} ${mac}"
         done
         echo "}"
         echo
