@@ -405,15 +405,16 @@ decode() {
 
 doit() {
     local dpid=$1
-    local dpid_n=$2
-    local dup=$3
-    local prt=$(printf '%d' $4)
-    local cl=$5
-    local pl=$6
-    local nl=$7
-    local p1=$8
-    local l1=$9
-    shift 4
+    local type=$2
+    local dpid_n=$3
+    local dup=$4
+    local prt=$(printf '%d' $5)
+    local cl=$6
+    local pl=$7
+    local nl=$8
+    local p1=$9
+    shift 5
+    local l1=$5
     local p2=$6
     local l2=$7
     local m1=$8
@@ -433,6 +434,7 @@ doit() {
     #
     [ ${cl} -eq 1 ] && [ ${pl} -eq 0 ] && [ ${nl} -eq 0 ] && cl=0
     [ ${cl} -eq 1 ] && [ "${EDGE_TYPE}" = "simple" ] && cl=0
+    [ ${cl} -eq 1 ] && [ "${type}" = "none" ] && cl=0
     local sfc=0
     if [ "${LINK_TYPE}" = "PHY" ] && [ ${cl} -eq 1 ] && [ ${pl} -eq 0 ] && [ ${nl} -lt 0 ]; then
         sfc=1
@@ -602,9 +604,10 @@ setup_datapath() {
         #
         echo "${dpid}_${dup}() {"
         eval local dpid_n=\${${dp_a[${i}]}_DPID_N:-}
+        eval local type=\${${dp_a[${i}]}_TYPE:-}
         eval local protolist=\${${dp_a[${i}]}_PROTO:-}
         for prt in ${protolist}; do
-            doit ${dpid} ${dpid_n} ${dup} ${prt} ${cl} ${pl} ${nl} ${p1} ${l1} ${p2} ${l2} ${m1} ${m2}
+            doit ${dpid} ${type} ${dpid_n} ${dup} ${prt} ${cl} ${pl} ${nl} ${p1} ${l1} ${p2} ${l2} ${m1} ${m2}
         done
         echo "    :"
         echo "}"

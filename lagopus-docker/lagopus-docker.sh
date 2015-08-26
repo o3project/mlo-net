@@ -134,7 +134,7 @@ case "$1" in
     *)
 	echo "Usage: lagopus-docker.sh {stop|install|clean}"
 	echo "                         {start [CONFIG]}"
-	echo "                         {status [{start|stop}]"
+	echo "                         {status [{start|stop}]}"
 	exit 2
 	;;
 esac

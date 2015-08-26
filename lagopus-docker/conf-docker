@@ -424,6 +424,8 @@ conf_flow() {
                 level=-1
             elif [ "${type}" = "edge" ]; then
                 level=1
+            elif [ "${type}" = "none" ]; then
+                level=1
             elif [ "${type}" = "mpls" ]; then
                 level=2
             else
@@ -493,6 +495,7 @@ conf_flow() {
                 echo "${dp}_${neth}_LABEL=${br_n}"			>>"${outfile1}"
                 eval local protolist=\${${dp}_PROTO:-}
                 echo "${dp}_PROTO=\"${protolist}\""			>>"${outfile1}"
+                echo "${dp}_TYPE=\"${type}\""				>>"${outfile1}"
             fi
         done
         echo "EP=\"${eplist}\""						>>"${outfile1}"
