@@ -21,6 +21,7 @@ OFCONF=$1
 LABEL=`expr "${OFCONF}" : '[^0-9]*\([0-9]*\)'`
 LAGOPUS_PORT_OFFSET=1
 HTTP_OK=200
+PROTO_IP=$(printf '%d' 0x0800)
 PROTO_8021Q=$(printf '%d' 0x8100)
 PROTO_MPLS=$(printf '%d' 0x8847)
 FILE=/dev/null
@@ -434,7 +435,8 @@ doit() {
     #
     [ ${cl} -eq 1 ] && [ ${pl} -eq 0 ] && [ ${nl} -eq 0 ] && cl=0
     [ ${cl} -eq 1 ] && [ "${EDGE_TYPE}" = "simple" ] && cl=0
-    [ ${cl} -eq 1 ] && [ "${type}" = "none" ] && cl=0
+    [ ${cl} -eq 1 ] && [ "${type}" = "none" ] && [ ${prt} -eq ${PROTO_MPLS} ] && cl=0
+    [ ${cl} -eq 1 ] && [ "${type}" = "none" ] && [ ${prt} -eq ${PROTO_8021Q} ] && cl=0
     local sfc=0
     if [ "${LINK_TYPE}" = "PHY" ] && [ ${cl} -eq 1 ] && [ ${pl} -eq 0 ] && [ ${nl} -lt 0 ]; then
         sfc=1
@@ -468,7 +470,7 @@ doit() {
         local sm=${m2}
         local dm=${m1}
     fi
-    # echo ${dpid} ${dpid_n} ${dup} ${prt} ${cl} ${sfc} ${pl} ${nl} ${dp} ${dl} ${up} ${ul} ${sm} ${dm} 1>&2
+    # echo ${dpid} ${type} ${dpid_n} ${dup} ${prt} ${cl} ${sfc} ${pl} ${nl} ${dp} ${dl} ${up} ${ul} ${sm} ${dm} 1>&2
     ### uplink and downlink datapath setup ###
     case "${cl}" in
         0) # simple switch 
@@ -511,12 +513,16 @@ doit() {
                 echo "    _m2=\`docker exec ${dpid} bash -c \"cd /src/workspace;./macaddr.sh ${_eth2}\"\`"
                 echo "    push_vlan ${dpid_n} ${prt} ${dp} ${up} ${LABEL} \${_m2} \${_m1} ${dm} ${sm}"
                 echo "    pop_vlan ${dpid_n} ${prt} ${up} ${LABEL} ${dp} ${sm} ${dm} \${_m1} \${_m2}"
-            elif [ "${EDGE_TYPE}" = "mplsvlan" ]; then
-                #echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${ul}"
-                echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${LABEL}"
-                #echo "    pop_mpls ${dpid_n} ${prt} ${up} ${ul} ${dp}"
+            elif [ "${EDGE_TYPE}" = "mplsvlan" ] && [ "${type}" = "none" ]; then
                 echo "    pop_mpls ${dpid_n} ${prt} ${up} ${LABEL} ${dp}"
-            elif [ "${EDGE_TYPE}" = "tagvlan" ]; then
+                echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${LABEL}"
+            elif [ "${EDGE_TYPE}" = "mplsvlan" ] && [ "${type}" != "none" ]; then
+                echo "    push_mpls ${dpid_n} ${prt} ${dp} ${up} ${LABEL}"
+                echo "    pop_mpls ${dpid_n} ${prt} ${up} ${LABEL} ${dp}"
+            elif [ "${EDGE_TYPE}" = "tagvlan" ] && [ "${type}" = "none" ]; then
+                echo "    pop_vlan ${dpid_n} ${prt} ${up} ${LABEL} ${dp} ${sm} ${dm} ${sm} ${dm}"
+                echo "    push_vlan ${dpid_n} ${prt} ${dp} ${up} ${LABEL} ${dm} ${sm} ${dm} ${sm}"
+            elif [ "${EDGE_TYPE}" = "tagvlan" ] && [ "${type}" != "none" ]; then
                 echo "    push_vlan ${dpid_n} ${prt} ${dp} ${up} ${LABEL} ${dm} ${sm} ${dm} ${sm}"
                 echo "    pop_vlan ${dpid_n} ${prt} ${up} ${LABEL} ${dp} ${sm} ${dm} ${sm} ${dm}"
             fi

@@ -321,7 +321,9 @@ conf_host() {
         echo 								>>"${outfile}"
         for eth in ${ethlist}; do
             echo "${SRCWRKDIR}/pipework --wait -i ${eth}" 		>>"${outfile}"
+        [ ${type} = "service" ] || {
             echo "ip link set dev ${eth} mtu 1454" 			>>"${outfile}"
+        }
         done
         [ ${type} = "service" ] || {
             echo "install -m 644 ${SRCWRKDIR}/`basename ${conf_file}`\\"	>>"${outfile}"
