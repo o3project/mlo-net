@@ -191,7 +191,7 @@ register_docker_run_ryu() {
 }
 
 register_docker_run_lagopus_vswitch() {
-   echo "docker_run_lagopus_vswitch() {"
+    echo "docker_run_lagopus_vswitch() {"
     echo "    local name=\$1"
     echo "    for ((;;)); do"
     echo "        docker run --name \${name} --link ${RYU}:OF --cap-add=NET_ADMIN -v ${WORKDIR}:${SRCWRKDIR}\\"
