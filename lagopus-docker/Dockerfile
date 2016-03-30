@@ -13,11 +13,9 @@ RUN ./configure
 RUN make OPT_CFLAGS=-O2
 RUN make install
 
-RUN apt-get install -y tcpdump curl iperf
+RUN apt-get install -y tcpdump curl iperf wget
 
 RUN apt-get install -y zabbix-agent
 ADD tools/zabbix_agentd.conf /etc/zabbix/zabbix_agentd.conf
 
 WORKDIR /src/workspace
-
-
